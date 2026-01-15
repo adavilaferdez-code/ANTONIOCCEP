@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HostelHub Premium</title>
+    <link rel="stylesheet" href="style.css?v=21">
+    <link rel="stylesheet" href="style_append.css?v=21">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Dynamic Background -->
+    <div class="app-background"></div>
+
+    <div class="app-container">
+
+        <!-- Header -->
+        <!-- Header Removed -->
+        <header class="app-header" style="display:none;">
+            <div class="brand">
+                <div class="logo-icon"><i class="fa-solid fa-martini-glass-citrus"></i></div>
+                <div class="logo-text">HOSTELHUB</div>
+            </div>
+            <div class="date-display" id="fecha"></div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-main">
+
+            <!-- Hero Search -->
+            <section class="search-hero">
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input"
+                        placeholder="Buscar bar, restaurante, ciudad...">
+                </div>
+            </section>
+
+            <div class="actions-container">
+
+                <!-- DASHBOARD CARD (Grupos unificados) -->
+                <div class="dashboard-card">
+
+                    <!-- 1. Cerca Button -->
+                    <button class="btn-cerca" onclick="searchNearMe()">
+                        <i class="fa-solid fa-location-crosshairs"></i> CERCA (100km)
+                    </button>
+
+                    <!-- 2. Shortcuts Grid -->
+                    <div class="bento-grid">
+                        <!-- 1. Catálogo -->
+                        <a href="catalogo.html" class="bento-card">
+                            <i class="fa-solid fa-box-open" style="color: #fbbf24;"></i>
+                            <span>Catálogo</span>
+                        </a>
+
+                        <!-- 2. Power BI -->
+                        <div class="bento-card"
+                            onclick="window.open('https://app.powerbi.com/', '_blank'); return false;">
+                            <i class="fa-solid fa-chart-pie" style="color: #f59e0b;"></i>
+                            <span>Power BI</span>
+                        </div>
+
+                        <!-- 3. Checklist -->
+                        <div class="bento-card" onclick="openChecklist()">
+                            <i class="fa-solid fa-clipboard-check" style="color: #d946ef;"></i>
+                            <span>Checklist</span>
+                        </div>
+
+                        <!-- 4. Negociaciones -->
+                        <div class="bento-card" onclick="window.open('https://gemini.google.com', '_blank')">
+                            <i class="fa-solid fa-handshake" style="color: #10b981;"></i>
+                            <span>Negociación</span>
+                        </div>
+                    </div>
+
+                    <!-- 3. Distribuidores -->
+                    <div class="capsule-btn cap-blue" onclick="openDistribuidoresModal()"
+                        style="width: 100%; justify-content: center; margin-top: 5px;">
+                        <i class="fa-solid fa-truck-fast"></i> DISTRIBUIDORES
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 4. HERO IMAGES (RESTORED) -->
+            <div class="hero-grid">
+                <!-- FOCOS -->
+                <div class="hero-card" onclick="openFocusModal()">
+                    <img src="focos_dashboard.jpg" class="hero-bg" alt="Focos">
+                    <div class="hero-overlay">
+                        <div class="hero-title"><i class="fa-solid fa-star"></i> FOCOS ENERO</div>
+                        <div class="hero-sub">Clic para ver novedades</div>
+                    </div>
+                </div>
+
+                <!-- DEUDAS -->
+                <div class="hero-card" onclick="openDebtModal()">
+                    <img src="deudas.png" class="hero-bg" alt="Deudas">
+                    <div class="hero-overlay">
+                        <div class="hero-title"><i class="fa-solid fa-file-invoice-dollar"></i> DEUDAS</div>
+                        <div class="hero-sub">Clic para ver listado oficial</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Link to AI Chat (kept as extra or moved? Screenshot didn't show it explicitly but good to keep) -->
+            <!-- Suggest keeping it as a small link footer or removing if strict adherence. 
+                  User said "ESTO SI QUIERO" showing the screenshot.
+                  Screenshot doesn't show AI Chat. I'll hide it for now to match exactly. -->
+
+            <!-- Results List (Hidden by default until search) -->
+            <div id="venueList" class="venue-list"></div>
+
+        </main>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Checklist Modal -->
+    <div id="checklistModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Checklist</h2>
+                <button class="close-btn" onclick="closeChecklist()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="checklist-container">
+                <label class="check-item"><input type="checkbox"> <span>Revisar Stock</span></label>
+                <label class="check-item"><input type="checkbox"> <span>AUDIT FRÍO</span></label>
+                <label class="check-item"><input type="checkbox"> <span>Promociones Activas</span></label>
+                <label class="check-item"><input type="checkbox"> <span>Material PLV</span></label>
+                <label class="check-item"><input type="checkbox"> <span>Precios Visibles</span></label>
+                <label class="check-item"><input type="checkbox"> <span>Caducidades</span></label>
+                <label class="check-item"><input type="checkbox"> <span>Foto de Éxito</span></label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Focus Modal (Image View) -->
+    <div id="focusModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Focos Enero</h2>
+                <button class="close-btn" onclick="closeFocusModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <img src="focos_dashboard.jpg" class="modal-image-view">
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Detalle</h2>
+                <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>Nombre</label>
+                    <input type="text" id="inputName" class="modal-input">
+                </div>
+                <div class="input-group">
+                    <label>Dirección</label>
+                    <input type="text" id="inputAddress" class="modal-input">
+                </div>
+                <div class="input-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="inputPhone" class="modal-input">
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="inputEmail" class="modal-input">
+                </div>
+                <div class="input-group">
+                    <label>Notas</label>
+                    <textarea id="inputNotes" class="modal-input" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <a id="btnCall" href="#" class="action-capsule call"><i class="fa-solid fa-phone"></i> Llamar</a>
+                    <a id="btnEmail" href="#" class="action-capsule email"><i class="fa-solid fa-envelope"></i>
+                        Correo</a>
+                    <button onclick="saveToDebts()" class="action-capsule save"><i class="fa-solid fa-floppy-disk"></i>
+                        Guardar Deuda</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Distribuidores Modal -->
+    <div id="distribuidoresModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Distribuidores</h2>
+                <button class="close-btn" onclick="closeDistribuidoresModal()"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+            <img src="distribuidores.jpg" class="modal-image-view" onclick="openZoomModal(this.src)">
+        </div>
+    </div>
+
+    <!-- Debt Modal -->
+    <div id="debtModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Deudas</h2>
+                <button class="close-btn" onclick="closeDebtModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <!-- Debt Image Header -->
+            <img src="deudas.png" class="modal-image-view" style="margin-bottom: 20px;"
+                onclick="openZoomModal(this.src)">
+
+            <div class="filter-bar">
+                <input type="text" id="debtSearchName" placeholder="Buscar nombre..." class="filter-input">
+                <input type="text" id="debtSearchDate" placeholder="Fecha..." class="filter-input">
+                <div class="toggles">
+                    <label><input type="checkbox" id="debtFilterGreen"> <span class="dot-green"></span></label>
+                    <label><input type="checkbox" id="debtFilterRed"> <span class="dot-red"></span></label>
+                </div>
+            </div>
+            <div id="debtPad" class="debt-pad"></div>
+            <button onclick="addDebtRow()" class="add-btn"><i class="fa-solid fa-plus"></i> Nueva Nota</button>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item" onclick="window.scrollTo({top:0, behavior:'smooth'}); return false;">
+            <i class="fa-solid fa-house"></i>
+            <span>Inicio</span>
+        </a>
+        <a href="#" class="nav-item" onclick="openPlanes(); return false;">
+            <i class="fa-solid fa-list-check"></i>
+            <span>Tareas</span>
+        </a>
+        <a href="catalogo.html" class="nav-item">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span>Pedidos</span>
+        </a>
+        <a href="#" class="nav-item" onclick="alert('Perfil: Próximamente'); return false;">
+            <i class="fa-solid fa-user"></i>
+            <span>Perfil</span>
+        </a>
+    </nav>
+
+    <!-- Planes Modal (formerly Notes) -->
+    <div id="planesModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="planesTitle">Planes</h2>
+                <button class="close-btn" onclick="closePlanes()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <!-- Dynamic Content Area -->
+            <div id="planesContent" class="debt-pad" style="min-height: 300px;"></div>
+
+            <!-- Controls (Will be rendered by JS based on view) -->
+            <div id="planesControls" style="display:flex; justify-content:center; gap:10px; margin-top:15px;"></div>
+        </div>
+    </div>
+
+    <!-- Debug Console Overlay -->
+
+
+    <script src="app.js"></script>
+    <script>
+        // Simple Date Script
+        function updateDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('fecha').textContent = now.toLocaleDateString('es-ES', options);
+        }
+        updateDate();
+    </script>
+</body>
+
+</html>
