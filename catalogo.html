@@ -619,6 +619,51 @@
             }
         }
 
+        function incrementCompPrice(id) {
+            const input = document.getElementById(`comp-${id}`);
+            if (input) {
+                let val = parseFloat(input.value) || 0;
+                val += 0.50;
+                input.value = val.toFixed(2);
+                updateCompetitorPrice(id, input.value);
+            }
+        }
+
+        function decrementCompPrice(id) {
+            const input = document.getElementById(`comp-${id}`);
+            if (input) {
+                let val = parseFloat(input.value) || 0;
+                if (val > 0) {
+                    val -= 0.50;
+                    if (val < 0) val = 0;
+                    input.value = val > 0 ? val.toFixed(2) : '';
+                    updateCompetitorPrice(id, input.value);
+                }
+            }
+        }
+
+        function incrementDiscount() {
+            const input = document.getElementById('discountInput');
+            if (input) {
+                let val = parseFloat(input.value) || 0;
+                val++;
+                if (val > 100) val = 100;
+                input.value = val;
+                renderCardUpdate();
+            }
+        }
+
+        function decrementDiscount() {
+            const input = document.getElementById('discountInput');
+            if (input) {
+                let val = parseFloat(input.value) || 0;
+                val--;
+                if (val < 0) val = 0;
+                input.value = val > 0 ? val : '';
+                renderCardUpdate();
+            }
+        }
+
         function updateCardCalculations(id) {
             const card = document.getElementById(`card-${id}`);
             const pricesContainer = document.getElementById(`prices-${id}`);
