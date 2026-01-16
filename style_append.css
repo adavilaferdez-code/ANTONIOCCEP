@@ -554,3 +554,12 @@ body,
     grid-column: span 2;
 }
 
+
+/* Force wide modal for Focos */
+@media(min-width: 768px) {
+    #focusModal .modal-content {
+        width: 95% !important;
+        max-width: 1200px !important;
+        max-height: 90vh !important;
+    }
+}
