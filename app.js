@@ -930,3 +930,65 @@ try {
 } catch (e) {
     console.error("Error restoring search:", e);
 }
+/* Calculator Logic */
+let calcExpression = '';
+
+function openCalculator() {
+    document.getElementById('calculatorModal').classList.add('open');
+    calcExpression = '';
+    updateCalcDisplay();
+}
+
+function closeCalculator() {
+    document.getElementById('calculatorModal').classList.remove('open');
+}
+
+function updateCalcDisplay() {
+    const display = document.getElementById('calcDisplay');
+    display.value = calcExpression || '0';
+    // Auto scroll to end
+    display.scrollLeft = display.scrollWidth;
+}
+
+function calcAppend(val) {
+    if (val === '.' && calcExpression.slice(-1) === '.') return;
+    if (['+', '-', '*', '/'].includes(val) && ['+', '-', '*', '/'].includes(calcExpression.slice(-1))) {
+        // Replace operator
+        calcExpression = calcExpression.slice(0, -1) + val;
+    } else {
+        calcExpression += val;
+    }
+    updateCalcDisplay();
+}
+
+function calcClear() {
+    calcExpression = '';
+    updateCalcDisplay();
+}
+
+function calcBackspace() {
+    calcExpression = calcExpression.slice(0, -1);
+    updateCalcDisplay();
+}
+
+function calcCalculate() {
+    try {
+        // Safe evaluation
+        // Valid characters only
+        if (/[^0-9+\-*/.]/.test(calcExpression)) {
+            calcExpression = 'Error';
+        } else {
+            // Eval is safe here due to regex check above (basic calculator)
+            const result = eval(calcExpression);
+            if (!isFinite(result) || isNaN(result)) {
+                calcExpression = 'Error';
+            } else {
+                calcExpression = result.toString();
+            }
+        }
+    } catch (e) {
+        calcExpression = 'Error';
+    }
+    updateCalcDisplay();
+}
+

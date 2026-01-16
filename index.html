@@ -132,13 +132,41 @@
                 <button class="close-btn" onclick="closeChecklist()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="checklist-container">
-                <label class="check-item"><input type="checkbox"> <span>Revisar Stock</span></label>
-                <label class="check-item"><input type="checkbox"> <span>AUDIT FRÍO</span></label>
-                <label class="check-item"><input type="checkbox"> <span>Promociones Activas</span></label>
-                <label class="check-item"><input type="checkbox"> <span>Material PLV</span></label>
-                <label class="check-item"><input type="checkbox"> <span>Precios Visibles</span></label>
-                <label class="check-item"><input type="checkbox"> <span>Caducidades</span></label>
-                <label class="check-item"><input type="checkbox"> <span>Foto de Éxito</span></label>
+                <label class="check-item">
+                    <div class="check-icon"><i class="fa-solid fa-address-card"></i></div>
+                    <span>Datos Cliente</span>
+                    <input type="checkbox">
+                </label>
+                <label class="check-item">
+                    <div class="check-icon"><i class="fa-solid fa-temperature-arrow-down"></i></div>
+                    <span>AUDIT FRÍO</span>
+                    <input type="checkbox">
+                </label>
+                <label class="check-item">
+                    <div class="check-icon"><i class="fa-solid fa-tags"></i></div>
+                    <span>Promociones Activas</span>
+                    <input type="checkbox">
+                </label>
+                <label class="check-item">
+                    <div class="check-icon"><i class="fa-solid fa-bullhorn"></i></div>
+                    <span>Material PLV</span>
+                    <input type="checkbox">
+                </label>
+                <label class="check-item">
+                    <div class="check-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                    <span>Facturas Pendientes</span>
+                    <input type="checkbox">
+                </label>
+                <label class="check-item">
+                    <div class="check-icon"><i class="fa-solid fa-handshake"></i></div>
+                    <span>Soporte Comercial</span>
+                    <input type="checkbox">
+                </label>
+                <label class="check-item">
+                    <div class="check-icon"><i class="fa-solid fa-camera"></i></div>
+                    <span>Foto de Éxito</span>
+                    <input type="checkbox">
+                </label>
             </div>
         </div>
     </div>
@@ -235,9 +263,9 @@
 
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
-        <a href="#" class="nav-item" onclick="window.scrollTo({top:0, behavior:'smooth'}); return false;">
-            <i class="fa-solid fa-house"></i>
-            <span>Inicio</span>
+        <a href="#" class="nav-item" onclick="openCalculator(); return false;">
+            <i class="fa-solid fa-calculator"></i>
+            <span>Calculadora</span>
         </a>
         <a href="#" class="nav-item" onclick="openPlanes(); return false;">
             <i class="fa-solid fa-pen-to-square"></i>
@@ -269,6 +297,45 @@
 
             <!-- Controls (Will be rendered by JS based on view) -->
             <div id="planesControls" style="display:flex; justify-content:center; gap:10px; margin-top:15px;"></div>
+        </div>
+    </div>
+
+
+    <!-- Calculator Modal -->
+    <div id="calculatorModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Calculadora</h2>
+                <button class="close-btn" onclick="closeCalculator()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="calculator-body">
+                <input type="text" id="calcDisplay" readonly value="0">
+                <div class="calc-grid">
+                    <button class="calc-btn op" onclick="calcClear()">C</button>
+                    <button class="calc-btn op" onclick="calcAppend('/')">/</button>
+                    <button class="calc-btn op" onclick="calcAppend('*')">x</button>
+                    <button class="calc-btn op" onclick="calcBackspace()"><i
+                            class="fa-solid fa-delete-left"></i></button>
+
+                    <button class="calc-btn" onclick="calcAppend('7')">7</button>
+                    <button class="calc-btn" onclick="calcAppend('8')">8</button>
+                    <button class="calc-btn" onclick="calcAppend('9')">9</button>
+                    <button class="calc-btn op" onclick="calcAppend('-')">-</button>
+
+                    <button class="calc-btn" onclick="calcAppend('4')">4</button>
+                    <button class="calc-btn" onclick="calcAppend('5')">5</button>
+                    <button class="calc-btn" onclick="calcAppend('6')">6</button>
+                    <button class="calc-btn op" onclick="calcAppend('+')">+</button>
+
+                    <button class="calc-btn" onclick="calcAppend('1')">1</button>
+                    <button class="calc-btn" onclick="calcAppend('2')">2</button>
+                    <button class="calc-btn" onclick="calcAppend('3')">3</button>
+                    <button class="calc-btn op equals" onclick="calcCalculate()">=</button>
+
+                    <button class="calc-btn zero" onclick="calcAppend('0')">0</button>
+                    <button class="calc-btn" onclick="calcAppend('.')">.</button>
+                </div>
+            </div>
         </div>
     </div>
 

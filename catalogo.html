@@ -72,11 +72,6 @@
             margin: 0;
         }
 
-        .dropdown-style {
-            background: white !important;
-            color: #333;
-        }
-
         .search-panel {
             background: white;
             border: 1px solid rgba(0, 0, 0, 0.05);
@@ -121,6 +116,83 @@
             box-shadow: 0 0 0 4px rgba(217, 70, 239, 0.1);
         }
 
+        /* CUSTOM MULTI-SELECT STYLES */
+        .custom-select-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .select-trigger {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text-main);
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .select-trigger:after {
+            content: '\f078';
+            /* FontAwesome chevron-down */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .options-container {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            margin-top: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            padding: 8px;
+        }
+
+        .options-container.open {
+            display: block;
+        }
+
+        .option-item {
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+
+        .option-item:hover {
+            background: #f3f4f6;
+        }
+
+        .option-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #d946ef;
+            cursor: pointer;
+        }
+
+        .option-label {
+            font-size: 0.95rem;
+            color: #333;
+            flex-grow: 1;
+        }
+
         .product-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -139,6 +211,7 @@
             flex-direction: column;
             justify-content: space-between;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            touch-action: manipulation;
         }
 
         .product-card:hover {
@@ -290,16 +363,18 @@
                 <div class="input-group" style="margin:0;">
                     <label>Descuento (%)</label>
                     <input type="number" id="discountInput" class="modal-input" placeholder="0"
-                        oninput="renderCatalog()">
+                        oninput="renderCardUpdate()">
                 </div>
 
-                <!-- Droparrow Restored -->
+                <!-- Custom Multi-Select -->
                 <div class="input-group" style="margin:0;">
-                    <label>Categoría</label>
-                    <select id="categorySelect" class="modal-input" onchange="renderCatalog()">
-                        <option value="todos">📦 Todas</option>
-                        <!-- Populated by JS -->
-                    </select>
+                    <label>Categoría (Multi-selección)</label>
+                    <div class="custom-select-container" id="categorySelect">
+                        <div class="select-trigger" onclick="toggleDropdown()">📦 Todas</div>
+                        <div class="options-container" id="categoryOptions">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
                 </div>
 
                 <div class="input-group" style="margin:0;">
@@ -395,35 +470,215 @@
             { id: 53, name: 'VILAS DEL TURBÓN', category: 'Aguas VNR 75CL', price: 12.30, envase: '6 botellas', icon: '💧' }
         ];
 
-        // POPULATE SELECT
-        function initCategories() {
-            const select = document.getElementById('categorySelect');
-            const categories = ['todos', ...new Set(PRODUCTS.map(p => p.category))];
+        // LOGIC
+        let selectedIds = new Set();
+        let quantities = {};
+        let competitorPrices = {};
+        let checkedCategories = new Set(['todos']); // Default all
 
-            categories.forEach(cat => {
-                const opt = document.createElement('option');
-                opt.value = cat;
-                opt.textContent = cat === 'todos' ? '📦 Todas' : cat;
-                select.appendChild(opt);
+        function toggleDropdown() {
+            const el = document.getElementById('categoryOptions');
+            el.classList.toggle('open');
+            // Close on outside click
+            if (el.classList.contains('open')) {
+                document.addEventListener('click', closeDropdownOutside);
+            }
+        }
+
+        function closeDropdownOutside(e) {
+            if (!e.target.closest('.custom-select-container')) {
+                document.getElementById('categoryOptions').classList.remove('open');
+                document.removeEventListener('click', closeDropdownOutside);
+            }
+        }
+
+        function toggleCategory(cat) {
+            if (cat === 'todos') {
+                // If todos selected, clear others
+                checkedCategories.clear();
+                checkedCategories.add('todos');
+            } else {
+                // If specific category selected, remove 'todos'
+                if (checkedCategories.has('todos')) {
+                    checkedCategories.delete('todos');
+                }
+
+                if (checkedCategories.has(cat)) {
+                    checkedCategories.delete(cat);
+                } else {
+                    checkedCategories.add(cat);
+                }
+
+                // If nothing selected, revert to 'todos'
+                if (checkedCategories.size === 0) {
+                    checkedCategories.add('todos');
+                }
+            }
+            updateCategoryUI();
+            renderCatalog();
+        }
+
+        function updateCategoryUI() {
+            const trigger = document.querySelector('.select-trigger');
+            const checkboxes = document.querySelectorAll('.option-item input');
+
+            // Update Text
+            if (checkedCategories.has('todos')) {
+                trigger.textContent = '📦 Todas';
+            } else {
+                trigger.textContent = `${checkedCategories.size} Categorías`;
+            }
+
+            // Update Checkboxes
+            checkboxes.forEach(cb => {
+                const val = cb.value;
+                cb.checked = checkedCategories.has(val);
             });
         }
 
-        // LOGIC
-        let selectedIds = new Set();
+        function initCategories() {
+            const container = document.getElementById('categoryOptions');
+            container.innerHTML = '';
 
+            const uniqueCats = [...new Set(PRODUCTS.map(p => p.category))];
+
+            // Add 'Todas'
+            container.innerHTML += `
+                <label class="option-item">
+                    <input type="checkbox" value="todos" checked onchange="toggleCategory('todos')">
+                    <span class="option-label">📦 Todas</span>
+                </label>
+            `;
+
+            // Add others
+            uniqueCats.forEach(cat => {
+                container.innerHTML += `
+                    <label class="option-item">
+                         <input type="checkbox" value="${cat}" onchange="toggleCategory('${cat}')">
+                         <span class="option-label">${cat}</span>
+                    </label>
+                `;
+            });
+        }
+
+        // Logic Functions
         function toggleProduct(id) {
             if (selectedIds.has(id)) {
                 selectedIds.delete(id);
             } else {
                 selectedIds.add(id);
             }
-            renderCatalog();
+            updateCardCalculations(id);
+        }
+
+        function updateQuantity(id, value) {
+            const qty = parseInt(value);
+            if (qty > 0) {
+                quantities[id] = qty;
+                if (!selectedIds.has(id)) selectedIds.add(id);
+            } else {
+                delete quantities[id];
+            }
+            updateCardCalculations(id);
+        }
+
+        function updateCompetitorPrice(id, value) {
+            competitorPrices[id] = value;
+            updateCardCalculations(id);
+        }
+
+        function updateCardCalculations(id) {
+            const card = document.getElementById(`card-${id}`);
+            const pricesContainer = document.getElementById(`prices-${id}`);
+
+            if (!card) return; // might have been filtered out
+
+            // Update Selection UI
+            if (selectedIds.has(id)) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+
+            // Calculations
+            if (pricesContainer) {
+                const product = PRODUCTS.find(p => p.id === id);
+                const quantity = quantities[id] || 0;
+                const discount = parseFloat(document.getElementById('discountInput').value) || 0;
+                const compPriceRaw = competitorPrices[id] !== undefined ? competitorPrices[id] : '';
+                const compPrice = parseFloat(compPriceRaw) || 0;
+                const isSelected = selectedIds.has(id);
+
+                pricesContainer.innerHTML = generatePricesHTML(product, quantity, discount, isSelected, compPrice);
+            }
+        }
+
+        // Helper to update only calculations for all visible cards (for Discount input changes)
+        function renderCardUpdate() {
+            // Find visible cards
+            const cards = document.querySelectorAll('.product-card');
+            cards.forEach(card => {
+                const id = parseInt(card.id.replace('card-', ''));
+                updateCardCalculations(id);
+            });
+        }
+
+        function generatePricesHTML(p, quantity, discount, isSelected, compPrice) {
+            // FIX: Apply discount globally if input > 0
+            const applyDiscount = discount > 0;
+            const unitPrice = p.price * (1 - discount / 100);
+            const displayPrice = applyDiscount ? unitPrice : p.price;
+            const myTotal = displayPrice * (quantity > 0 ? quantity : 1);
+
+            const compTotal = compPrice * (quantity > 0 ? quantity : 1);
+            const difference = compTotal - myTotal;
+
+            return `
+                <div class="price-row">
+                    <span class="price-label">Precio Caja (OFICIAL)</span>
+                    <span class="price-value ${applyDiscount ? 'old-price' : ''}">€${p.price.toFixed(2)}</span>
+                </div>
+                
+                ${applyDiscount ? `
+                <div class="discount-section">
+                    <div class="price-row">
+                        <span class="discount-badge">AHORRAS ${discount}%</span>
+                    </div>
+                    <div class="price-row" style="margin-top:4px;">
+                        <span class="price-label">Precio Unitario (Mío)</span>
+                        <span class="final-price" style="font-size: 1.2rem;">€${unitPrice.toFixed(2)}</span>
+                    </div>
+                </div>
+                ` : ''}
+
+                ${compPrice > 0 ? `
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc;">
+                    <div class="price-row">
+                        <span class="price-label" style="font-size: 0.8rem;">Diferencia vs Comp.</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="price-value" style="color: ${difference >= 0 ? '#16a34a' : '#dc2626'}; font-size: 1.4rem;">
+                            ${difference >= 0 ? '-' : '+'}€${Math.abs(difference).toFixed(2)}
+                        </span>
+                    </div>
+                    ${difference >= 0 ? `<div style="font-size: 0.75rem; color: #16a34a; text-align: right; font-weight: bold;">(AHORRAS)</div>` : `<div style="font-size: 0.75rem; color: #dc2626; text-align: right; font-weight: bold;">(PAGAS MÁS)</div>`}
+                </div>
+                ` : ''}
+
+                ${quantity > 0 ? `
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc;">
+                    <div class="price-row">
+                        <span class="price-label">TOTAL (${quantity} cajas)</span>
+                        <span class="final-price">€${myTotal.toFixed(2)}</span>
+                    </div>
+                </div>
+                ` : ''}
+            `;
         }
 
         function renderCatalog() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             const discount = parseFloat(document.getElementById('discountInput').value) || 0;
-            const category = document.getElementById('categorySelect').value;
             const sortBy = document.getElementById('sortSelect').value;
             const grid = document.getElementById('catalogGrid');
 
@@ -432,7 +687,14 @@
             // Filter
             let filtered = PRODUCTS.filter(p => {
                 const matchesSearch = p.name.toLowerCase().includes(search) || p.category.toLowerCase().includes(search);
-                const matchesCat = category === 'todos' || p.category === category;
+                // Multi-select Category Logic
+                let matchesCat = false;
+                if (checkedCategories.has('todos')) {
+                    matchesCat = true;
+                } else {
+                    matchesCat = checkedCategories.has(p.category);
+                }
+
                 return matchesSearch && matchesCat;
             });
 
@@ -448,15 +710,16 @@
 
             filtered.forEach(p => {
                 const isSelected = selectedIds.has(p.id);
-                // Discount applies ONLY if selected
-                const applyDiscount = isSelected && discount > 0;
+                const quantity = quantities[p.id] || 0;
 
-                const finalPrice = p.price * (1 - discount / 100);
+                const compPriceRaw = competitorPrices[p.id] !== undefined ? competitorPrices[p.id] : '';
+                const compPrice = parseFloat(compPriceRaw) || 0;
 
                 const card = document.createElement('div');
+                card.id = `card-${p.id}`;
                 card.className = `product-card ${isSelected ? 'selected' : ''}`;
                 card.onclick = () => toggleProduct(p.id);
-                card.style.cursor = 'pointer'; // Feedback
+                card.style.cursor = 'pointer';
 
                 card.innerHTML = `
                     <div class="product-header">
@@ -468,24 +731,26 @@
                     </div>
                     
                     <div class="product-envase">📦 ${p.envase}</div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;" onclick="event.stopPropagation()">
+                         <div>
+                            <label style="font-size: 0.65rem; color: #666; font-weight: 700; margin-bottom: 4px; display: block;">CANTIDAD</label>
+                            <input id="qty-${p.id}" type="number" min="0" max="100" value="${quantity || ''}" 
+                                style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem;"
+                                placeholder="0"
+                                oninput="updateQuantity(${p.id}, this.value)">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.65rem; color: #666; font-weight: 700; margin-bottom: 4px; display: block;">PRECIO COMPETENCIA</label>
+                            <input id="comp-${p.id}" type="number" step="0.01" value="${compPriceRaw}" 
+                                style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem;"
+                                placeholder="€"
+                                oninput="updateCompetitorPrice(${p.id}, this.value)">
+                        </div>
+                    </div>
                     
-                    <div class="prices">
-                        <div class="price-row">
-                            <span class="price-label">Precio caja</span>
-                            <span class="price-value ${applyDiscount ? 'old-price' : ''}">€${p.price.toFixed(2)}</span>
-                        </div>
-                        
-                        ${applyDiscount ? `
-                        <div class="discount-section">
-                            <div class="price-row">
-                                <span class="discount-badge">AHORRAS ${discount}%</span>
-                            </div>
-                            <div class="price-row" style="margin-top:4px;">
-                                <span class="price-label">Precio Final</span>
-                                <span class="final-price">€${finalPrice.toFixed(2)}</span>
-                            </div>
-                        </div>
-                        ` : ''}
+                    <div class="prices" id="prices-${p.id}">
+                        ${generatePricesHTML(p, quantity, discount, isSelected, compPrice)}
                     </div>
                 `;
                 grid.appendChild(card);
