@@ -342,6 +342,8 @@ function closeDebtModal() {
     debtModal.classList.remove('open');
 }
 
+const saveIndicatorDebt = document.getElementById('saveIndicatorDebt');
+
 function addDebtRow(initialText = '') {
     // Generate unique ID based on timestamp and random
     const rowId = 'row_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
@@ -362,7 +364,10 @@ function addDebtRow(initialText = '') {
     div.className = 'debt-row';
     div.id = rowId;
     div.innerHTML = `
-        <div class="debt-text" contenteditable="true" oninput="saveDebt()">
+        <div class="debt-text" contenteditable="true" 
+            oninput="saveDebt()" 
+            onblur="saveDebt()"
+            style="min-height:24px; outline:none;">
             ${initialText}
         </div>
         <div class="debt-dots">
@@ -419,6 +424,12 @@ function clearDebtPad() {
 
 function saveDebt() {
     localStorage.setItem('debtNotesContent', debtPad.innerHTML);
+    if (saveIndicatorDebt) {
+        saveIndicatorDebt.style.opacity = '1';
+        setTimeout(() => {
+            saveIndicatorDebt.style.opacity = '0';
+        }, 1500);
+    }
 }
 
 // Auto-save on input listener is removed because we use oninput inline
@@ -503,6 +514,7 @@ const planesModal = document.getElementById('planesModal');
 const planesTitle = document.getElementById('planesTitle');
 const planesContent = document.getElementById('planesContent');
 const planesControls = document.getElementById('planesControls');
+const saveIndicator = document.getElementById('saveIndicator');
 
 let currentFolderId = null;
 
@@ -515,6 +527,16 @@ function getPlanesData() {
 
 function savePlanesData(data) {
     localStorage.setItem('planesData', JSON.stringify(data));
+    showSaveFeedback();
+}
+
+function showSaveFeedback() {
+    if (saveIndicator) {
+        saveIndicator.style.opacity = '1';
+        setTimeout(() => {
+            saveIndicator.style.opacity = '0';
+        }, 1500);
+    }
 }
 
 function openPlanes() {
@@ -530,13 +552,13 @@ function closePlanes() {
 // RENDER FOLDERS (LEVEL 1)
 function renderFolders() {
     const planes = getPlanesData();
-    planesTitle.innerText = '🗂️ Mis Planes';
+    planesTitle.innerText = '🗂️ Mis Notas (Carpetas)';
 
     // Controls for Root
     planesControls.innerHTML = `
         <button onclick="createNewFolder()" class="add-btn" style="background:var(--primary-gradient);"><i class="fa-solid fa-folder-plus"></i> Nueva Carpeta</button>
         <button onclick="exportBackup()" class="add-btn" style="background:#555;" title="Descargar archivo"><i class="fa-solid fa-download"></i> Copia</button>
-        <button onclick="copyBackup()" class="add-btn" style="background:#555;" title="Copiar texto para pegar en Notas"><i class="fa-solid fa-copy"></i> Texto</button>
+        <button onclick="copyBackup()" class="add-btn" style="background:#555;" title="Copiar texto"><i class="fa-solid fa-copy"></i> Texto</button>
         <button onclick="document.getElementById('backupInput').click()" class="add-btn" style="background:#555;"><i class="fa-solid fa-upload"></i> Restaurar</button>
     `;
 
@@ -548,7 +570,7 @@ function renderFolders() {
     planesContent.innerHTML = '';
     planes.forEach(folder => {
         const div = document.createElement('div');
-        div.className = 'nav-item'; // Reusing nav style or create new
+        div.className = 'nav-item';
         div.style.cssText = `
             display: flex; align-items: center; justify-content: space-between;
             padding: 15px; margin-bottom: 10px; background: rgba(255,255,255,0.05);
@@ -557,9 +579,9 @@ function renderFolders() {
         `;
         div.innerHTML = `
             <div onclick="openFolder('${folder.id}')" style="display:flex; align-items:center; gap:15px; flex:1;">
-                <i class="fa-solid fa-folderbox" style="font-size:1.5rem; color:#ffd700;"></i>
+                <i class="fa-solid fa-folder-closed" style="font-size:1.5rem; color:#ffd700;"></i>
                 <span style="font-size:1.1rem; font-weight:bold; color:white;">${folder.name}</span>
-                <span style="font-size:0.8rem; color:#aaa;">(${folder.clients.length} clientes)</span>
+                <span style="font-size:0.8rem; color:#aaa;">(${folder.clients.length} notas)</span>
             </div>
             <div style="display:flex; gap:10px;">
                 <button onclick="editFolder('${folder.id}')" style="background:none; border:none; color:#aaa; cursor:pointer;"><i class="fa-solid fa-pen"></i></button>
@@ -582,7 +604,7 @@ function openFolder(folderId) {
     // Controls for Folder
     planesControls.innerHTML = `
         <button onclick="renderFolders()" class="add-btn" style="background:#555;"><i class="fa-solid fa-arrow-left"></i> Volver</button>
-        <button onclick="addClientRow()" class="add-btn"><i class="fa-solid fa-user-plus"></i> Añadir Cliente</button>
+        <button onclick="addClientRow()" class="add-btn"><i class="fa-solid fa-plus"></i> Añadir Nota</button>
     `;
 
     renderClientList(folder);
@@ -592,7 +614,7 @@ function renderClientList(folder) {
     planesContent.innerHTML = '';
 
     if (folder.clients.length === 0) {
-        planesContent.innerHTML = '<div class="empty-state" style="color:#aaa;">Carpeta vacía. Añade clientes.</div>';
+        planesContent.innerHTML = '<div class="empty-state" style="color:#aaa;">Carpeta vacía. Añade notas.</div>';
         return;
     }
 
@@ -601,12 +623,16 @@ function renderClientList(folder) {
         const div = document.createElement('div');
         div.className = 'debt-row';
         div.id = rowId;
+        // Use keyup and blur for extra safety on iPad
         div.innerHTML = `
-            <div class="debt-text" contenteditable="true" oninput="saveClientEdit('${rowId}')">
+            <div class="debt-text" contenteditable="true" 
+                oninput="saveClientEdit('${rowId}')" 
+                onblur="saveClientEdit('${rowId}')"
+                style="min-height:24px; outline:none;">
                 ${client.text}
             </div>
             <div class="debt-dots">
-                <button class="dot-btn" style="background:#3b82f6; color:white; font-size:10px; display:flex; align-items:center; justify-content:center;" onclick="openMoveModal('${rowId}')" title="Mover a otra carpeta"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+                <button class="dot-btn" style="background:#3b82f6; color:white; font-size:10px; display:flex; align-items:center; justify-content:center;" onclick="openMoveModal('${rowId}')" title="Mover"><i class="fa-solid fa-arrow-right"></i></button>
                 <button class="dot-btn" style="background:#555; color:white; font-size:10px; display:flex; align-items:center; justify-content:center;" onclick="deleteClientRow('${rowId}')" title="Borrar">X</button>
             </div>
         `;
@@ -663,7 +689,7 @@ function addClientRow() {
 
     const newClient = {
         id: 'cli_' + Date.now(),
-        text: `<b>[${dateStr}]</b> Nuevo Cliente...`,
+        text: `<b>[${dateStr}]</b> Nueva Nota...`,
         date: new Date().toISOString()
     };
 
@@ -680,7 +706,10 @@ function saveClientEdit(rowId) {
     const row = document.getElementById(rowId);
     if (!row) return;
 
-    const textContent = row.querySelector('.debt-text').innerHTML;
+    const textDiv = row.querySelector('.debt-text');
+    if (!textDiv) return;
+
+    const textContent = textDiv.innerHTML;
 
     const planes = getPlanesData();
     const folder = planes.find(f => f.id === currentFolderId);
@@ -695,7 +724,7 @@ function saveClientEdit(rowId) {
 
 function deleteClientRow(rowId) {
     if (!currentFolderId) return;
-    if (!confirm("¿Borrar cliente?")) return;
+    if (!confirm("¿Borrar nota?")) return;
 
     const planes = getPlanesData();
     const folder = planes.find(f => f.id === currentFolderId);
@@ -712,6 +741,7 @@ if (!localStorage.getItem('planesData')) {
         { id: 'f1', name: 'General', clients: [] }
     ]);
 }
+
 
 // === BACKUP SYSTEM ===
 function exportBackup() {

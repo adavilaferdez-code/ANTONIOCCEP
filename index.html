@@ -103,7 +103,7 @@
 
                 <!-- DEUDAS -->
                 <div class="hero-card" onclick="openDebtModal()">
-                    <img src="deudas.png" class="hero-bg" alt="Deudas">
+                    <img src="deudas_v2.jpg" class="hero-bg" alt="Deudas">
                     <div class="hero-overlay">
                         <div class="hero-title"><i class="fa-solid fa-file-invoice-dollar"></i> DEUDAS</div>
                         <div class="hero-sub">Clic para ver listado oficial</div>
@@ -209,11 +209,15 @@
     <div id="debtModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Deudas</h2>
+                <h2>Deudas y Notas</h2>
+                <div id="saveIndicatorDebt"
+                    style="font-size: 0.8rem; color: var(--success); margin-right: 10px; opacity: 0; transition: opacity 0.3s;">
+                    <i class="fa-solid fa-check"></i> Guardado
+                </div>
                 <button class="close-btn" onclick="closeDebtModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <!-- Debt Image Header -->
-            <img src="deudas.png" class="modal-image-view" style="margin-bottom: 20px;"
+            <img src="deudas_v2.jpg" class="modal-image-view" style="margin-bottom: 20px;"
                 onclick="openZoomModal(this.src)">
 
             <div class="filter-bar">
@@ -236,8 +240,8 @@
             <span>Inicio</span>
         </a>
         <a href="#" class="nav-item" onclick="openPlanes(); return false;">
-            <i class="fa-solid fa-list-check"></i>
-            <span>Tareas</span>
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span>Notas</span>
         </a>
         <a href="catalogo.html" class="nav-item">
             <i class="fa-solid fa-cart-shopping"></i>
@@ -249,11 +253,15 @@
         </a>
     </nav>
 
-    <!-- Planes Modal (formerly Notes) -->
+    <!-- Planes Modal (Persistent Folders/Notas) -->
     <div id="planesModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="planesTitle">Planes</h2>
+                <h2 id="planesTitle">Notas (Carpetas)</h2>
+                <div id="saveIndicator"
+                    style="font-size: 0.8rem; color: var(--success); margin-right: 10px; opacity: 0; transition: opacity 0.3s;">
+                    <i class="fa-solid fa-check"></i> Guardado
+                </div>
                 <button class="close-btn" onclick="closePlanes()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <!-- Dynamic Content Area -->
