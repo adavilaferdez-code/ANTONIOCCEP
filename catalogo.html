@@ -587,6 +587,28 @@
             updateCardCalculations(id);
         }
 
+        function incrementQuantity(id) {
+            const input = document.getElementById(`qty-${id}`);
+            if (input) {
+                let val = parseInt(input.value) || 0;
+                val++;
+                input.value = val;
+                updateQuantity(id, val);
+            }
+        }
+
+        function decrementQuantity(id) {
+            const input = document.getElementById(`qty-${id}`);
+            if (input) {
+                let val = parseInt(input.value) || 0;
+                if (val > 0) {
+                    val--;
+                    input.value = val > 0 ? val : '';
+                    updateQuantity(id, val);
+                }
+            }
+        }
+
         function updateCardCalculations(id) {
             const card = document.getElementById(`card-${id}`);
             const pricesContainer = document.getElementById(`prices-${id}`);
@@ -735,10 +757,14 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;" onclick="event.stopPropagation()">
                          <div>
                             <label style="font-size: 0.65rem; color: #666; font-weight: 700; margin-bottom: 4px; display: block;">CANTIDAD</label>
-                            <input id="qty-${p.id}" type="number" min="0" max="100" value="${quantity || ''}" 
-                                style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem;"
-                                placeholder="0"
-                                oninput="updateQuantity(${p.id}, this.value)">
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <button onclick="decrementQuantity(${p.id})" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #ddd; background: #fff; font-weight: bold; color: #555;">-</button>
+                                <input id="qty-${p.id}" type="number" min="0" max="100" value="${quantity || ''}" 
+                                    style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; text-align: center;"
+                                    placeholder="0"
+                                    oninput="updateQuantity(${p.id}, this.value)">
+                                <button onclick="incrementQuantity(${p.id})" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #ddd; background: #fff; font-weight: bold; color: #555;">+</button>
+                            </div>
                         </div>
                         <div>
                             <label style="font-size: 0.65rem; color: #666; font-weight: 700; margin-bottom: 4px; display: block;">PRECIO COMPETENCIA</label>
