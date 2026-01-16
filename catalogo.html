@@ -758,12 +758,16 @@
                          <div>
                             <label style="font-size: 0.65rem; color: #666; font-weight: 700; margin-bottom: 4px; display: block;">CANTIDAD</label>
                             <div style="display: flex; align-items: center; gap: 5px;">
-                                <button onclick="decrementQuantity(${p.id})" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #ddd; background: #fff; font-weight: bold; color: #555;">-</button>
+                                <button type="button" onclick="decrementQuantity(${p.id})" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #bbb; background: #eee; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
+                                    <i class="fa-solid fa-minus" style="font-size: 0.8rem;"></i>
+                                </button>
                                 <input id="qty-${p.id}" type="number" min="0" max="100" value="${quantity || ''}" 
                                     style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; text-align: center;"
                                     placeholder="0"
                                     oninput="updateQuantity(${p.id}, this.value)">
-                                <button onclick="incrementQuantity(${p.id})" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #ddd; background: #fff; font-weight: bold; color: #555;">+</button>
+                                <button type="button" onclick="incrementQuantity(${p.id})" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #bbb; background: #eee; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
+                                    <i class="fa-solid fa-plus" style="font-size: 0.8rem;"></i>
+                                </button>
                             </div>
                         </div>
                         <div>
