@@ -221,7 +221,7 @@ body {
 
 /* === RESULTS LIST === */
 .venue-list {
-    margin-top: 40px;
+    margin-top: 10px;
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -343,11 +343,17 @@ body {
     }
 
     .modal-content {
-        width: 500px;
+        width: 600px;
         border-radius: 24px;
         max-height: 80vh;
         transform: scale(0.9);
         opacity: 0;
+    }
+
+    /* Wider modal for search results */
+    #searchResultsModal .modal-content {
+        width: 800px;
+        max-width: 90vw;
     }
 
     .modal-overlay.open .modal-content {

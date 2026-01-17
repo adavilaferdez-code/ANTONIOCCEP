@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Catálogo de Productos - HostelHub</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=99">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Catalog Specific Overrides - LIGHT THEME */
@@ -195,8 +195,8 @@
 
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
         }
 
         .product-card {
@@ -336,6 +336,68 @@
         .product-card.selected .product-name {
             color: #1e40af;
         }
+
+        .product-card.list-view {
+            display: grid;
+            grid-template-columns: 60px 2fr 1.5fr 1.5fr;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 15px;
+            height: auto;
+        }
+
+        .product-card.list-view .product-header {
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .product-card.list-view .product-icon-wrapper {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            order: -1;
+            /* Icon first */
+        }
+
+        .product-card.list-view .product-name {
+            font-size: 1rem;
+            margin-bottom: 2px;
+        }
+
+        .product-card.list-view .product-cat,
+        .product-card.list-view .product-envase {
+            font-size: 0.75rem;
+            margin-bottom: 0;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .product-card.list-view .prices {
+            margin-top: 0;
+            padding: 5px;
+            background: transparent;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .product-card.list-view .product-controls {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 5px;
+        }
+
+        /* Adjust input group in list view */
+        .product-card.list-view .input-group-compact {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            justify-content: flex-end;
+        }
     </style>
 </head>
 
@@ -351,6 +413,12 @@
                 <h1 class="catalog-title">Catálogo</h1>
                 <p style="color: var(--text-secondary); margin-top:5px;">Calculadora de Precios</p>
             </div>
+            <div style="margin-left: auto;">
+                <button onclick="toggleViewMode()" id="viewToggleBtn"
+                    style="background: white; border: 1px solid #ddd; padding: 10px 15px; border-radius: 12px; cursor: pointer; font-weight: bold; color: #333; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-list"></i> Vista Lista
+                </button>
+            </div>
         </header>
 
         <section class="search-panel">
@@ -360,33 +428,6 @@
                     <input type="text" id="searchInput" class="modal-input"
                         placeholder="Ej: Coca-Cola, Monster, Vidrio..." oninput="renderCatalog()">
                 </div>
-                <div class="input-group" style="margin:0;">
-                    <label>Descuento (%)</label>
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <button type="button" onclick="decrementDiscount()"
-                            style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #bbb; background: #eee; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
-                            <i class="fa-solid fa-minus" style="font-size: 0.8rem;"></i>
-                        </button>
-                        <input type="number" id="discountInput" class="modal-input" placeholder="0"
-                            style="text-align: center;" oninput="renderCardUpdate()">
-                        <button type="button" onclick="incrementDiscount()"
-                            style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #bbb; background: #eee; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
-                            <i class="fa-solid fa-plus" style="font-size: 0.8rem;"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Custom Multi-Select -->
-                <div class="input-group" style="margin:0;">
-                    <label>Categoría (Multi-selección)</label>
-                    <div class="custom-select-container" id="categorySelect">
-                        <div class="select-trigger" onclick="toggleDropdown()">📦 Todas</div>
-                        <div class="options-container" id="categoryOptions">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
-                </div>
-
                 <div class="input-group" style="margin:0;">
                     <label>Ordenar por</label>
                     <select id="sortSelect" class="modal-input" onchange="renderCatalog()">
@@ -408,56 +449,57 @@
     <script>
         // DATA
         const PRODUCTS = [
+            // ... (PRODUCTS array remains unchanged) ...
             // 1. COCA-COLA (All)
-            { id: 1, name: 'COCA-COLA', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas', icon: '🥤' },
-            { id: 2, name: 'CC LIGHT / CC ZERO', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas', icon: '🥤' },
-            { id: 16, name: 'COCA-COLA / CC ZERO / CC LIGHT', category: 'VNR 1 LIT.', price: 18.66, envase: '12 botellas', icon: '🥤' },
-            { id: 17, name: 'COCA-COLA', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas', icon: '🥤' },
-            { id: 18, name: 'COCA-COLA LIGHT / CC ZERO / CCZZ', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas', icon: '🥤' },
-            { id: 29, name: 'COCA-COLA', category: 'Lata 33cl', price: 39.36, envase: '24 latas', icon: '🥤' },
-            { id: 30, name: 'CCL / CCZ / CCZZ / CCSC / CCLSC', category: 'Lata 33cl', price: 39.36, envase: '24 latas', icon: '🥤' },
-            { id: 34, name: 'COCA-COLA VR 350', category: 'Vidrio 350ml', price: 29.28, envase: '12 botellas', icon: '🥤' },
-            { id: 39, name: 'CC REGULAR / CCZ / CCZZ / CCL / CCSC', category: 'PET 2,0 Lts', price: 28.68, envase: '6 botellas', icon: '🥤' },
+            { id: 1, name: 'COCA-COLA', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 2, name: 'CC LIGHT / CC ZERO', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 16, name: 'COCA-COLA / CC ZERO / CC LIGHT', category: 'VNR 1 LIT.', price: 18.66, envase: '12 botellas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 17, name: 'COCA-COLA', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 18, name: 'COCA-COLA LIGHT / CC ZERO / CCZZ', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 29, name: 'COCA-COLA', category: 'Lata 33cl', price: 39.36, envase: '24 latas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 30, name: 'CCL / CCZ / CCZZ / CCSC / CCLSC', category: 'Lata 33cl', price: 39.36, envase: '24 latas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 34, name: 'COCA-COLA VR 350', category: 'Vidrio 350ml', price: 29.28, envase: '12 botellas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 39, name: 'CC REGULAR / CCZ / CCZZ / CCL / CCSC', category: 'PET 2,0 Lts', price: 28.68, envase: '6 botellas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
 
             // 2. FANTA (All)
-            { id: 3, name: 'FANTA NARANJA', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas', icon: '🍊' },
-            { id: 4, name: 'FANTA LIMÓN', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas', icon: '🍋' },
-            { id: 19, name: 'FANTA NARANJA', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas', icon: '🍊' },
-            { id: 20, name: 'FANTA LIMÓN', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas', icon: '🍋' },
-            { id: 31, name: 'FANTA', category: 'Lata 33cl', price: 37.68, envase: '24 latas', icon: '🍊' },
-            { id: 40, name: 'FANTA NARANJA / LIMÓN (6 ud)', category: 'PET 2,0 Lts', price: 27.06, envase: '6 botellas', icon: '🍊' },
+            { id: 3, name: 'FANTA NARANJA', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas', icon: '<img src="fanta_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 4, name: 'FANTA LIMÓN', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas', icon: '<img src="fanta_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 19, name: 'FANTA NARANJA', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas', icon: '<img src="fanta_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 20, name: 'FANTA LIMÓN', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas', icon: '<img src="fanta_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 31, name: 'FANTA', category: 'Lata 33cl', price: 37.68, envase: '24 latas', icon: '<img src="fanta_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 40, name: 'FANTA NARANJA / LIMÓN (6 ud)', category: 'PET 2,0 Lts', price: 27.06, envase: '6 botellas', icon: '<img src="fanta_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
 
             // 3. AQUARIUS (All)
-            { id: 22, name: 'AQUARIUS', category: 'Vidrio Rellenable 30cl', price: 35.04, envase: '24 botellas', icon: '🏃' },
-            { id: 33, name: 'AQUARIUS / AQUARIUS LIBRE / VIVE', category: 'Lata 33cl', price: 41.04, envase: '24 latas', icon: '🏃' },
-            { id: 37, name: 'AQUARIUS (6 uds.)', category: 'PET 1,5L', price: 23.52, envase: '6 botellas', icon: '🏃' },
+            { id: 22, name: 'AQUARIUS', category: 'Vidrio Rellenable 30cl', price: 35.04, envase: '24 botellas', icon: '<img src="aquarius_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 33, name: 'AQUARIUS / AQUARIUS LIBRE / VIVE', category: 'Lata 33cl', price: 41.04, envase: '24 latas', icon: '<img src="aquarius_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 37, name: 'AQUARIUS (6 uds.)', category: 'PET 1,5L', price: 23.52, envase: '6 botellas', icon: '<img src="aquarius_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
 
             // 4. FUZE TEA (All)
-            { id: 23, name: 'FUZE TEA', category: 'Vidrio Rellenable 30cl', price: 33.12, envase: '24 botellas', icon: '🍵' },
-            { id: 32, name: 'FUZE TEA', category: 'Vidrio 30cl', price: 33.12, envase: '24 botellas', icon: '🍵' },
-            { id: 34, name: 'FUZE TEA', category: 'Lata 33cl', price: 39.60, envase: '24 latas', icon: '🍵' },
-            { id: 38, name: 'FUZE TEA (6 uds.)', category: 'PET 1,5L', price: 21.54, envase: '6 botellas', icon: '🍵' },
+            { id: 23, name: 'FUZE TEA', category: 'Vidrio Rellenable 30cl', price: 33.12, envase: '24 botellas', icon: '<img src="fuzetea_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 32, name: 'FUZE TEA', category: 'Vidrio 30cl', price: 33.12, envase: '24 botellas', icon: '<img src="fuzetea_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 34, name: 'FUZE TEA', category: 'Lata 33cl', price: 39.60, envase: '24 latas', icon: '<img src="fuzetea_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 38, name: 'FUZE TEA (6 uds.)', category: 'PET 1,5L', price: 21.54, envase: '6 botellas', icon: '<img src="fuzetea_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
 
             // 5. RESTO (Sorted roughly by logic or original order)
-            { id: 5, name: 'SPRITE', category: 'Vidrio Rellenable 23,7cl', price: 24.96, envase: '24 botellas', icon: '🍋' },
-            { id: 21, name: 'SPRITE', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas', icon: '🍋' },
-            { id: 32, name: 'SPRITE', category: 'Lata 33cl', price: 37.68, envase: '24 latas', icon: '🍋' },
-            { id: 41, name: 'SPRITE (6 ud) / SPRITE ZERO', category: 'PET 2,0 Lts', price: 27.06, envase: '6 botellas', icon: '🍋' },
+            { id: 5, name: 'SPRITE', category: 'Vidrio Rellenable 23,7cl', price: 24.96, envase: '24 botellas', icon: '<img src="sprite_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 21, name: 'SPRITE', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas', icon: '<img src="sprite_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 32, name: 'SPRITE', category: 'Lata 33cl', price: 37.68, envase: '24 latas', icon: '<img src="sprite_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 41, name: 'SPRITE (6 ud) / SPRITE ZERO', category: 'PET 2,0 Lts', price: 27.06, envase: '6 botellas', icon: '<img src="sprite_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
 
-            { id: 6, name: 'ROYAL BLISS TON, CREATIV, YUZ, ZER Y BERRY', category: 'Vidrio Rellenable 20cl', price: 31.92, envase: '24 botellas', icon: '🍸' },
-            { id: 7, name: 'ROYAL BLISS CÍTRICOS', category: 'Vidrio Rellenable 20cl', price: 28.80, envase: '24 botellas', icon: '🍸' },
+            { id: 6, name: 'ROYAL BLISS TON, CREATIV, YUZ, ZER Y BERRY', category: 'Vidrio Rellenable 20cl', price: 31.92, envase: '24 botellas', icon: '<img src="royalbliss_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 7, name: 'ROYAL BLISS CÍTRICOS', category: 'Vidrio Rellenable 20cl', price: 28.80, envase: '24 botellas', icon: '<img src="royalbliss_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 8, name: 'NORDIC MIST TÓNICA', category: 'Vidrio Rellenable 20cl', price: 30.96, envase: '24 botellas', icon: '🍸' },
             { id: 9, name: 'NORDIC MIST TÓNICA BLUE/ROSE', category: 'Vidrio Rellenable 20cl', price: 30.96, envase: '24 botellas', icon: '🍸' },
-            { id: 10, name: 'ROYAL BLISS TÓNICAS', category: 'Vidrio No Rellenable 20cl', price: 36.72, envase: '24 botellas', icon: '🍸' },
-            { id: 11, name: 'ROYAL BLISS SODA', category: 'Vidrio No Rellenable 20cl', price: 36.72, envase: '24 botellas', icon: '🍸' },
-            { id: 12, name: 'ROYAL BLISS GINGER ALE', category: 'Vidrio No Rellenable 20cl', price: 36.72, envase: '24 botellas', icon: '🍸' },
-            { id: 26, name: 'ROYAL BLISS', category: 'Lata 25cl Slim', price: 15.48, envase: '24 latas', icon: '🍸' },
+            { id: 10, name: 'ROYAL BLISS TÓNICAS', category: 'Vidrio No Rellenable 20cl', price: 36.72, envase: '24 botellas', icon: '<img src="royalbliss_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 11, name: 'ROYAL BLISS SODA', category: 'Vidrio No Rellenable 20cl', price: 36.72, envase: '24 botellas', icon: '<img src="royalbliss_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 12, name: 'ROYAL BLISS GINGER ALE', category: 'Vidrio No Rellenable 20cl', price: 36.72, envase: '24 botellas', icon: '<img src="royalbliss_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 26, name: 'ROYAL BLISS', category: 'Lata 25cl Slim', price: 15.48, envase: '24 latas', icon: '<img src="royalbliss_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 27, name: 'TÓNICA NORDIC Y ZERO', category: 'Lata 25cl Sleek', price: 33.60, envase: '24 latas', icon: '🍸' },
 
-            { id: 24, name: 'MONSTER ENERGY / ULTRA', category: 'Lata 25cl', price: 44.40, envase: '24 latas', icon: '⚡' },
-            { id: 28, name: 'MONSTER ENERGY / ULTRA', category: 'Lata 355 ML', price: 24.96, envase: '12 latas', icon: '⚡' },
-            { id: 33, name: 'MONSTER ENERGY', category: 'Lata 25cl', price: 44.40, envase: '24 latas', icon: '⚡' },
-            { id: 36, name: 'MONSTER ENERGY / REHAB / RIPPER / ULTRA', category: 'Lata 50cl', price: 56.16, envase: '12 latas', icon: '⚡' },
+            { id: 24, name: 'MONSTER ENERGY / ULTRA', category: 'Lata 25cl', price: 44.40, envase: '24 latas', icon: '<img src="monster_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 28, name: 'MONSTER ENERGY / ULTRA', category: 'Lata 355 ML', price: 24.96, envase: '12 latas', icon: '<img src="monster_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 33, name: 'MONSTER ENERGY', category: 'Lata 25cl', price: 44.40, envase: '24 latas', icon: '<img src="monster_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 36, name: 'MONSTER ENERGY / REHAB / RIPPER / ULTRA', category: 'Lata 50cl', price: 56.16, envase: '12 latas', icon: '<img src="monster_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
 
             { id: 25, name: 'BURN / BURN ZERO', category: 'Lata 25cl', price: 58.80, envase: '24 latas', icon: '🔥' },
             { id: 35, name: 'BURN / BURN ZERO', category: 'Lata 50cl', price: 36.48, envase: '12 latas', icon: '🔥' },
@@ -469,13 +511,13 @@
             { id: 43, name: 'MINUTE MAID L&N / N&N', category: 'Zumos 200 S/R', price: 38.16, envase: '27 briks', icon: '🧃' },
             { id: 44, name: 'M. MAID LIMÓN&NADA', category: 'PET 1 LITRO', price: 24.48, envase: '12 botellas', icon: '🧃' },
 
-            { id: 45, name: 'AQUABONA SINGULAR CON GAS', category: 'Aguas VR 365', price: 24.00, envase: '20 botellas', icon: '💧' },
-            { id: 46, name: 'AQUABONA', category: 'Aguas Ret. 500cc', price: 20.20, envase: '20 botellas', icon: '💧' },
-            { id: 47, name: 'AQUABONA', category: 'Aguas Ret. Litro', price: 19.32, envase: '12 botellas', icon: '💧' },
-            { id: 48, name: 'AQUABONA', category: 'Aguas PET 35CL', price: 17.76, envase: '24 botellas', icon: '💧' },
-            { id: 49, name: 'AQUABONA', category: 'Aguas PET 50CL', price: 20.64, envase: '24 botellas', icon: '💧' },
-            { id: 50, name: 'AQUABONA SINGULAR CON GAS', category: 'Aguas PET 50CL', price: 11.00, envase: '6 botellas', icon: '💧' },
-            { id: 51, name: 'AQUABONA', category: 'Aguas PET 1,5L', price: 9.30, envase: '6 botellas', icon: '💧' },
+            { id: 45, name: 'AQUABONA SINGULAR CON GAS', category: 'Aguas VR 365', price: 24.00, envase: '20 botellas', icon: '<img src="aquabona_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 46, name: 'AQUABONA', category: 'Aguas Ret. 500cc', price: 20.20, envase: '20 botellas', icon: '<img src="aquabona_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 47, name: 'AQUABONA', category: 'Aguas Ret. Litro', price: 19.32, envase: '12 botellas', icon: '<img src="aquabona_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 48, name: 'AQUABONA', category: 'Aguas PET 35CL', price: 17.76, envase: '24 botellas', icon: '<img src="aquabona_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 49, name: 'AQUABONA', category: 'Aguas PET 50CL', price: 20.64, envase: '24 botellas', icon: '<img src="aquabona_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 50, name: 'AQUABONA SINGULAR CON GAS', category: 'Aguas PET 50CL', price: 11.00, envase: '6 botellas', icon: '<img src="aquabona_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 51, name: 'AQUABONA', category: 'Aguas PET 1,5L', price: 9.30, envase: '6 botellas', icon: '<img src="aquabona_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 52, name: 'VILAS DEL TURBÓN', category: 'Aguas VNR 33CL', price: 27.36, envase: '24 botellas', icon: '💧' },
             { id: 53, name: 'VILAS DEL TURBÓN', category: 'Aguas VNR 75CL', price: 12.30, envase: '6 botellas', icon: '💧' }
         ];
@@ -484,12 +526,31 @@
         let selectedIds = new Set();
         let quantities = {};
         let competitorPrices = {};
+        let discounts = {}; // Store discount per product
         let checkedCategories = new Set(['todos']); // Default all
+        let isListView = false; // State for view mode
 
+        function toggleViewMode() {
+            isListView = !isListView;
+            const btn = document.getElementById('viewToggleBtn');
+            const grid = document.getElementById('catalogGrid');
+
+            if (isListView) {
+                btn.innerHTML = '<i class="fa-solid fa-border-all"></i> Vista Rejilla';
+                grid.style.gridTemplateColumns = '1fr';
+                grid.style.gap = '10px';
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-list"></i> Vista Lista';
+                grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(320px, 1fr))'; // Matches CSS
+                grid.style.gap = '30px'; // Matches CSS
+            }
+            renderCatalog();
+        }
+
+        // ... (toggleDropdown, closeDropdownOutside, toggleCategory, updateCategoryUI, initCategories remain unchanged) ...
         function toggleDropdown() {
             const el = document.getElementById('categoryOptions');
             el.classList.toggle('open');
-            // Close on outside click
             if (el.classList.contains('open')) {
                 document.addEventListener('click', closeDropdownOutside);
             }
@@ -504,25 +565,13 @@
 
         function toggleCategory(cat) {
             if (cat === 'todos') {
-                // If todos selected, clear others
                 checkedCategories.clear();
                 checkedCategories.add('todos');
             } else {
-                // If specific category selected, remove 'todos'
-                if (checkedCategories.has('todos')) {
-                    checkedCategories.delete('todos');
-                }
-
-                if (checkedCategories.has(cat)) {
-                    checkedCategories.delete(cat);
-                } else {
-                    checkedCategories.add(cat);
-                }
-
-                // If nothing selected, revert to 'todos'
-                if (checkedCategories.size === 0) {
-                    checkedCategories.add('todos');
-                }
+                if (checkedCategories.has('todos')) checkedCategories.delete('todos');
+                if (checkedCategories.has(cat)) checkedCategories.delete(cat);
+                else checkedCategories.add(cat);
+                if (checkedCategories.size === 0) checkedCategories.add('todos');
             }
             updateCategoryUI();
             renderCatalog();
@@ -531,36 +580,23 @@
         function updateCategoryUI() {
             const trigger = document.querySelector('.select-trigger');
             const checkboxes = document.querySelectorAll('.option-item input');
-
-            // Update Text
-            if (checkedCategories.has('todos')) {
-                trigger.textContent = '📦 Todas';
-            } else {
-                trigger.textContent = `${checkedCategories.size} Categorías`;
-            }
-
-            // Update Checkboxes
-            checkboxes.forEach(cb => {
-                const val = cb.value;
-                cb.checked = checkedCategories.has(val);
-            });
+            if (checkedCategories.has('todos')) trigger.textContent = '📦 Todas';
+            else trigger.textContent = `${checkedCategories.size} Categorías`;
+            checkboxes.forEach(cb => cb.checked = checkedCategories.has(cb.value));
         }
 
         function initCategories() {
             const container = document.getElementById('categoryOptions');
+            if (!container) return; // Safety check
             container.innerHTML = '';
-
             const uniqueCats = [...new Set(PRODUCTS.map(p => p.category))];
 
-            // Add 'Todas'
             container.innerHTML += `
                 <label class="option-item">
                     <input type="checkbox" value="todos" checked onchange="toggleCategory('todos')">
                     <span class="option-label">📦 Todas</span>
                 </label>
             `;
-
-            // Add others
             uniqueCats.forEach(cat => {
                 container.innerHTML += `
                     <label class="option-item">
@@ -571,13 +607,9 @@
             });
         }
 
-        // Logic Functions
         function toggleProduct(id) {
-            if (selectedIds.has(id)) {
-                selectedIds.delete(id);
-            } else {
-                selectedIds.add(id);
-            }
+            if (selectedIds.has(id)) selectedIds.delete(id);
+            else selectedIds.add(id);
             updateCardCalculations(id);
         }
 
@@ -594,6 +626,16 @@
 
         function updateCompetitorPrice(id, value) {
             competitorPrices[id] = value;
+            updateCardCalculations(id);
+        }
+
+        function updateDiscount(id, value) {
+            const disc = parseFloat(value);
+            if (disc > 0) {
+                discounts[id] = disc;
+            } else {
+                delete discounts[id];
+            }
             updateCardCalculations(id);
         }
 
@@ -619,6 +661,29 @@
             }
         }
 
+        function incrementDiscount(id) {
+            const input = document.getElementById(`disc-${id}`);
+            if (input) {
+                let val = parseFloat(input.value) || 0;
+                val++;
+                if (val > 100) val = 100;
+                input.value = val;
+                updateDiscount(id, val);
+            }
+        }
+
+        function decrementDiscount(id) {
+            const input = document.getElementById(`disc-${id}`);
+            if (input) {
+                let val = parseFloat(input.value) || 0;
+                val--;
+                if (val < 0) val = 0;
+                input.value = val > 0 ? val : '';
+                updateDiscount(id, val);
+            }
+        }
+
+
         function incrementCompPrice(id) {
             const input = document.getElementById(`comp-${id}`);
             if (input) {
@@ -642,27 +707,10 @@
             }
         }
 
-        function incrementDiscount() {
-            const input = document.getElementById('discountInput');
-            if (input) {
-                let val = parseFloat(input.value) || 0;
-                val++;
-                if (val > 100) val = 100;
-                input.value = val;
-                renderCardUpdate();
-            }
-        }
+        // OLD Global Handlers removed or updated
+        // function incrementDiscount() { ... } -> Removed/Changed to per-id
+        // function decrementDiscount() { ... } -> Removed/Changed to per-id
 
-        function decrementDiscount() {
-            const input = document.getElementById('discountInput');
-            if (input) {
-                let val = parseFloat(input.value) || 0;
-                val--;
-                if (val < 0) val = 0;
-                input.value = val > 0 ? val : '';
-                renderCardUpdate();
-            }
-        }
 
         function updateCardCalculations(id) {
             const card = document.getElementById(`card-${id}`);
@@ -681,7 +729,7 @@
             if (pricesContainer) {
                 const product = PRODUCTS.find(p => p.id === id);
                 const quantity = quantities[id] || 0;
-                const discount = parseFloat(document.getElementById('discountInput').value) || 0;
+                const discount = discounts[id] || 0; // Use individual discount
                 const compPriceRaw = competitorPrices[id] !== undefined ? competitorPrices[id] : '';
                 const compPrice = parseFloat(compPriceRaw) || 0;
                 const isSelected = selectedIds.has(id);
@@ -690,14 +738,16 @@
             }
         }
 
-        // Helper to update only calculations for all visible cards (for Discount input changes)
-        function renderCardUpdate() {
-            // Find visible cards
-            const cards = document.querySelectorAll('.product-card');
-            cards.forEach(card => {
-                const id = parseInt(card.id.replace('card-', ''));
-                updateCardCalculations(id);
-            });
+        function getUnitInfo(envase) {
+            const match = envase.match(/(\d+)\s*([a-zA-Zñ]+)/);
+            if (match) {
+                let qty = parseInt(match[1]);
+                let type = match[2].toLowerCase();
+                // Simple singularization
+                if (type.endsWith('s')) type = type.slice(0, -1);
+                return { qty, type };
+            }
+            return null;
         }
 
         function generatePricesHTML(p, quantity, discount, isSelected, compPrice) {
@@ -710,10 +760,23 @@
             const compTotal = compPrice * (quantity > 0 ? quantity : 1);
             const difference = compTotal - myTotal;
 
+            // Unit Price Logic
+            const unitInfo = getUnitInfo(p.envase);
+            let unitPriceDisplay = '';
+            if (unitInfo && unitInfo.qty > 0) {
+                const pricePerUnit = displayPrice / unitInfo.qty;
+                unitPriceDisplay = `<div style="font-size: 0.85rem; color: #6b7280; margin-top: 2px;">
+                    (€${pricePerUnit.toFixed(2)} / ${unitInfo.type})
+                </div>`;
+            }
+
             return `
-                <div class="price-row">
-                    <span class="price-label">Precio Caja (OFICIAL)</span>
-                    <span class="price-value ${applyDiscount ? 'old-price' : ''}">€${p.price.toFixed(2)}</span>
+                <div style="margin-bottom: 8px;">
+                    <div class="price-row" style="margin-bottom:0;">
+                        <span class="price-label">Precio Caja (OFICIAL)</span>
+                        <span class="price-value ${applyDiscount ? 'old-price' : ''}">€${p.price.toFixed(2)}</span>
+                    </div>
+                    ${!applyDiscount ? unitPriceDisplay : ''}
                 </div>
                 
                 ${applyDiscount ? `
@@ -725,6 +788,7 @@
                         <span class="price-label">Precio Unitario (Mío)</span>
                         <span class="final-price" style="font-size: 1.2rem;">€${unitPrice.toFixed(2)}</span>
                     </div>
+                     ${unitPriceDisplay}
                 </div>
                 ` : ''}
 
@@ -753,11 +817,21 @@
             `;
         }
 
+        // Helper to update only calculations for all visible cards (Not strictly needed with per-card update, but good fallback)
+        function renderCardUpdate() {
+            // Deprecated global updater, individual fields trigger their own updates
+        }
+
         function renderCatalog() {
             const search = document.getElementById('searchInput').value.toLowerCase();
-            const discount = parseFloat(document.getElementById('discountInput').value) || 0;
             const sortBy = document.getElementById('sortSelect').value;
             const grid = document.getElementById('catalogGrid');
+
+            // AGGRESSIVE STYLE ENFORCEMENT
+            if (!isListView) {
+                grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(320px, 1fr))';
+                grid.style.gap = '30px';
+            }
 
             grid.innerHTML = '';
 
@@ -788,13 +862,15 @@
             filtered.forEach(p => {
                 const isSelected = selectedIds.has(p.id);
                 const quantity = quantities[p.id] || 0;
+                const discount = discounts[p.id] || 0; // Individual Discount
 
                 const compPriceRaw = competitorPrices[p.id] !== undefined ? competitorPrices[p.id] : '';
                 const compPrice = parseFloat(compPriceRaw) || 0;
 
                 const card = document.createElement('div');
                 card.id = `card-${p.id}`;
-                card.className = `product-card ${isSelected ? 'selected' : ''}`;
+                // Apply list-view class if active
+                card.className = `product-card ${isSelected ? 'selected' : ''} ${isListView ? 'list-view' : ''}`;
                 card.onclick = () => toggleProduct(p.id);
                 card.style.cursor = 'pointer';
 
@@ -809,15 +885,15 @@
                     
                     <div class="product-envase">📦 ${p.envase}</div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;" onclick="event.stopPropagation()">
+                    <div class="product-controls input-group-compact" onclick="event.stopPropagation()">
                          <div>
-                            <label style="font-size: 0.65rem; color: #666; font-weight: 700; margin-bottom: 4px; display: block;">CANTIDAD</label>
+                            ${isListView ? '' : '<label style="font-size: 0.65rem; color: #666; font-weight: 700; margin-bottom: 4px; display: block;">CANTIDAD</label>'}
                             <div style="display: flex; align-items: center; gap: 5px;">
                                 <button type="button" onclick="decrementQuantity(${p.id})" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #bbb; background: #eee; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
                                     <i class="fa-solid fa-minus" style="font-size: 0.8rem;"></i>
                                 </button>
                                 <input id="qty-${p.id}" type="number" min="0" max="100" value="${quantity || ''}" 
-                                    style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; text-align: center;"
+                                    style="width: ${isListView ? '60px' : '100%'}; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; text-align: center;"
                                     placeholder="0"
                                     oninput="updateQuantity(${p.id}, this.value)">
                                 <button type="button" onclick="incrementQuantity(${p.id})" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #bbb; background: #eee; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
@@ -825,14 +901,31 @@
                                 </button>
                             </div>
                         </div>
+                        
                         <div>
-                            <label style="font-size: 0.65rem; color: #666; font-weight: 700; margin-bottom: 4px; display: block;">PRECIO COMPETENCIA</label>
+                            ${isListView ? '' : '<label style="font-size: 0.65rem; color: #666; font-weight: 700; margin-bottom: 4px; display: block;">DTO %</label>'}
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <button type="button" onclick="decrementDiscount(${p.id})" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #bbb; background: #eee; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
+                                    <i class="fa-solid fa-minus" style="font-size: 0.8rem;"></i>
+                                </button>
+                                <input id="disc-${p.id}" type="number" min="0" max="100" value="${discount || ''}" 
+                                    style="width: ${isListView ? '60px' : '100%'}; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; text-align: center;"
+                                    placeholder="%"
+                                    oninput="updateDiscount(${p.id}, this.value)">
+                                <button type="button" onclick="incrementDiscount(${p.id})" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #bbb; background: #eee; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
+                                    <i class="fa-solid fa-plus" style="font-size: 0.8rem;"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            ${isListView ? '' : '<label style="font-size: 0.65rem; color: #666; font-weight: 700; margin-bottom: 4px; display: block;">PRECIO COMPETENCIA</label>'}
                             <div style="display: flex; align-items: center; gap: 5px;">
                                 <button type="button" onclick="decrementCompPrice(${p.id})" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #bbb; background: #eee; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
                                     <i class="fa-solid fa-minus" style="font-size: 0.8rem;"></i>
                                 </button>
                                 <input id="comp-${p.id}" type="number" step="0.01" value="${compPriceRaw}" 
-                                    style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; text-align: center;"
+                                    style="width: ${isListView ? '80px' : '100%'}; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; text-align: center;"
                                     placeholder="€"
                                     oninput="updateCompetitorPrice(${p.id}, this.value)">
                                 <button type="button" onclick="incrementCompPrice(${p.id})" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #bbb; background: #eee; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
@@ -851,7 +944,20 @@
         }
 
         // Init
+        // Clear search on load to prevent blank screen
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) searchInput.value = '';
+
         initCategories();
+
+        // FORCE GRID VIEW ON INIT
+        isListView = false;
+        const initGrid = document.getElementById('catalogGrid');
+        if (initGrid) {
+            initGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(320px, 1fr))';
+            initGrid.style.gap = '30px';
+        }
+
         renderCatalog();
 
     </script>

@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="style.css?v=21">
     <link rel="stylesheet" href="style_append.css?v=21">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -116,13 +117,23 @@
                   User said "ESTO SI QUIERO" showing the screenshot.
                   Screenshot doesn't show AI Chat. I'll hide it for now to match exactly. -->
 
-            <!-- Results List (Hidden by default until search) -->
-            <div id="venueList" class="venue-list"></div>
+            <!-- Results List Removed from Main Flow -->
 
         </main>
     </div>
 
     <!-- Modals -->
+
+    <!-- Search Results Modal -->
+    <div id="searchResultsModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Resultados</h2>
+                <button class="close-btn" onclick="closeSearchResultsModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="venueList" class="venue-list"></div>
+        </div>
+    </div>
 
     <!-- Checklist Modal -->
     <div id="checklistModal" class="modal-overlay">
@@ -215,7 +226,7 @@
                     <a id="btnEmail" href="#" class="action-capsule email"><i class="fa-solid fa-envelope"></i>
                         Correo</a>
                     <button onclick="saveToDebts()" class="action-capsule save"><i class="fa-solid fa-floppy-disk"></i>
-                        Guardar Deuda</button>
+                        GUARDAR</button>
                 </div>
             </div>
         </div>
@@ -229,7 +240,60 @@
                 <button class="close-btn" onclick="closeDistribuidoresModal()"><i
                         class="fa-solid fa-xmark"></i></button>
             </div>
-            <img src="distribuidores.jpg" class="modal-image-view" onclick="openZoomModal(this.src)">
+
+            <!-- HTML TABLE REPLACEMENT -->
+            <table class="dist-table">
+                <tr class="header-row">
+                    <th>DISTRIBUIDOR</th>
+                    <th>RUTA</th>
+                    <th>RESPONSABLE</th>
+                </tr>
+                <!-- AMAGOSA -->
+                <tr class="row-amagosa">
+                    <td>AMAGOSA</td>
+                    <td>RUTA 2QA</td>
+                    <td>MANOLO</td>
+                </tr>
+                <tr class="row-amagosa">
+                    <td></td>
+                    <td>RUTA 2QB</td>
+                    <td>JESUS</td> <!-- CHANGED FROM ALFONSITO -->
+                </tr>
+                <tr class="row-amagosa">
+                    <td></td>
+                    <td>RUTA 2QC</td>
+                    <td>MANOLO</td>
+                </tr>
+                <tr class="row-amagosa">
+                    <td></td>
+                    <td>RUTA 2QF</td>
+                    <td>GASOLINERA</td>
+                </tr>
+                <!-- ESCUDERO -->
+                <tr class="row-escudero">
+                    <td>ESCUDERO VENTA</td>
+                    <td>RUTA 2QO</td>
+                    <td>JOSEMARI</td>
+                </tr>
+                <!-- LORENZO -->
+                <tr class="row-lorenzo">
+                    <td>LORENZO GALLARDO</td>
+                    <td>RUTA 2QP</td>
+                    <td>PACO PEPE</td>
+                </tr>
+                <!-- MIGUEL -->
+                <tr class="row-miguel">
+                    <td>MIGUEL POZO</td>
+                    <td>RUTA 1QK</td>
+                    <td>DIEGO</td>
+                </tr>
+                <tr class="row-miguel">
+                    <td></td>
+                    <td>RUTA 1QL</td>
+                    <td>JAVI</td>
+                </tr>
+            </table>
+
         </div>
     </div>
 
