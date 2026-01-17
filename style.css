@@ -55,8 +55,29 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 10px;
+    padding: 20px 20px;
     margin-bottom: 40px;
+
+    /* Dark Charcoal (Anthracite) Brushed Metal Effect */
+    background:
+        repeating-linear-gradient(90deg,
+            rgba(255, 255, 255, 0.03) 0px,
+            rgba(255, 255, 255, 0.03) 1px,
+            transparent 1px,
+            transparent 3px),
+        linear-gradient(to bottom, #4a4a4a 0%, #2b2b2b 40%, #1a1a1a 100%);
+
+    background-blend-mode: overlay, normal;
+
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.8);
+
+    border-bottom: 1px solid #000;
+    position: relative;
+    z-index: 50;
+    border-radius: 0 0 12px 12px;
 }
 
 .brand {
@@ -73,12 +94,18 @@ body {
 
 .logo-text {
     font-weight: 800;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     letter-spacing: 1px;
-    background: linear-gradient(90deg, #fff, #ccc);
+    text-transform: uppercase;
+
+    /* Gold/Bronze Forged Plate Effect */
+    background: linear-gradient(to bottom, #fff7cc 0%, #d4af37 30%, #b8860b 60%, #805e00 100%);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+
+    /* Relief Effect */
+    filter: drop-shadow(0 2px 0px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
 }
 
 .date-display {

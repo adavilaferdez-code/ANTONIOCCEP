@@ -356,6 +356,15 @@
                 </div>
                 <button class="close-btn" onclick="closePlanes()"><i class="fa-solid fa-xmark"></i></button>
             </div>
+            <!-- Filter Bar for Notes -->
+            <div class="filter-bar" style="margin-bottom: 15px;">
+                <input type="text" id="notesSearchInput" placeholder="Buscar en notas..." class="filter-input">
+                <div class="toggles">
+                    <label><input type="checkbox" id="notesFilterGreen"> <span class="dot-green"></span></label>
+                    <label><input type="checkbox" id="notesFilterRed"> <span class="dot-red"></span></label>
+                </div>
+            </div>
+
             <!-- Dynamic Content Area -->
             <div id="planesContent" class="debt-pad" style="min-height: 300px;"></div>
 
@@ -406,15 +415,41 @@
     <!-- Debug Console Overlay -->
 
 
+    <div id="transitionOverlay" class="transition-overlay"></div>
+
     <script src="app.js"></script>
     <script>
         // Simple Date Script
         function updateDate() {
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('fecha').textContent = now.toLocaleDateString('es-ES', options);
+            // Check if element exists before setting (in case removed)
+            const dateEl = document.getElementById('fecha');
+            if (dateEl) dateEl.textContent = now.toLocaleDateString('es-ES', options);
         }
         updateDate();
+
+        // Screen Transition Script
+        document.addEventListener('DOMContentLoaded', () => {
+            const overlay = document.getElementById('transitionOverlay');
+            // Intercept links to catalogo.html
+            const catalogLinks = document.querySelectorAll('a[href="catalogo.html"]');
+
+            catalogLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (overlay) {
+                        overlay.classList.add('active-slide-up');
+                        // Wait for animation then navigate
+                        setTimeout(() => {
+                            window.location.href = 'catalogo.html';
+                        }, 600);
+                    } else {
+                        window.location.href = 'catalogo.html';
+                    }
+                });
+            });
+        });
     </script>
 </body>
 

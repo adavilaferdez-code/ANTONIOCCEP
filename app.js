@@ -2,6 +2,24 @@ let searchResults = [];
 let currentEditingId = null;
 let userLocation = null;
 
+// Initialize Geolocation immediately
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            userLocation = {
+                lat: position.coords.latitude,
+                lon: position.coords.longitude
+            };
+            console.log("📍 Location acquired:", userLocation);
+        },
+        (error) => {
+            console.warn("⚠️ Location access denied or error:", error.message);
+        }
+    );
+} else {
+    console.warn("⚠️ Geolocation not supported by this browser.");
+}
+
 // Search Modal Control
 const searchResultsModal = document.getElementById('searchResultsModal');
 
@@ -537,6 +555,15 @@ const planesContent = document.getElementById('planesContent');
 const planesControls = document.getElementById('planesControls');
 const saveIndicator = document.getElementById('saveIndicator');
 
+// Note Filters
+const notesSearchInput = document.getElementById('notesSearchInput');
+const notesFilterGreen = document.getElementById('notesFilterGreen');
+const notesFilterRed = document.getElementById('notesFilterRed');
+
+if (notesSearchInput) notesSearchInput.addEventListener('input', filterNotes);
+if (notesFilterGreen) notesFilterGreen.addEventListener('change', filterNotes);
+if (notesFilterRed) notesFilterRed.addEventListener('change', filterNotes);
+
 let currentFolderId = null;
 
 // Ensure Planes Data Structure exists
@@ -579,9 +606,12 @@ function renderFolders() {
     planesControls.innerHTML = `
         <button onclick="createNewFolder()" class="add-btn" style="background:var(--primary-gradient);"><i class="fa-solid fa-folder-plus"></i> Nueva Carpeta</button>
         <button onclick="exportBackup()" class="add-btn" style="background:#555;" title="Descargar archivo"><i class="fa-solid fa-download"></i> Copia</button>
-        <button onclick="copyBackup()" class="add-btn" style="background:#555;" title="Copiar texto"><i class="fa-solid fa-copy"></i> Texto</button>
         <button onclick="document.getElementById('backupInput').click()" class="add-btn" style="background:#555;"><i class="fa-solid fa-upload"></i> Restaurar</button>
     `;
+
+    // Hide filter bar in root view (optional, but cleaner)
+    const filterBar = document.querySelector('#planesModal .filter-bar');
+    if (filterBar) filterBar.style.display = 'none';
 
     if (planes.length === 0) {
         planesContent.innerHTML = '<div class="empty-state" style="color:#aaa;">No tienes carpetas creadas.</div>';
@@ -624,9 +654,20 @@ function openFolder(folderId) {
 
     // Controls for Folder
     planesControls.innerHTML = `
-        <button onclick="renderFolders()" class="add-btn" style="background:#555;"><i class="fa-solid fa-arrow-left"></i> Volver</button>
-        <button onclick="addClientRow()" class="add-btn"><i class="fa-solid fa-plus"></i> Añadir Nota</button>
+        <button onclick="renderFolders()" class="add-btn" style="background:#555; width:auto; padding:12px 15px;"><i class="fa-solid fa-arrow-left"></i></button>
+        <button onclick="addClientRow()" class="add-btn"><i class="fa-solid fa-plus"></i> Nota</button>
+        <button onclick="syncFolderToNotion()" class="add-btn" style="background:#333; border: 1px solid #777;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png" style="width:16px; margin-right:5px;"> 
+            Sync
+        </button>
+        <button onclick="configureNotion()" class="add-btn" style="background:#333; border: 1px solid #777; width:auto; padding:12px 15px;" title="Configurar API">
+            <i class="fa-solid fa-gear"></i>
+        </button>
     `;
+
+    // Show filter bar in folder view
+    const filterBar = document.querySelector('#planesModal .filter-bar');
+    if (filterBar) filterBar.style.display = 'flex';
 
     renderClientList(folder);
 }
@@ -641,24 +682,90 @@ function renderClientList(folder) {
 
     folder.clients.forEach(client => {
         const rowId = client.id;
+        // Determine classes for status
+        let statusClass = '';
+        if (client.status === 'paid') statusClass = 'status-paid'; // reusing 'paid' for Green/Done
+        if (client.status === 'pending') statusClass = 'status-pending'; // reusing 'pending' for Red/Urgent
+
         const div = document.createElement('div');
-        div.className = 'debt-row';
+        div.className = 'debt-row plane-row'; // Added plane-row class for filtering
         div.id = rowId;
-        // Use keyup and blur for extra safety on iPad
+        div.dataset.status = client.status || ''; // Store status in dataset
+
         div.innerHTML = `
-            <div class="debt-text" contenteditable="true" 
+            <div class="debt-text ${statusClass}" contenteditable="true" 
                 oninput="saveClientEdit('${rowId}')" 
                 onblur="saveClientEdit('${rowId}')"
                 style="min-height:24px; outline:none;">
                 ${client.text}
             </div>
             <div class="debt-dots">
+                <button class="dot-btn dot-green" onclick="setClientStatus('${rowId}', 'paid')" title="Hecho"></button>
+                <button class="dot-btn dot-red" onclick="setClientStatus('${rowId}', 'pending')" title="Pendiente"></button>
                 <button class="dot-btn" style="background:#3b82f6; color:white; font-size:10px; display:flex; align-items:center; justify-content:center;" onclick="openMoveModal('${rowId}')" title="Mover"><i class="fa-solid fa-arrow-right"></i></button>
                 <button class="dot-btn" style="background:#555; color:white; font-size:10px; display:flex; align-items:center; justify-content:center;" onclick="deleteClientRow('${rowId}')" title="Borrar">X</button>
             </div>
         `;
         planesContent.appendChild(div);
     });
+
+    // Apply filters immediately after rendering
+    filterNotes();
+}
+
+function setClientStatus(rowId, status) {
+    if (!currentFolderId) return;
+    const planes = getPlanesData();
+    const folder = planes.find(f => f.id === currentFolderId);
+    if (!folder) return;
+
+    const client = folder.clients.find(c => c.id === rowId);
+    if (!client) return;
+
+    // Toggle logic: if clicking same status, remove it
+    if (client.status === status) {
+        client.status = null;
+    } else {
+        client.status = status;
+    }
+
+    savePlanesData(planes);
+    renderClientList(folder); // Re-render to show changes
+}
+
+function filterNotes() {
+    const term = notesSearchInput ? notesSearchInput.value.toLowerCase() : '';
+    const showGreen = notesFilterGreen ? notesFilterGreen.checked : false;
+    const showRed = notesFilterRed ? notesFilterRed.checked : false;
+
+    // Select only the rows in the current view (planesContent)
+    const rows = planesContent.querySelectorAll('.plane-row');
+
+    rows.forEach(row => {
+        const textDiv = row.querySelector('.debt-text');
+        const textContent = textDiv.textContent.toLowerCase();
+        const status = row.dataset.status;
+
+        const matchesText = term === '' || textContent.includes(term);
+
+        // Color Filter Logic
+        let matchesColor = true;
+        if (showGreen || showRed) {
+            matchesColor = false;
+            if (showGreen && status === 'paid') matchesColor = true;
+            if (showRed && status === 'pending') matchesColor = true;
+        }
+
+        if (matchesText && matchesColor) {
+            row.style.display = 'flex';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    // Special case for folders view (if we want to hide filter bar there? for now let's keep it but it won't do much on folders)
+    // Actually, maybe hide filter bar when in Root Folder view?
+    // Let's handle visibility in Render
 }
 
 
@@ -1011,5 +1118,222 @@ function calcCalculate() {
         calcExpression = 'Error';
     }
     updateCalcDisplay();
+}
+
+// === NOTION INTEGRATION ===
+const NOTION_KEY_DEFAULT = ''; // REMOVED FOR SECURITY
+const NOTION_DB_ID_DEFAULT = '2eb60cbd80db80b0ae41d3eb9f774f26';
+const CORS_PROXY = 'https://corsproxy.io/?';
+
+function configureNotion() {
+    const currentKey = localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT;
+    const currentDb = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
+
+    const newKey = prompt("🔑 Pega aquí tu 'Internal Integration Secret' de Notion:", currentKey);
+    if (newKey === null) return; // Cancelled
+
+    const newDb = prompt("🗄️ Pega aquí tu ID de Base de Datos:", currentDb);
+    if (newDb === null) return;
+
+
+    // Auto-format ID if it doesn't have hyphens
+    const formatUUID = (id) => {
+        if (!id || id.length !== 32) return id;
+        return `${id.substr(0, 8)}-${id.substr(8, 4)}-${id.substr(12, 4)}-${id.substr(16, 4)}-${id.substr(20)}`;
+    };
+
+    localStorage.setItem('notionKey', newKey.trim());
+    localStorage.setItem('notionDb', formatUUID(newDb.replace(/-/g, '').trim()));
+
+    if (confirm("✅ Configuración guardada.\n\n¿Quieres probar la conexión ahora para ver si la Clave es correcta?")) {
+        testNotionConnection();
+    }
+}
+
+async function testNotionConnection() {
+    const NOTION_KEY = localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT;
+    // We don't test DB connection here, only User token. 
+    // But let's verify DB ID format just in case user wants to know
+    const rawDb = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
+    const url = `${CORS_PROXY}https://api.notion.com/v1/users/me`;
+
+    // Show spinner on the gear button if possible, or just alert "Comprobando..."
+    // Since this is triggered from prompt or button, let's just use alert flow or simple console log for now, 
+    // but better user feedback is an alert that says "Checking..." then updates.
+    // We can't update a JS alert. We'll verify and then alert.
+
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${NOTION_KEY}`,
+                'Notion-Version': '2022-06-28'
+            }
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.message || 'Error de conexión');
+        }
+
+        const data = await response.json();
+        alert(`🎉 ¡CONEXIÓN EXITOSA!\n\n🤖 Bot detectado: ${data.bot ? data.bot.owner.type : 'Usuario'}\n✅ Tu API Key funciona perfectamente.\n\nSi la sincronización falla, el problema es que NO has dado permiso al bot en la base de datos (Menú Copas > Conexiones).`);
+
+    } catch (e) {
+        alert(`❌ ERROR DE CONEXIÓN:\n"${e.message}"\n\nEsto significa que la Clave API (Secret) está MAL copiada/pegada.`);
+    }
+}
+
+async function syncFolderToNotion() {
+    if (!currentFolderId) return;
+
+    const formatUUID = (id) => {
+        if (!id) return id;
+        const clean = id.replace(/-/g, '');
+        if (clean.length !== 32) return id; // Return original if not 32 hex
+        return `${clean.substr(0, 8)}-${clean.substr(8, 4)}-${clean.substr(12, 4)}-${clean.substr(16, 4)}-${clean.substr(20)}`;
+    };
+
+    const NOTION_KEY = localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT;
+    let NOTION_DB_ID = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
+    NOTION_DB_ID = formatUUID(NOTION_DB_ID);
+
+    const planes = getPlanesData();
+    const folder = planes.find(f => f.id === currentFolderId);
+    if (!folder || folder.clients.length === 0) {
+        alert("La carpeta está vacía.");
+        return;
+    }
+
+    if (!confirm(`¿Enviar ${folder.clients.length} notas a Notion?\nEsto creará o actualizará las entradas en tu base de datos.`)) return;
+
+    // Show loading state
+    const syncBtn = planesControls.querySelector('button:last-child');
+    const originalText = syncBtn.innerHTML;
+    syncBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+    syncBtn.disabled = true;
+
+    let successCount = 0;
+    let errorCount = 0;
+    let lastErrorMsg = "";
+
+    for (const client of folder.clients) {
+        try {
+            await sendNoteToNotion(client, folder.name);
+            successCount++;
+        } catch (e) {
+            console.error("Error syncing note:", client, e);
+            errorCount++;
+            lastErrorMsg = e.message;
+        }
+    }
+
+    // Save changes (in case we added notion_ids)
+    savePlanesData(planes);
+
+    syncBtn.innerHTML = originalText;
+    syncBtn.disabled = false;
+
+    if (errorCount > 0) {
+        alert(`⚠️ Problema en la sincronización:\n\n✅ Enviados: ${successCount}\n❌ Fallos: ${errorCount}\n\n🔍 ERROR DETECTADO:\n"${lastErrorMsg}"\n\n(Revisa que las columnas en Notion se llamen exactamente "Carpeta" y "Estado")`);
+    } else {
+        alert(`¡Sincronización Perfecta! 🚀\n\n✅ Se han enviado ${successCount} notas a Notion.`);
+    }
+}
+
+async function sendNoteToNotion(client, folderName) {
+    // Re-fetch credentials inside loop/helper (or better pass them)
+    const NOTION_KEY = localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT;
+    let NOTION_DB_ID = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
+
+    // Helper inside (or move to global scope properly in next refactor)
+    const formatUUID = (id) => {
+        if (!id) return id;
+        const clean = id.replace(/-/g, '');
+        if (clean.length !== 32) return id;
+        return `${clean.substr(0, 8)}-${clean.substr(8, 4)}-${clean.substr(12, 4)}-${clean.substr(16, 4)}-${clean.substr(20)}`;
+    };
+    NOTION_DB_ID = formatUUID(NOTION_DB_ID);
+
+    // Strip HTML from text for title
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = client.text;
+    let plainText = tempDiv.textContent || tempDiv.innerText || "";
+
+    // CLEANUP: Robust multi-step removal
+    // CLEANUP: Robust multi-step removal
+    // 1. Remove the date prefix [17/1] (handling leading spaces)
+    plainText = plainText.replace(/^\s*\[.*?\]/, '').trim();
+
+    // 2. Remove ANY text that ends with "..." (common prefix pattern)
+    // This catches "Nueva Nota...", "Nuevo Cliente...", "Bla bla..."
+    if (plainText.includes('...')) {
+        plainText = plainText.replace(/^.*?\.\.\./, '').trim();
+    } else {
+        // Fallback for older prefixes like "Nueva Nota" without dots or just spaced
+        plainText = plainText.replace(/Nu.*?Nota\.*/i, '').trim();
+    }
+
+    // 3. Remove leading dots, spaces, or punctuation left over
+    plainText = plainText.replace(/^[\.\s\-\:]+/, '').trim();
+
+    // If cleanup left it empty (user didn't type anything), put a default
+    if (!plainText) plainText = "Nota sin título";
+
+    // Determine Status
+    const statusName = client.status === 'paid' ? 'Hecho' : (client.status === 'pending' ? 'Pendiente' : 'Sin Estado');
+
+    const payload = {
+        parent: { database_id: NOTION_DB_ID },
+        properties: {
+            "Name": { // Title property
+                title: [
+                    { text: { content: plainText } }
+                ]
+            },
+            "Carpeta": { // Select or Text property for Folder
+                rich_text: [
+                    { text: { content: folderName } }
+                ]
+            },
+            "Estado": { // Select property
+                select: { name: statusName }
+            },
+            "Fecha": { // Date propery (YYYY-MM-DD for no time)
+                date: { start: (client.date ? client.date.split('T')[0] : new Date().toISOString().split('T')[0]) }
+            }
+        }
+    };
+
+    let url = `${CORS_PROXY}https://api.notion.com/v1/pages`;
+    let method = 'POST';
+
+    if (client.notion_id) {
+        url = `${CORS_PROXY}https://api.notion.com/v1/pages/${client.notion_id}`;
+        method = 'PATCH';
+        delete payload.parent; // Parent cannot be updated in PATCH
+    }
+
+    const response = await fetch(url, {
+        method: method,
+        headers: {
+            'Authorization': `Bearer ${NOTION_KEY}`,
+            'Notion-Version': '2022-06-28',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || 'Notion API Error');
+    }
+
+    const data = await response.json();
+
+    // Store the Notion ID to enable updates next time
+    if (!client.notion_id) {
+        client.notion_id = data.id;
+    }
 }
 

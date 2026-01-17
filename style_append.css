@@ -44,20 +44,56 @@
 }
 
 /* CERCA CAPSULE */
+/* CERCA BUTTON - RUBY GEM EFFECT */
 .btn-cerca {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    /* Faceted Ruby Appearance */
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, transparent 40%),
+        linear-gradient(to bottom, #ff0000 0%, #b30000 50%, #800000 100%);
+    background-color: #990000;
+
     color: white;
-    border: none;
-    padding: 15px 40px;
+    border: 1px solid rgba(255, 100, 100, 0.4);
+    padding: 16px 45px;
     border-radius: 50px;
-    font-size: 1.1rem;
-    font-weight: 800;
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+    /* Capsule */
+
+    font-size: 1.2rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+
+    /* Deep Crystalline Depth */
+    box-shadow:
+        inset 0 4px 8px rgba(255, 255, 255, 0.4),
+        /* Top internal reflection */
+        inset 0 -6px 10px rgba(0, 0, 0, 0.6),
+        /* Bottom internal shading */
+        0 10px 20px rgba(220, 20, 60, 0.5),
+        /* Outer Ruby Glow */
+        0 4px 5px rgba(0, 0, 0, 0.4);
+    /* Drop shadow */
+
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-cerca::after {
+    /* Shine/Facet Hint */
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 45%, rgba(255, 255, 255, 0.1) 50%, transparent 55%);
+    transform: rotate(30deg);
+    pointer-events: none;
 }
 
 .btn-cerca:hover {
@@ -317,54 +353,148 @@ body {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     /* 5 Columns in 1 Row */
-    gap: 8px;
-    /* Tight gap */
-    margin-bottom: 20px;
+    gap: 12px;
+    /* Slightly increased gap for glow clearance */
+    margin-bottom: 25px;
+    padding: 10px 5px;
+    /* Padding for shadows */
 }
 
+/* Base Polished Glass Style */
 .bento-card {
-    background: #1e1e1e;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    /* Slightly less rounded for small cards */
-    padding: 10px 4px;
+    position: relative;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    /* Highlight top edge */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    padding: 15px 5px;
     display: flex;
     flex-direction: column;
-    /* Vertical Stack */
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
     cursor: pointer;
     text-decoration: none;
-    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    min-height: 75px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+    /* Tactile/Physical Depth */
+    box-shadow:
+        inset 0 0 15px rgba(255, 255, 255, 0.05),
+        /* Inner light */
+        0 5px 15px rgba(0, 0, 0, 0.3);
+    /* Drop shadow */
+
+    min-height: 85px;
+    overflow: hidden;
 }
 
+/* Glass Shine Reflection */
+.bento-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), transparent);
+    border-radius: 20px 20px 80% 80% / 20px 20px 40px 40px;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Hover Effect: Lift + Intensify */
 .bento-card:hover {
-    background: #2a2a2a;
-    transform: translateY(-2px);
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .bento-card i {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     margin-bottom: 0;
-    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
-    text-align: center;
+    z-index: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    transition: all 0.3s;
 }
 
 .bento-card span {
-    color: #e5e5e5;
+    font-family: 'Montserrat', sans-serif;
+    color: rgba(255, 255, 255, 0.9);
     font-weight: 600;
     font-size: 0.65rem;
-    /* Small font for 4-col */
-    letter-spacing: 0.2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    z-index: 1;
+}
+
+/* --- SPECIFIC CAPSULE STYLES (Order: Productos, Power BI, Checklist, Negociación, Catálogo) --- */
+
+/* 1. Productos: Gray Glass, Gold Box, Yellow Glow */
+.bento-card:nth-child(1) {
+    background: linear-gradient(135deg, rgba(128, 128, 128, 0.15), rgba(80, 80, 80, 0.1));
+}
+
+.bento-card:nth-child(1) i {
+    color: #fbbf24;
+    /* Gold */
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8));
+}
+
+.bento-card:nth-child(1):hover {
+    box-shadow: 0 10px 25px rgba(251, 191, 36, 0.3), inset 0 0 20px rgba(251, 191, 36, 0.1);
+    border-color: #fbbf24;
+}
+
+/* 2. Power BI: Orange Glow */
+.bento-card:nth-child(2) i {
+    color: #f97316;
+    /* Orange */
+    filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.8));
+}
+
+.bento-card:nth-child(2):hover {
+    box-shadow: 0 10px 25px rgba(249, 115, 22, 0.3), inset 0 0 20px rgba(249, 115, 22, 0.1);
+    border-color: #f97316;
+}
+
+/* 3. Checklist: Purple List, Purple/Magenta Glow */
+.bento-card:nth-child(3) i {
+    color: #d946ef;
+    /* Magenta */
+    filter: drop-shadow(0 0 8px rgba(217, 70, 239, 0.8));
+}
+
+.bento-card:nth-child(3):hover {
+    box-shadow: 0 10px 25px rgba(217, 70, 239, 0.3), inset 0 0 20px rgba(217, 70, 239, 0.1);
+    border-color: #d946ef;
+}
+
+/* 4. Negociación (Gemini): Teal/Turquoise Glow */
+.bento-card:nth-child(4) i {
+    color: #2dd4bf;
+    /* Teal/Turquoise */
+    filter: drop-shadow(0 0 8px rgba(45, 212, 191, 0.8));
+}
+
+.bento-card:nth-child(4):hover {
+    box-shadow: 0 10px 25px rgba(45, 212, 191, 0.3), inset 0 0 20px rgba(45, 212, 191, 0.1);
+    border-color: #2dd4bf;
+}
+
+/* 5. Catálogo (Clientes): Blue Image, Light Blue Glow */
+.bento-card:nth-child(5) i {
+    color: #60a5fa;
+    /* Light Blue */
+    filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.8));
+}
+
+.bento-card:nth-child(5):hover {
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4), inset 0 0 20px rgba(59, 130, 246, 0.1);
+    border-color: #60a5fa;
 }
 
 /* === PREMIUM DESIGN UPDATE === */
@@ -398,17 +528,56 @@ body,
     color: #e5e5e5 !important;
 }
 
-/* Restore Blue Bar Logic */
+/* Restore Blue Bar Logic - COBALT BLUE METALLIC UPDATE */
 .capsule-btn.cap-blue {
-    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
-    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4) !important;
+    /* Cobalt Blue / Steel Metallic Finish */
+    background: linear-gradient(to bottom, #4c6ef5 0%, #1c3faa 45%, #00227a 50%, #001242 100%) !important;
+
+    /* 3D Volume & Reflections */
+    box-shadow:
+        0 5px 15px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+        0 0 15px rgba(59, 130, 246, 0.3) !important;
+
+    /* Light Blue/White Light Border Accent */
+    border: 1px solid rgba(147, 197, 253, 0.5) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.8) !important;
+    border-bottom: 1px solid #000 !important;
+
     backdrop-filter: none !important;
-    border: none !important;
     color: white !important;
+
+    font-size: 1rem !important;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.6), 0 2px 2px rgba(0, 0, 0, 0.8) !important;
+
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, filter 0.2s !important;
+    z-index: 10;
+}
+
+/* Metallic Sheen Animation support */
+.capsule-btn.cap-blue::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+.capsule-btn.cap-blue:hover {
+    transform: translateY(-2px) scale(1.01) !important;
+    filter: brightness(1.1) !important;
+    box-shadow: 0 8px 25px rgba(0, 30, 100, 0.6) !important;
 }
 
 .capsule-btn.cap-blue i {
-    color: white !important;
+    color: #fff !important;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
 }
 
 /* 4. Floating Dock Navigation (macOS Style) */
@@ -427,8 +596,17 @@ body,
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
     padding: 10px 30px !important;
+    padding: 10px 30px !important;
     justify-content: space-between !important;
     gap: 30px !important;
+    z-index: 9000 !important;
+    /* Ensure it stays on top */
+}
+
+/* Fix for scrolling content behind dock */
+.modal-content {
+    padding-bottom: 120px !important;
+    /* Space for the dock */
 }
 
 /* Hover Effects */
@@ -670,4 +848,47 @@ body,
 .dist-table .row-miguel {
     background: #fecaca;
     /* Light Red */
+}
+
+/* === SCREEN TRANSITION OVERLAY === */
+.transition-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    pointer-events: none;
+
+    /* Frosted Glass Style */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+
+    /* Initial State: Hidden/Below */
+    opacity: 0;
+    transform: translateY(100%);
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease;
+}
+
+/* Active State: Covers Screen (Slide Up) */
+.transition-overlay.active-slide-up {
+    pointer-events: all;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Active State: Covering Screen (For Page Load) */
+.transition-overlay.active-cover {
+    pointer-events: all;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Exit State: Fade Out (Clear Up) */
+.transition-overlay.fade-out {
+    opacity: 0;
+    /* transform: translateY(0); stays in place while fading */
+    pointer-events: none;
+    transition: opacity 0.8s ease;
 }

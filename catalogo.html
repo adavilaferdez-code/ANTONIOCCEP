@@ -403,6 +403,9 @@
 
 <body>
 
+    <!-- Transition Overlay (Starts Active/Covering) -->
+    <div id="transitionOverlay" class="transition-overlay active-cover"></div>
+
     <div class="app-background"></div>
 
     <div class="app-container">
@@ -447,6 +450,19 @@
     </div>
 
     <script>
+        // Transition Entry Script
+        window.addEventListener('load', () => {
+            const overlay = document.getElementById('transitionOverlay');
+            if (overlay) {
+                // Short delay to ensure browser renders the cover before fading
+                setTimeout(() => {
+                    overlay.classList.add('fade-out');
+                    // Remove pointer events immediately after starting fade? 
+                    // No, CSS handles pointer-events:none on .fade-out
+                }, 100);
+            }
+        });
+
         // DATA
         const PRODUCTS = [
             // ... (PRODUCTS array remains unchanged) ...
