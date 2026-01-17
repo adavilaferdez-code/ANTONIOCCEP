@@ -1,7 +1,17 @@
-// App State
 let searchResults = [];
 let currentEditingId = null;
 let userLocation = null;
+
+// Search Modal Control
+const searchResultsModal = document.getElementById('searchResultsModal');
+
+function openSearchResultsModal() {
+    searchResultsModal.classList.add('open');
+}
+
+function closeSearchResultsModal() {
+    searchResultsModal.classList.remove('open');
+}
 
 // Search Logic - Google Maps Direct
 function searchNearMe() {
@@ -49,17 +59,20 @@ searchInput.addEventListener('input', (e) => {
 });
 
 async function performSearch(query) {
-    venueList.innerHTML = '<div class="empty-state"><p>Buscando en Extremadura...</p></div>';
+    venueList.innerHTML = '<div class="empty-state"><p>Buscando...</p></div>';
+    openSearchResultsModal(); // Show loading in modal
 
     try {
-        // Enforce Extremadura context
-        const searchQuery = `${query} Extremadura`; // Filter by user request
+        // Strategy 1: Search in Extremadura first
+        let data = await runNominatimSearch(`${query} Extremadura`);
 
-        // Using Nominatim OpenStreetMap API with Extra Tags (Phone, Email, Website)
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&addressdetails=1&extratags=1&limit=25`);
-        const data = await response.json();
+        // Strategy 2: If no results, search globally
+        if (!data || data.length === 0) {
+            venueList.innerHTML = '<div class="empty-state"><p>Buscando fuera de Extremadura...</p></div>';
+            data = await runNominatimSearch(query);
+        }
 
-        // Calculate distance if location available
+        // Process Data
         let processedData = data.map(item => {
             const lat = parseFloat(item.lat);
             const lon = parseFloat(item.lon);
@@ -106,10 +119,18 @@ async function performSearch(query) {
             console.warn("Storage full?", e);
         }
         renderList(searchResults);
+        openSearchResultsModal(); // Open modal with results
     } catch (error) {
         console.error(error);
         venueList.innerHTML = '<div class="empty-state"><p>Error al buscar. Intenta de nuevo.</p></div>';
+        openSearchResultsModal();
     }
+}
+
+async function runNominatimSearch(q) {
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&extratags=1&limit=40`);
+    if (!response.ok) throw new Error('Network response was not ok');
+    return await response.json();
 }
 
 // Haversine Formula for distance
@@ -506,7 +527,7 @@ function saveToDebts() {
     addDebtRow(noteText);
 
     // Feedback
-    alert(`Guardado en Deudas:\n${item.name}`);
+    alert(`Guardado:\n${item.name}`);
 }
 
 // === PLANES (FOLDERS) LOGIC ===
