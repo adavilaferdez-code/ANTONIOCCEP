@@ -634,7 +634,7 @@ function renderFolders() {
     // Controls for Root
     planesControls.innerHTML = `
         <button onclick="createNewFolder()" class="add-btn" style="background:var(--primary-gradient);"><i class="fa-solid fa-folder-plus"></i> Nueva Carpeta</button>
-        <button onclick="syncFromNotion()" class="add-btn" style="background:#333; border: 1px solid #777;" title="Bajar datos de Notion"><i class="fa-solid fa-cloud-arrow-down"></i> Importar Notion</button>
+        <button onclick="syncNotion_FINAL()" class="add-btn" style="background:#333; border: 1px solid #777;" title="Bajar datos de Notion"><i class="fa-solid fa-cloud-arrow-down"></i> Importar Notion (NEW)</button>
         <button onclick="exportBackup()" class="add-btn" style="background:#555;" title="Descargar archivo"><i class="fa-solid fa-download"></i> Copia</button>
         <button onclick="document.getElementById('backupInput').click()" class="add-btn" style="background:#555;"><i class="fa-solid fa-upload"></i> Restaurar</button>
         <button onclick="configureSettings()" class="add-btn" style="background:#333; border: 1px solid #777; width:auto; padding:12px 15px;" title="Configurar API">
@@ -1174,38 +1174,81 @@ const NOTION_KEY_DEFAULT = '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';
 const NOTION_DB_ID_DEFAULT = '2eb60cbd80db80b0ae41d3eb9f774f26';
 const CORS_PROXY = 'https://corsproxy.io/?';
 
-function configureSettings() {
+// === SETTINGS MODAL LOGIC ===
+const settingsModal = document.getElementById('settingsModal');
+const settingNotionKey = document.getElementById('settingNotionKey');
+const settingNotionDb = document.getElementById('settingNotionDb');
+
+function configureSettings() { // Kept name for compatibility with existing button
     const currentKey = localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT;
     const currentDb = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
 
-    // Step 1: Notion
-    const newKey = prompt("🔑 NOTION: Pega tu 'Internal Integration Secret':", currentKey);
-    if (newKey === null) return;
+    // Pre-fill inputs
+    if (settingNotionKey) settingNotionKey.value = currentKey;
+    if (settingNotionDb) settingNotionDb.value = currentDb;
 
-    const newDb = prompt("🗄️ NOTION: Pega tu ID de Base de Datos:", currentDb);
-    if (newDb === null) return;
+    settingsModal.classList.add('open');
+}
 
-    // Auto-format Notion ID
-    const formatUUID = (id) => {
-        if (!id || id.length !== 32) return id;
-        return `${id.substr(0, 8)}-${id.substr(8, 4)}-${id.substr(12, 4)}-${id.substr(16, 4)}-${id.substr(20)}`;
+function closeSettingsModal() {
+    settingsModal.classList.remove('open');
+}
+
+function saveSettings() {
+    const newKey = settingNotionKey.value.trim();
+    const newDb = settingNotionDb.value.trim();
+
+    // Validation removed as user has 'ntn_' key format
+    if (newKey.length < 10) {
+        alert("⚠️ La clave parece demasiado corta. Asegúrate de copiarla entera.");
+        return;
+    }
+
+    // Prevent pasting Key into DB ID
+    if (newDb.startsWith('ntn_') || newDb.startsWith('secret_')) {
+        alert("⚠️ ERROR: Has pegado la Clave en el hueco del ID.\n\nEl 'Database ID' es diferente (búscalo en la URL de tu Notion).");
+        return;
+    }
+
+    // Auto-format Notion ID helper (Smart Extract V4 - View ID Fix)
+    const formatUUID = (input) => {
+        if (!input) return "";
+
+        // Fix: If URL contains ?v= (View ID), we might be grabbing the wrong one at the end.
+        // We want the MAIN ID (the first 32-char sequence).
+
+        // Remove non-hex chars BUT keep some separators to distinguish blocks if needed?
+        // Better strategy: Find ALL 32-char hex sequences in the original string.
+        const matches = input.match(/[a-fA-F0-9]{32}/g);
+
+        if (matches && matches.length > 0) {
+            // The Database ID is always the FIRST full UUID in the URL
+            // (The second one, if exists, is usually the View ID after ?v=)
+            const id = matches[0];
+            return `${id.substr(0, 8)}-${id.substr(8, 4)}-${id.substr(12, 4)}-${id.substr(16, 4)}-${id.substr(20)}`;
+        }
+
+        // Fallback or if user input just the ID
+        const clean = input.replace(/[^a-fA-F0-9]/g, '');
+        if (clean.length >= 32) {
+            const id = clean.substr(0, 32); // Take first 32 if cleaned
+            return `${id.substr(0, 8)}-${id.substr(8, 4)}-${id.substr(12, 4)}-${id.substr(16, 4)}-${id.substr(20)}`;
+        }
+
+        return input;
     };
 
-    localStorage.setItem('notionKey', newKey.trim());
-    localStorage.setItem('notionDb', formatUUID(newDb.replace(/-/g, '').trim()));
-    localStorage.removeItem('geminiKey'); // Clean up old key if exists
+    localStorage.setItem('notionKey', newKey);
+    localStorage.setItem('notionDb', formatUUID(newDb.replace(/-/g, '')));
 
-    if (confirm("✅ Configuración guardada.\n\n¿Quieres probar la conexión con Notion ahora?")) {
-        testNotionConnection();
-    }
+    closeSettingsModal();
+
+    // Trigger test
+    testNotionConnection();
 }
 
-// FORCE UPDATE KEY (Fix for "API token is invalid"):
-// This ensures the new 'ntn_' key replaces the old 'secret_' key in the user's browser storage.
-if (localStorage.getItem('notionKey') !== NOTION_KEY_DEFAULT) {
-    localStorage.setItem('notionKey', NOTION_KEY_DEFAULT);
-    console.log("🔑 Notion Key actualizada automáticamente a la nueva versión.");
-}
+// FORCE UPDATE KEY logic removed to allow user customization
+
 
 
 // === AI MAGIC REWRITE ===
@@ -1405,14 +1448,17 @@ async function sendNoteToNotion(client, folderName) {
 
 
 // === AI MAGIC REWRITE ===
-async function syncFromNotion() {
+// === SYNC FUNCTION FINAL ===
+// === AI MAGIC REWRITE ===
+// === SYNC FUNCTION FINAL ===
+async function syncNotion_FINAL() {
+    console.log("🚀 syncNotion_FINAL Triggered"); // Debug Log
+
+    // 1. Get Credentials
     const NOTION_KEY = (localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT).trim();
     let NOTION_DB_ID = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
 
-    // DEBUG: Verify key before request (RE-ADDED)
-    alert(`🐛 DIAGNÓSTICO IMPORTAR\n\nClave: ${NOTION_KEY.substring(0, 10)}...${NOTION_KEY.substring(NOTION_KEY.length - 5)}\nLongitud: ${NOTION_KEY.length}`);
-
-    // Helper inside (duplicated for now to ensure isolation)
+    // Helper inside
     const formatUUID = (id) => {
         if (!id) return id;
         const clean = id.replace(/-/g, '');
@@ -1432,20 +1478,26 @@ async function syncFromNotion() {
         syncBtn.disabled = true;
     }
 
+    // FEEDBACK
+    // alert("⏳ Conectando con Notion...\n(Dale a Aceptar y espera unos segundos)"); // Commented out to reduce clicks
+
     try {
         let hasMore = true;
         let startCursor = undefined;
         let allPages = [];
 
+        // Debug First Fetch
+        console.log(`Connecting to DB: ${NOTION_DB_ID} with Key ending in ...${NOTION_KEY.slice(-4)}`);
+
         // Fetch loop for pagination
         while (hasMore) {
-            // Add cache buster
-            const safeUrl = `${CORS_PROXY}https://api.notion.com/v1/databases/${NOTION_DB_ID}/query?t=${Date.now()}`;
+            // Add cache buster (REMOVED: Notion API rejects query params on POST query)
+            const safeUrl = `${CORS_PROXY}https://api.notion.com/v1/databases/${NOTION_DB_ID}/query`;
 
-            const response = await fetch(safeUrl, {
+            let response = await fetch(safeUrl, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${NOTION_KEY}`,
+                    'Authorization': 'Bearer ' + NOTION_KEY,
                     'Notion-Version': '2022-06-28',
                     'Content-Type': 'application/json'
                 },
@@ -1455,12 +1507,99 @@ async function syncFromNotion() {
                 })
             });
 
+            // === ULTIMATE RECOVERY: SEARCH FOR ANY DATABASE ===
             if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.message || "Error al conectar con Notion (verifica tu Clave)");
+                let err = await response.json(); // Read once
+                console.warn("First attempt failed:", err);
+
+                // If we get ANY error (400, 404, 401), it means the ID is wrong OR we don't have access.
+                // Let's try to SEARCH for what databases we DO have access to.
+                if (response.status === 400 || response.status === 404 || err.code === 'object_not_found' || err.code === 'validation_error') {
+                    console.log("🕵️‍♂️ ID failed. Searching for ANY accessible database...");
+
+                    const searchUrl = `${CORS_PROXY}https://api.notion.com/v1/search`;
+                    const searchResp = await fetch(searchUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + NOTION_KEY,
+                            'Notion-Version': '2022-06-28',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            filter: {
+                                value: 'database',
+                                property: 'object'
+                            },
+                            page_size: 5 // Just need one
+                        })
+                    });
+
+                    if (searchResp.ok) {
+                        const searchData = await searchResp.json();
+                        const foundDbs = searchData.results;
+
+                        if (foundDbs.length > 0) {
+                            // We found databases! Use the first one.
+                            const bestDb = foundDbs[0];
+                            console.log("🎉 FOUND DATABASE VIA SEARCH:", bestDb.id);
+                            const dbName = bestDb.title && bestDb.title.length > 0 ? bestDb.title[0].plain_text : "Sin nombre";
+
+                            alert(`✅ ¡Lo encontré! El ID que pusiste no funcionaba, pero he buscado y he encontrado tu base de datos: "${dbName}".\n\nVoy a usar esta automáticamente.`);
+
+                            // Update ID and Persist
+                            NOTION_DB_ID = bestDb.id.replace(/-/g, '');
+                            localStorage.setItem('notionDb', NOTION_DB_ID);
+
+                            // RETRY THE QUERY with new ID
+                            const retryUrl = `${CORS_PROXY}https://api.notion.com/v1/databases/${bestDb.id}/query`;
+                            response = await fetch(retryUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': 'Bearer ' + NOTION_KEY,
+                                    'Notion-Version': '2022-06-28',
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ page_size: 100 })
+                            });
+
+                            // If retry fails, we need to handle it too
+                            if (!response.ok) {
+                                err = await response.json();
+                            }
+
+                        } else {
+                            throw new Error("❌ Tu ID era incorrecto, y he buscado pero NO veo ninguna base de datos compartida.\n\nPOR FAVOR: Ve a la tabla en Notion -> 3 puntos -> Conexiones -> Añadir 'MI AUTOMATIZACION'.");
+                        }
+                    }
+                }
+
+                // Final check after potential retry
+                if (!response.ok) {
+                    // console.error("Notion Final Error:", err); // Removed to avoid circular json error if err is not json
+                    throw new Error(err.message || "Error al conectar con Notion. Verifica el ID y el acceso.");
+                }
             }
 
             const data = await response.json();
+
+            // --- SMART DEBUG OF COLUMNS (Only on first page) ---
+            if (allPages.length === 0 && data.results.length > 0) {
+                const sampleProps = data.results[0].properties;
+                const propNames = Object.keys(sampleProps);
+                console.log("Found Properties:", propNames);
+
+                const missing = [];
+                if (!propNames.includes("Name") && !propNames.includes("Nombre")) missing.push("Name (o Nombre)");
+                if (!propNames.includes("Carpeta")) missing.push("Carpeta");
+                if (!propNames.includes("Estado")) missing.push("Estado");
+                // Date is usually optional but good to have
+
+                if (missing.length > 0) {
+                    alert(`⚠️ AVISO DE CONFIGURACIÓN:\n\nTu base de datos de Notion parece tener nombres de columnas diferentes.\n\nFaltan (o se llaman diferente): \n- ${missing.join('\n- ')}\n\nColumnas encontradas: \n[ ${propNames.join(', ')} ]\n\nEl sistema intentará importar lo que pueda.`);
+                }
+            }
+            // ---------------------------------------------------
+
             allPages = allPages.concat(data.results);
             hasMore = data.has_more;
             startCursor = data.next_cursor;
@@ -1475,36 +1614,54 @@ async function syncFromNotion() {
             const props = page.properties;
 
             // Extract Data
-            // 1. Name (Title) - Essential
+            // 1. Name (Title) - Essential - TRY "Name", "NAME", "Nombre", "title"
             let text = "";
-            if (props.Name && props.Name.title && props.Name.title.length > 0) {
-                text = props.Name.title.map(t => t.plain_text).join('');
+            let nameProp = props.Name || props.NAME || props.Nombre || props.Title;
+
+            if (nameProp && nameProp.title && nameProp.title.length > 0) {
+                text = nameProp.title.map(t => t.plain_text).join('');
             } else {
                 return; // Skip empty names
             }
 
-            // 2. Folder (Carpeta)
+            // 2. Folder (Carpeta) - TRY "Carpeta", "Folder", "Status" (if misused)
             let folderName = "General";
-            if (props.Carpeta) {
-                if (props.Carpeta.type === 'rich_text' && props.Carpeta.rich_text.length > 0) {
-                    folderName = props.Carpeta.rich_text[0].plain_text;
-                } else if (props.Carpeta.type === 'select' && props.Carpeta.select) {
-                    folderName = props.Carpeta.select.name;
+            let folderProp = props.Carpeta || props.Folder || props.Category;
+
+            if (folderProp) {
+                if (folderProp.type === 'rich_text' && folderProp.rich_text.length > 0) {
+                    folderName = folderProp.rich_text[0].plain_text;
+                } else if (folderProp.type === 'select' && folderProp.select) {
+                    folderName = folderProp.select.name;
+                } else if (folderProp.type === 'multi_select' && folderProp.multi_select.length > 0) {
+                    folderName = folderProp.multi_select[0].name; // Take first tag
+                } else if (folderProp.type === 'status' && folderProp.status) {
+                    folderName = folderProp.status.name;
                 }
             }
 
-            // 3. Status (Estado)
+            // 3. Status (Estado) - TRY "Estado", "Status"
             let status = null;
-            if (props.Estado && props.Estado.select) {
-                const s = props.Estado.select.name.toLowerCase();
-                if (s === 'hecho' || s === 'paid') status = 'paid';
-                if (s === 'pendiente' || s === 'pending') status = 'pending';
+            let statusProp = props.Estado || props.Status || props.State;
+
+            if (statusProp) {
+                let s = '';
+                if (statusProp.type === 'select' && statusProp.select) {
+                    s = statusProp.select.name.toLowerCase();
+                } else if (statusProp.type === 'status' && statusProp.status) {
+                    s = statusProp.status.name.toLowerCase();
+                }
+
+                if (s === 'hecho' || s === 'paid' || s === 'done' || s === 'completado') status = 'paid';
+                if (s === 'pendiente' || s === 'pending' || s === 'todo' || s === 'por hacer') status = 'pending';
             }
 
-            // 4. Date (Fecha)
+            // 4. Date (Fecha) - TRY "Fecha", "Date"
             let dateIdx = new Date().toISOString();
-            if (props.Fecha && props.Fecha.date && props.Fecha.date.start) {
-                dateIdx = props.Fecha.date.start;
+            let dateProp = props.Fecha || props.Date || props.Fech;
+
+            if (dateProp && dateProp.date && dateProp.date.start) {
+                dateIdx = dateProp.date.start;
             }
 
             // Find or Create Folder
@@ -1551,14 +1708,23 @@ async function syncFromNotion() {
 
     } catch (e) {
         console.error(e);
-        alert("âŒ Error al importar: " + e.message);
+        alert("❌ Error al importar: " + e.message + "\n\n(Abre la consola (F12) para más detalles)");
     } finally {
         if (syncBtn) {
-            syncBtn.innerHTML = originalText || 'Importar Notion';
+            syncBtn.innerHTML = originalText || 'Importar Notion (NEW)';
             syncBtn.disabled = false;
         }
     }
 }
+// End of syncNotion_FINAL
+
+
+
+// CHECK INTEGRITY
+// CHECK INTEGRITY
+// console.log("APP V3 LOADED OK");
+// alert("✅ SISTEMA OK (V3)");
+
 
 
 // === AI MAGIC REWRITE ===

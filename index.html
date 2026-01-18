@@ -23,6 +23,7 @@
         <header class="app-header">
             <div class="brand-centered">
                 <img src="logo_antonio.png" alt="Antonio Dávila" class="main-logo">
+                <p style="color:white; font-size:10px; margin-top:5px;">V2.0 (Cache Bust)</p>
             </div>
         </header>
 
@@ -76,10 +77,11 @@
                         </div>
 
                         <!-- 5. Catálogo Clientes -->
-                        <a href="catalogo_visual.html" class="bento-card">
+                        <div class="bento-card" onclick="window.open('catalogo_2025.pdf', '_blank')"
+                            style="cursor:pointer;">
                             <i class="fa-solid fa-images" style="color: #3b82f6;"></i>
                             <span>Catálogo</span>
-                        </a>
+                        </div>
                     </div>
 
                     <!-- 3. Distribuidores -->
@@ -420,7 +422,43 @@
     <!-- Hidden Backup Input for Restore Functionality -->
     <input type="file" id="backupInput" style="display:none;" accept=".json" onchange="importBackup(this)">
 
-    <script src="app.js"></script>
+    <!-- Settings Modal (New) -->
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>⚙️ Configuración Notion</h2>
+                <button class="close-btn" onclick="closeSettingsModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:bold; color:var(--text-color);">🔑
+                        Internal Integration Secret</label>
+                    <input type="password" id="settingNotionKey" placeholder="secret_..."
+                        style="width:100%; padding:10px; border-radius:8px; border:1px solid #444; background:#222; color:white;">
+                    <p style="font-size:12px; color:#aaa; margin-top:5px;">Empieza por "secret_". Consíguelo en <a
+                            href="https://www.notion.so/my-integrations" target="_blank"
+                            style="color:#3b82f6;">notion.so/my-integrations</a></p>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:bold; color:var(--text-color);">🗄️
+                        Database ID</label>
+                    <input type="text" id="settingNotionDb" placeholder="32 caracteres hex..."
+                        style="width:100%; padding:10px; border-radius:8px; border:1px solid #444; background:#222; color:white;">
+                    <p style="font-size:12px; color:#aaa; margin-top:5px;">El ID de la base de datos (normalmente en la
+                        URL).</p>
+                </div>
+
+                <div style="text-align: right;">
+                    <button onclick="saveSettings()"
+                        style="background:var(--primary-gradient); border:none; padding:10px 20px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">💾
+                        Guardar y Probar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app_v3.js"></script>
     <script>
         // Simple Date Script
         function updateDate() {

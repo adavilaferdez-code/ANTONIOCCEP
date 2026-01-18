@@ -634,7 +634,7 @@ function renderFolders() {
     // Controls for Root
     planesControls.innerHTML = `
         <button onclick="createNewFolder()" class="add-btn" style="background:var(--primary-gradient);"><i class="fa-solid fa-folder-plus"></i> Nueva Carpeta</button>
-        <button onclick="syncFromNotion()" class="add-btn" style="background:#333; border: 1px solid #777;" title="Bajar datos de Notion"><i class="fa-solid fa-cloud-arrow-down"></i> Importar Notion</button>
+        <button onclick="syncNotion_FINAL()" class="add-btn" style="background:#333; border: 1px solid #777;" title="Bajar datos de Notion"><i class="fa-solid fa-cloud-arrow-down"></i> Importar Notion (NEW)</button>
         <button onclick="exportBackup()" class="add-btn" style="background:#555;" title="Descargar archivo"><i class="fa-solid fa-download"></i> Copia</button>
         <button onclick="document.getElementById('backupInput').click()" class="add-btn" style="background:#555;"><i class="fa-solid fa-upload"></i> Restaurar</button>
         <button onclick="configureSettings()" class="add-btn" style="background:#333; border: 1px solid #777; width:auto; padding:12px 15px;" title="Configurar API">
@@ -1405,14 +1405,12 @@ async function sendNoteToNotion(client, folderName) {
 
 
 // === AI MAGIC REWRITE ===
-async function syncFromNotion() {
+// === SYNC FUNCTION FINAL ===
+async function syncNotion_FINAL() {
+    // 1. Get Credentials
     const NOTION_KEY = (localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT).trim();
-    let NOTION_DB_ID = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
 
-    // DEBUG: Verify key before request (RE-ADDED)
-    alert(`🐛 DIAGNÓSTICO IMPORTAR\n\nClave: ${NOTION_KEY.substring(0, 10)}...${NOTION_KEY.substring(NOTION_KEY.length - 5)}\nLongitud: ${NOTION_KEY.length}`);
-
-    // Helper inside (duplicated for now to ensure isolation)
+    // Helper inside
     const formatUUID = (id) => {
         if (!id) return id;
         const clean = id.replace(/-/g, '');
@@ -1432,6 +1430,9 @@ async function syncFromNotion() {
         syncBtn.disabled = true;
     }
 
+    // FEEDBACK
+    alert("⏳ Conectando con Notion...\n(Dale a Aceptar y espera unos segundos)");
+
     try {
         let hasMore = true;
         let startCursor = undefined;
@@ -1445,7 +1446,7 @@ async function syncFromNotion() {
             const response = await fetch(safeUrl, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${NOTION_KEY}`,
+                    'Authorization': 'Bearer ' + NOTION_KEY,
                     'Notion-Version': '2022-06-28',
                     'Content-Type': 'application/json'
                 },
@@ -1483,22 +1484,32 @@ async function syncFromNotion() {
                 return; // Skip empty names
             }
 
-            // 2. Folder (Carpeta)
+            // 2. Folder (Carpeta) - ROBUST PARSING
             let folderName = "General";
             if (props.Carpeta) {
                 if (props.Carpeta.type === 'rich_text' && props.Carpeta.rich_text.length > 0) {
                     folderName = props.Carpeta.rich_text[0].plain_text;
                 } else if (props.Carpeta.type === 'select' && props.Carpeta.select) {
                     folderName = props.Carpeta.select.name;
+                } else if (props.Carpeta.type === 'multi_select' && props.Carpeta.multi_select.length > 0) {
+                    folderName = props.Carpeta.multi_select[0].name; // Take first tag
+                } else if (props.Carpeta.type === 'status' && props.Carpeta.status) {
+                    folderName = props.Carpeta.status.name;
                 }
             }
 
-            // 3. Status (Estado)
+            // 3. Status (Estado) - ROBUST PARSING
             let status = null;
-            if (props.Estado && props.Estado.select) {
-                const s = props.Estado.select.name.toLowerCase();
-                if (s === 'hecho' || s === 'paid') status = 'paid';
-                if (s === 'pendiente' || s === 'pending') status = 'pending';
+            if (props.Estado) {
+                let s = '';
+                if (props.Estado.type === 'select' && props.Estado.select) {
+                    s = props.Estado.select.name.toLowerCase();
+                } else if (props.Estado.type === 'status' && props.Estado.status) {
+                    s = props.Estado.status.name.toLowerCase();
+                }
+
+                if (s === 'hecho' || s === 'paid' || s === 'done' || s === 'completado') status = 'paid';
+                if (s === 'pendiente' || s === 'pending' || s === 'todo' || s === 'por hacer') status = 'pending';
             }
 
             // 4. Date (Fecha)
@@ -1551,7 +1562,7 @@ async function syncFromNotion() {
 
     } catch (e) {
         console.error(e);
-        alert("âŒ Error al importar: " + e.message);
+        alert("❌ Error al importar: " + e.message);
     } finally {
         if (syncBtn) {
             syncBtn.innerHTML = originalText || 'Importar Notion';
@@ -1559,6 +1570,170 @@ async function syncFromNotion() {
         }
     }
 }
+// 2. DEBUG ALERT (Check if this runs!)
+// 2. DEBUG ALERT REMOVED
+
+// Helper inside
+const formatUUID = (id) => {
+    if (!id) return id;
+    const clean = id.replace(/-/g, '');
+    if (clean.length !== 32) return id;
+    return `${clean.substr(0, 8)}-${clean.substr(8, 4)}-${clean.substr(12, 4)}-${clean.substr(16, 4)}-${clean.substr(20)}`;
+};
+NOTION_DB_ID = formatUUID(NOTION_DB_ID);
+
+if (!confirm("⚠️  ¿Quieres IMPORTAR y RESTAURAR tus notas desde Notion PRO?\n\nEsto buscará todas las notas en tu base de datos y las recreará en esta aplicación. Útil si has perdido datos o cambiado de dispositivo.")) return;
+
+// Show loading
+const syncBtn = planesControls.querySelector('button[title="Bajar datos de Notion"]');
+let originalText = "";
+if (syncBtn) {
+    originalText = syncBtn.innerHTML;
+    syncBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Bajando...';
+    syncBtn.disabled = true;
+}
+
+// FEEDBACK
+alert("⏳ Conectando con Notion...\n(Dale a Aceptar y espera unos segundos)");
+
+try {
+    let hasMore = true;
+    let startCursor = undefined;
+    let allPages = [];
+
+    // Fetch loop for pagination
+    while (hasMore) {
+        // Add cache buster
+        const safeUrl = `${CORS_PROXY}https://api.notion.com/v1/databases/${NOTION_DB_ID}/query?t=${Date.now()}`;
+
+        const response = await fetch(safeUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + NOTION_KEY,
+                'Notion-Version': '2022-06-28',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                page_size: 100,
+                start_cursor: startCursor
+            })
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.message || "Error al conectar con Notion (verifica tu Clave)");
+        }
+
+        const data = await response.json();
+        allPages = allPages.concat(data.results);
+        hasMore = data.has_more;
+        startCursor = data.next_cursor;
+    }
+
+    // Process Results
+    const planes = getPlanesData();
+    let restoredCount = 0;
+    let updatedCount = 0;
+
+    allPages.forEach(page => {
+        const props = page.properties;
+
+        // Extract Data
+        // 1. Name (Title) - Essential
+        let text = "";
+        if (props.Name && props.Name.title && props.Name.title.length > 0) {
+            text = props.Name.title.map(t => t.plain_text).join('');
+        } else {
+            return; // Skip empty names
+        }
+
+        // 2. Folder (Carpeta) - ROBUST PARSING
+        let folderName = "General";
+        if (props.Carpeta) {
+            if (props.Carpeta.type === 'rich_text' && props.Carpeta.rich_text.length > 0) {
+                folderName = props.Carpeta.rich_text[0].plain_text;
+            } else if (props.Carpeta.type === 'select' && props.Carpeta.select) {
+                folderName = props.Carpeta.select.name;
+            } else if (props.Carpeta.type === 'multi_select' && props.Carpeta.multi_select.length > 0) {
+                folderName = props.Carpeta.multi_select[0].name; // Take first tag
+            } else if (props.Carpeta.type === 'status' && props.Carpeta.status) {
+                folderName = props.Carpeta.status.name;
+            }
+        }
+
+        // 3. Status (Estado) - ROBUST PARSING
+        let status = null;
+        if (props.Estado) {
+            let s = '';
+            if (props.Estado.type === 'select' && props.Estado.select) {
+                s = props.Estado.select.name.toLowerCase();
+            } else if (props.Estado.type === 'status' && props.Estado.status) {
+                s = props.Estado.status.name.toLowerCase();
+            }
+
+            if (s === 'hecho' || s === 'paid' || s === 'done' || s === 'completado') status = 'paid';
+            if (s === 'pendiente' || s === 'pending' || s === 'todo' || s === 'por hacer') status = 'pending';
+        }
+
+        // 4. Date (Fecha)
+        let dateIdx = new Date().toISOString();
+        if (props.Fecha && props.Fecha.date && props.Fecha.date.start) {
+            dateIdx = props.Fecha.date.start;
+        }
+
+        // Find or Create Folder
+        let folder = planes.find(f => f.name.toLowerCase() === folderName.toLowerCase());
+        if (!folder) {
+            folder = {
+                id: 'folder_' + Date.now() + Math.random().toString(36).substr(2, 5),
+                name: folderName,
+                clients: []
+            };
+            planes.push(folder);
+        }
+
+        // Check if Client Exists (by Notion ID)
+        let existingClient = folder.clients.find(c => c.notion_id === page.id);
+
+        // Construct the HTML text format [DD/MM] Name
+        const dObj = new Date(dateIdx);
+        const dStr = dObj.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }).replace(',', '');
+        const newTextFormatted = `<b>[${dStr}]</b> ${text}`;
+
+        if (existingClient) {
+            // UPDATE Existing
+            existingClient.text = newTextFormatted;
+            existingClient.status = status;
+            existingClient.date = dateIdx;
+            updatedCount++;
+        } else {
+            // CREATE New
+            folder.clients.push({
+                id: 'cli_' + Date.now() + Math.random().toString(36).substr(2, 5), // generate new local ID
+                text: newTextFormatted,
+                date: dateIdx,
+                status: status,
+                notion_id: page.id
+            });
+            restoredCount++;
+        }
+    });
+
+    savePlanesData(planes);
+    renderFolders(); // Refresh View
+    alert(`✅ Proceso finalizado.\n\n📥 Descargados: ${allPages.length}\n✨ Nuevos: ${restoredCount}\n🔄 Actualizados: ${updatedCount}`);
+
+} catch (e) {
+    console.error(e);
+    alert("❌ Error al importar: " + e.message);
+} finally {
+    if (syncBtn) {
+        syncBtn.innerHTML = originalText || 'Importar Notion';
+        syncBtn.disabled = false;
+    }
+}
+}
+
 
 
 // === AI MAGIC REWRITE ===

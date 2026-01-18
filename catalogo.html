@@ -441,11 +441,12 @@
                     </select>
                 </div>
             </div>
-        </section>
+    </div>
+    </section>
 
-        <div id="catalogGrid" class="product-grid">
-            <!-- Products rendered here -->
-        </div>
+    <div id="catalogGrid" class="product-grid">
+        <!-- Products rendered here -->
+    </div>
 
     </div>
 
@@ -602,21 +603,26 @@
             // Get Values
             const qty = quantities[id] || 0;
             const discount = discounts[id] || 0;
-            const compPrice = parseFloat(competitorPrices[id] || 0);
+            const compPriceUnit = parseFloat(competitorPrices[id] || 0);
 
-            // Calculate
-            const unitPrice = product.price * (1 - discount / 100);
+            // Calculate My Price
+            const myUnitPrice = product.price * (1 - discount / 100);
+
+            // Calculate Comp Price (Case)
+            // Input is considered CASE PRICE directly
+            const compCasePrice = compPriceUnit;
 
             // Build String
             const time = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
             let details = `<b>${product.name}</b>`;
 
             if (qty > 0) details += ` | 📦 ${qty} cajas`;
-            if (discount > 0) details += ` | 📉 Dto: ${discount}% (€${unitPrice.toFixed(2)})`;
-            if (compPrice > 0) {
-                const diff = compPrice - unitPrice;
+            if (discount > 0) details += ` | 📉 Dto: ${discount}% (€${myUnitPrice.toFixed(2)})`;
+
+            if (compPriceUnit > 0) {
+                const diff = compCasePrice - myUnitPrice;
                 const diffStr = diff >= 0 ? `<span style="color:green">(-€${diff.toFixed(2)})</span>` : `<span style="color:red">(+€${Math.abs(diff).toFixed(2)})</span>`;
-                details += ` | ⚔️ Comp: €${compPrice.toFixed(2)} ${diffStr}`;
+                details += ` | ⚔️ Comp: €${compCasePrice.toFixed(2)} ${diffStr}`;
             }
 
             // Append formatted HTML
@@ -929,11 +935,16 @@
             const displayPrice = applyDiscount ? unitPrice : p.price;
             const myTotal = displayPrice * (quantity > 0 ? quantity : 1);
 
-            const compTotal = compPrice * (quantity > 0 ? quantity : 1);
+            // Unit Price Logic & Pack Info
+            const unitInfo = getUnitInfo(p.envase);
+            const unitsPerCase = unitInfo && unitInfo.qty > 0 ? unitInfo.qty : 1;
+
+            // Competitor Calculation (Comp Price Input is CASE PRICE)
+            const compCasePrice = compPrice;
+            const compTotal = compCasePrice * (quantity > 0 ? quantity : 1);
+
             const difference = compTotal - myTotal;
 
-            // Unit Price Logic
-            const unitInfo = getUnitInfo(p.envase);
             let unitPriceDisplay = '';
             if (unitInfo && unitInfo.qty > 0) {
                 const pricePerUnit = displayPrice / unitInfo.qty;
@@ -957,7 +968,7 @@
                         <span class="discount-badge">AHORRAS ${discount}%</span>
                     </div>
                     <div class="price-row" style="margin-top:4px;">
-                        <span class="price-label">Precio Unitario (Mío)</span>
+                        <span class="price-label">Precio Caja (Mío)</span>
                         <span class="final-price" style="font-size: 1.2rem;">€${unitPrice.toFixed(2)}</span>
                     </div>
                      ${unitPriceDisplay}
@@ -974,6 +985,9 @@
                             ${difference >= 0 ? '-' : '+'}€${Math.abs(difference).toFixed(2)}
                         </span>
                     </div>
+                     <div style="font-size:0.75rem; color:#666; text-align:right; margin-top:-4px; margin-bottom:4px;">
+                        (Comp. €${compCasePrice.toFixed(2)})
+                    </div>
                     ${difference >= 0 ? `<div style="font-size: 0.75rem; color: #16a34a; text-align: right; font-weight: bold;">(AHORRAS)</div>` : `<div style="font-size: 0.75rem; color: #dc2626; text-align: right; font-weight: bold;">(PAGAS MÁS)</div>`}
                 </div>
                 ` : ''}
@@ -989,10 +1003,14 @@
             `;
         }
 
+
+
         // Helper to update only calculations for all visible cards (Not strictly needed with per-card update, but good fallback)
         function renderCardUpdate() {
             // Deprecated global updater, individual fields trigger their own updates
         }
+
+        // ... (variables already declared at top level) ...
 
         function renderCatalog() {
             const search = document.getElementById('searchInput').value.toLowerCase();
@@ -1091,7 +1109,9 @@
                         </div>
 
                         <div>
-                            ${isListView ? '' : '<label style="font-size: 0.65rem; color: #666; font-weight: 700; margin-bottom: 4px; display: block;">PRECIO COMPETENCIA</label>'}
+                            ${isListView ? '' : `<label style="font-size: 0.65rem; color: #666; font-weight: 700; margin-bottom: 4px; display: flex; align-items:center; justify-content:space-between;">
+                                <span>COMPETENCIA (CAJA)</span>
+                            </label>`}
                             <div style="display: flex; align-items: center; gap: 5px;">
                                 <button type="button" onclick="decrementCompPrice(${p.id})" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #bbb; background: #eee; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
                                     <i class="fa-solid fa-minus" style="font-size: 0.8rem;"></i>
@@ -1135,6 +1155,12 @@
         if (initGrid) {
             initGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(320px, 1fr))';
             initGrid.style.gap = '30px';
+        }
+
+        // Ensure Toggle Button State matches
+        const toggleBtn = document.getElementById('viewToggleBtn');
+        if (toggleBtn) {
+            toggleBtn.innerHTML = '<i class="fa-solid fa-list"></i> Vista Lista';
         }
 
         renderCatalog();
