@@ -43,7 +43,7 @@
                 <!-- DASHBOARD CARD (Grupos unificados) -->
                 <div class="dashboard-card">
 
-                    <!-- 1. Cerca Button -->
+                    <!-- 1. Button -->
                     <button class="btn-cerca" onclick="searchNearMe()">
                         <i class="fa-solid fa-location-crosshairs"></i> CERCA (100km)
                     </button>
@@ -51,10 +51,10 @@
                     <!-- 2. Shortcuts Grid -->
                     <div class="bento-grid">
                         <!-- 1. Productos -->
-                        <a href="catalogo.html" class="bento-card">
+                        <div class="bento-card" onclick="openCatalogWithNote()" style="cursor:pointer;">
                             <i class="fa-solid fa-box-open" style="color: #fbbf24;"></i>
                             <span>Productos</span>
-                        </a>
+                        </div>
 
                         <!-- 2. Power BI -->
                         <div class="bento-card"
@@ -417,6 +417,9 @@
 
     <div id="transitionOverlay" class="transition-overlay"></div>
 
+    <!-- Hidden Backup Input for Restore Functionality -->
+    <input type="file" id="backupInput" style="display:none;" accept=".json" onchange="importBackup(this)">
+
     <script src="app.js"></script>
     <script>
         // Simple Date Script
@@ -450,6 +453,15 @@
                 });
             });
         });
+
+        function openCatalogWithNote() {
+            const activeId = localStorage.getItem('activeNoteId');
+            if (activeId) {
+                window.location.href = `catalogo.html?nid=${activeId}`;
+            } else {
+                window.location.href = 'catalogo.html';
+            }
+        }
     </script>
 </body>
 

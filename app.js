@@ -1,8 +1,23 @@
-let searchResults = [];
+﻿let searchResults = [];
 let currentEditingId = null;
 let userLocation = null;
 
-// Initialize Geolocation immediately
+function requestLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                userLocation = {
+                    lat: position.coords.latitude,
+                    lon: position.coords.longitude
+                };
+                console.log("Loc ok");
+            },
+            (err) => console.warn("Loc err")
+        );
+    }
+}
+
+/* // Initialize Geolocation immediately
 if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -10,16 +25,17 @@ if (navigator.geolocation) {
                 lat: position.coords.latitude,
                 lon: position.coords.longitude
             };
-            console.log("📍 Location acquired:", userLocation);
+            console.log("ðŸ“ Location acquired:", userLocation);
         },
         (error) => {
-            console.warn("⚠️ Location access denied or error:", error.message);
+            console.warn("⚠️ Location access denied or error:", error.message);
         }
     );
 } else {
-    console.warn("⚠️ Geolocation not supported by this browser.");
+    console.warn("⚠️ Geolocation not supported by this browser.");
 }
 
+*/
 // Search Modal Control
 const searchResultsModal = document.getElementById('searchResultsModal');
 
@@ -36,7 +52,7 @@ function searchNearMe() {
     const term = searchInput.value.trim();
 
     // Visual feedback
-    venueList.innerHTML = '<div class="empty-state"><p>🚀 Abriendo Google Maps...</p></div>';
+    venueList.innerHTML = '<div class="empty-state"><p>ðŸš€ Abriendo Google Maps...</p></div>';
 
     const query = term.length > 0 ? term : 'restaurantes y bares';
     const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
@@ -66,6 +82,9 @@ const btnEmail = document.getElementById('btnEmail');
 // === SEARCH LOGIC ===
 let debounceTimer;
 searchInput.addEventListener('input', (e) => {
+    // Ask for location when typing starts
+    if (!userLocation) requestLocation();
+
     clearTimeout(debounceTimer);
     const query = e.target.value.trim();
 
@@ -145,6 +164,8 @@ async function performSearch(query) {
     }
 }
 
+
+// === AI MAGIC REWRITE ===
 async function runNominatimSearch(q) {
     const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&extratags=1&limit=40`);
     if (!response.ok) throw new Error('Network response was not ok');
@@ -377,6 +398,8 @@ function openDebtModal() {
     }
 }
 
+
+// === AI MAGIC REWRITE ===
 function closeDebtModal() {
     debtModal.classList.remove('open');
 }
@@ -454,13 +477,15 @@ function deleteRow(rowId) {
 }
 
 function clearDebtPad() {
-    if (confirm('¿Borrar todas las notas de deuda?')) {
+    if (confirm('Â¿Borrar todas las notas de deuda?')) {
         debtPad.innerHTML = '';
         addDebtRow();
         saveDebt();
     }
 }
 
+
+// === AI MAGIC REWRITE ===
 function saveDebt() {
     localStorage.setItem('debtNotesContent', debtPad.innerHTML);
     if (saveIndicatorDebt) {
@@ -471,6 +496,8 @@ function saveDebt() {
     }
 }
 
+
+// === AI MAGIC REWRITE ===
 // Auto-save on input listener is removed because we use oninput inline
 debtPad.addEventListener('input', () => {
     saveDebt();
@@ -538,7 +565,7 @@ function saveToDebts() {
     const item = searchResults.find(i => i.id === currentEditingId);
     if (!item) return;
 
-    const phoneStr = item.phone ? ` - 📞 ${item.phone}` : '';
+    const phoneStr = item.phone ? ` - ðŸ“ž ${item.phone}` : '';
     const noteText = `New: ${item.name}${phoneStr}`;
 
     // Add to debt list interactively
@@ -587,6 +614,8 @@ function showSaveFeedback() {
     }
 }
 
+
+// === AI MAGIC REWRITE ===
 function openPlanes() {
     currentFolderId = null; // Start at root
     renderFolders();
@@ -600,11 +629,12 @@ function closePlanes() {
 // RENDER FOLDERS (LEVEL 1)
 function renderFolders() {
     const planes = getPlanesData();
-    planesTitle.innerText = '🗂️ Mis Notas (Carpetas)';
-
+    planesTitle.innerText = '📂 Mis Notas (Carpetas)';
+    planesTitle.innerText = '📂 Mis Notas (Carpetas)';
     // Controls for Root
     planesControls.innerHTML = `
         <button onclick="createNewFolder()" class="add-btn" style="background:var(--primary-gradient);"><i class="fa-solid fa-folder-plus"></i> Nueva Carpeta</button>
+        <button onclick="syncFromNotion()" class="add-btn" style="background:#333; border: 1px solid #777;" title="Bajar datos de Notion"><i class="fa-solid fa-cloud-arrow-down"></i> Importar Notion</button>
         <button onclick="exportBackup()" class="add-btn" style="background:#555;" title="Descargar archivo"><i class="fa-solid fa-download"></i> Copia</button>
         <button onclick="document.getElementById('backupInput').click()" class="add-btn" style="background:#555;"><i class="fa-solid fa-upload"></i> Restaurar</button>
     `;
@@ -660,7 +690,7 @@ function openFolder(folderId) {
             <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png" style="width:16px; margin-right:5px;"> 
             Sync
         </button>
-        <button onclick="configureNotion()" class="add-btn" style="background:#333; border: 1px solid #777; width:auto; padding:12px 15px;" title="Configurar API">
+        <button onclick="configureSettings()" class="add-btn" style="background:#333; border: 1px solid #777; width:auto; padding:12px 15px;" title="Configurar API (Notion y AI)">
             <i class="fa-solid fa-gear"></i>
         </button>
     `;
@@ -691,17 +721,21 @@ function renderClientList(folder) {
         div.className = 'debt-row plane-row'; // Added plane-row class for filtering
         div.id = rowId;
         div.dataset.status = client.status || ''; // Store status in dataset
+        // Set Active Note on Click
+        div.onclick = function () { localStorage.setItem('activeNoteId', rowId); };
 
         div.innerHTML = `
             <div class="debt-text ${statusClass}" contenteditable="true" 
                 oninput="saveClientEdit('${rowId}')" 
                 onblur="saveClientEdit('${rowId}')"
+                onfocus="localStorage.setItem('activeNoteId', '${rowId}')"
                 style="min-height:24px; outline:none;">
                 ${client.text}
             </div>
             <div class="debt-dots">
                 <button class="dot-btn dot-green" onclick="setClientStatus('${rowId}', 'paid')" title="Hecho"></button>
                 <button class="dot-btn dot-red" onclick="setClientStatus('${rowId}', 'pending')" title="Pendiente"></button>
+
                 <button class="dot-btn" style="background:#3b82f6; color:white; font-size:10px; display:flex; align-items:center; justify-content:center;" onclick="openMoveModal('${rowId}')" title="Mover"><i class="fa-solid fa-arrow-right"></i></button>
                 <button class="dot-btn" style="background:#555; color:white; font-size:10px; display:flex; align-items:center; justify-content:center;" onclick="deleteClientRow('${rowId}')" title="Borrar">X</button>
             </div>
@@ -797,8 +831,10 @@ function editFolder(id) {
     }
 }
 
+
+// === AI MAGIC REWRITE ===
 function deleteFolder(id) {
-    if (!confirm("¿Seguro que quieres borrar esta carpeta y todo su contenido?")) return;
+    if (!confirm("Â¿Seguro que quieres borrar esta carpeta y todo su contenido?")) return;
     let planes = getPlanesData();
     planes = planes.filter(f => f.id !== id);
     savePlanesData(planes);
@@ -846,13 +882,17 @@ function saveClientEdit(rowId) {
         if (client) {
             client.text = textContent;
             savePlanesData(planes);
+            // Track active note for Catalog integration
+            localStorage.setItem('activeNoteId', rowId);
         }
     }
 }
 
+
+// === AI MAGIC REWRITE ===
 function deleteClientRow(rowId) {
     if (!currentFolderId) return;
-    if (!confirm("¿Borrar nota?")) return;
+    if (!confirm("Â¿Borrar nota?")) return;
 
     const planes = getPlanesData();
     const folder = planes.find(f => f.id === currentFolderId);
@@ -863,6 +903,8 @@ function deleteClientRow(rowId) {
     }
 }
 
+
+// === AI MAGIC REWRITE ===
 // Initialize Data if empty
 if (!localStorage.getItem('planesData')) {
     savePlanesData([
@@ -890,7 +932,7 @@ function exportBackup() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    alert('Copia de seguridad descargada. Guárdala en lugar seguro.');
+    alert('Copia de seguridad descargada. GuÃ¡rdala en lugar seguro.');
 }
 
 function copyBackup() {
@@ -902,10 +944,10 @@ function copyBackup() {
     const text = JSON.stringify(data, null, 2);
 
     navigator.clipboard.writeText(text).then(() => {
-        alert('¡Copia copiada al portapapeles! 📋\n\nAhora puedes pegarla en las Notas de tu iPad o enviártela por correo.');
+        alert('Â¡Copia copiada al portapapeles! ðŸ“‹\n\nAhora puedes pegarla en las Notas de tu iPad o enviÃ¡rtela por correo.');
     }).catch(err => {
         console.error('Error al copiar: ', err);
-        alert('No se pudo copiar automáticamente. Intenta usar el botón de Descarga.');
+        alert('No se pudo copiar automÃ¡ticamente. Intenta usar el botón de Descarga.');
     });
 }
 
@@ -913,7 +955,7 @@ function importBackup(input) {
     const file = input.files[0];
     if (!file) return;
 
-    if (!confirm('ATENCIÓN: Esto sobrescribirá tus datos actuales con los del archivo. ¿Seguro?')) {
+    if (!confirm('ATENCIÃ“N: Esto sobrescribirÃ¡ tus datos actuales con los del archivo. Â¿Seguro?')) {
         input.value = ''; // Reset
         return;
     }
@@ -930,12 +972,12 @@ function importBackup(input) {
                 localStorage.setItem('debtNotesContent', data.debts);
             }
 
-            alert('¡Datos restaurados con éxito!');
+            alert('Â¡Datos restaurados con Ã©xito!');
             renderFolders(); // Refresh view
 
         } catch (err) {
             console.error(err);
-            alert('Error al leer el archivo. Asegúrate de que es una copia válida.');
+            alert('Error al leer el archivo. AsegÃºrate de que es una copia vÃ¡lida.');
         }
         input.value = ''; // Reset
     };
@@ -984,6 +1026,8 @@ function loadChecklistState() {
         console.error("Error loading checklist:", e);
     }
 }
+
+
 
 function saveChecklistState() {
     const state = Array.from(checklistInputs).map(input => input.checked);
@@ -1044,6 +1088,8 @@ function executeMove() {
         alert(`Cliente movido a "${targetFolder.name}"`);
     }
 }
+
+
 
 // === RESTORE SEARCH RESULTS ===
 try {
@@ -1125,18 +1171,18 @@ const NOTION_KEY_DEFAULT = ''; // REMOVED FOR SECURITY
 const NOTION_DB_ID_DEFAULT = '2eb60cbd80db80b0ae41d3eb9f774f26';
 const CORS_PROXY = 'https://corsproxy.io/?';
 
-function configureNotion() {
+function configureSettings() {
     const currentKey = localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT;
     const currentDb = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
 
-    const newKey = prompt("🔑 Pega aquí tu 'Internal Integration Secret' de Notion:", currentKey);
-    if (newKey === null) return; // Cancelled
+    // Step 1: Notion
+    const newKey = prompt("🔑 NOTION: Pega tu 'Internal Integration Secret':", currentKey);
+    if (newKey === null) return;
 
-    const newDb = prompt("🗄️ Pega aquí tu ID de Base de Datos:", currentDb);
+    const newDb = prompt("🗄️ NOTION: Pega tu ID de Base de Datos:", currentDb);
     if (newDb === null) return;
 
-
-    // Auto-format ID if it doesn't have hyphens
+    // Auto-format Notion ID
     const formatUUID = (id) => {
         if (!id || id.length !== 32) return id;
         return `${id.substr(0, 8)}-${id.substr(8, 4)}-${id.substr(12, 4)}-${id.substr(16, 4)}-${id.substr(20)}`;
@@ -1144,12 +1190,15 @@ function configureNotion() {
 
     localStorage.setItem('notionKey', newKey.trim());
     localStorage.setItem('notionDb', formatUUID(newDb.replace(/-/g, '').trim()));
+    localStorage.removeItem('geminiKey'); // Clean up old key if exists
 
-    if (confirm("✅ Configuración guardada.\n\n¿Quieres probar la conexión ahora para ver si la Clave es correcta?")) {
+    if (confirm("✅ Configuración guardada.\n\n¿Quieres probar la conexión con Notion ahora?")) {
         testNotionConnection();
     }
 }
 
+
+// === AI MAGIC REWRITE ===
 async function testNotionConnection() {
     const NOTION_KEY = localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT;
     // We don't test DB connection here, only User token. 
@@ -1173,16 +1222,18 @@ async function testNotionConnection() {
 
         if (!response.ok) {
             const err = await response.json();
-            throw new Error(err.message || 'Error de conexión');
+            throw new Error(err.message || 'Error de conexiÃ³n');
         }
 
         const data = await response.json();
         alert(`🎉 ¡CONEXIÓN EXITOSA!\n\n🤖 Bot detectado: ${data.bot ? data.bot.owner.type : 'Usuario'}\n✅ Tu API Key funciona perfectamente.\n\nSi la sincronización falla, el problema es que NO has dado permiso al bot en la base de datos (Menú Copas > Conexiones).`);
 
     } catch (e) {
-        alert(`❌ ERROR DE CONEXIÓN:\n"${e.message}"\n\nEsto significa que la Clave API (Secret) está MAL copiada/pegada.`);
+        alert(`âŒ ERROR DE CONEXIÃ“N:\n"${e.message}"\n\nEsto significa que la Clave INTERNAL INTEGRATION SECRET (Notion) está MAL copiada/pegada (No confundir con Gemini).`);
     }
 }
+
+
 
 async function syncFolderToNotion() {
     if (!currentFolderId) return;
@@ -1235,12 +1286,14 @@ async function syncFolderToNotion() {
     syncBtn.disabled = false;
 
     if (errorCount > 0) {
-        alert(`⚠️ Problema en la sincronización:\n\n✅ Enviados: ${successCount}\n❌ Fallos: ${errorCount}\n\n🔍 ERROR DETECTADO:\n"${lastErrorMsg}"\n\n(Revisa que las columnas en Notion se llamen exactamente "Carpeta" y "Estado")`);
+        alert(`⚠️ Problema en la sincronización:\n\n✅ Enviados: ${successCount}\nâŒ Fallos: ${errorCount}\n\n🔍 ERROR DETECTADO:\n"${lastErrorMsg}"\n\n(Revisa que las columnas en Notion se llamen exactamente "Carpeta" y "Estado")`);
     } else {
         alert(`¡Sincronización Perfecta! 🚀\n\n✅ Se han enviado ${successCount} notas a Notion.`);
     }
 }
 
+
+// === AI MAGIC REWRITE ===
 async function sendNoteToNotion(client, folderName) {
     // Re-fetch credentials inside loop/helper (or better pass them)
     const NOTION_KEY = localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT;
@@ -1278,7 +1331,7 @@ async function sendNoteToNotion(client, folderName) {
     plainText = plainText.replace(/^[\.\s\-\:]+/, '').trim();
 
     // If cleanup left it empty (user didn't type anything), put a default
-    if (!plainText) plainText = "Nota sin título";
+    if (!plainText) plainText = "Nota sin tÃ­tulo";
 
     // Determine Status
     const statusName = client.status === 'paid' ? 'Hecho' : (client.status === 'pending' ? 'Pendiente' : 'Sin Estado');
@@ -1337,3 +1390,158 @@ async function sendNoteToNotion(client, folderName) {
     }
 }
 
+
+// === AI MAGIC REWRITE ===
+async function syncFromNotion() {
+    const NOTION_KEY = localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT;
+    let NOTION_DB_ID = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
+
+    // Helper inside (duplicated for now to ensure isolation)
+    const formatUUID = (id) => {
+        if (!id) return id;
+        const clean = id.replace(/-/g, '');
+        if (clean.length !== 32) return id;
+        return `${clean.substr(0, 8)}-${clean.substr(8, 4)}-${clean.substr(12, 4)}-${clean.substr(16, 4)}-${clean.substr(20)}`;
+    };
+    NOTION_DB_ID = formatUUID(NOTION_DB_ID);
+
+    if (!confirm("⚠️ Â¿Quieres IMPORTAR y RESTAURAR tus notas desde Notion PRO?\n\nEsto buscarÃ¡ todas las notas en tu base de datos y las recrearÃ¡ en esta aplicaciÃ³n. Ãštil si has perdido datos o cambiado de dispositivo.")) return;
+
+    // Show loading
+    const syncBtn = planesControls.querySelector('button[title="Bajar datos de Notion"]');
+    let originalText = "";
+    if (syncBtn) {
+        originalText = syncBtn.innerHTML;
+        syncBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Bajando...';
+        syncBtn.disabled = true;
+    }
+
+    try {
+        let hasMore = true;
+        let startCursor = undefined;
+        let allPages = [];
+
+        // Fetch loop for pagination
+        while (hasMore) {
+            const response = await fetch(`${CORS_PROXY}https://api.notion.com/v1/databases/${NOTION_DB_ID}/query`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${NOTION_KEY}`,
+                    'Notion-Version': '2022-06-28',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    page_size: 100,
+                    start_cursor: startCursor
+                })
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.message || "Error al conectar con Notion (verifica tu Clave)");
+            }
+
+            const data = await response.json();
+            allPages = allPages.concat(data.results);
+            hasMore = data.has_more;
+            startCursor = data.next_cursor;
+        }
+
+        // Process Results
+        const planes = getPlanesData();
+        let restoredCount = 0;
+        let updatedCount = 0;
+
+        allPages.forEach(page => {
+            const props = page.properties;
+
+            // Extract Data
+            // 1. Name (Title) - Essential
+            let text = "";
+            if (props.Name && props.Name.title && props.Name.title.length > 0) {
+                text = props.Name.title.map(t => t.plain_text).join('');
+            } else {
+                return; // Skip empty names
+            }
+
+            // 2. Folder (Carpeta)
+            let folderName = "General";
+            if (props.Carpeta) {
+                if (props.Carpeta.type === 'rich_text' && props.Carpeta.rich_text.length > 0) {
+                    folderName = props.Carpeta.rich_text[0].plain_text;
+                } else if (props.Carpeta.type === 'select' && props.Carpeta.select) {
+                    folderName = props.Carpeta.select.name;
+                }
+            }
+
+            // 3. Status (Estado)
+            let status = null;
+            if (props.Estado && props.Estado.select) {
+                const s = props.Estado.select.name.toLowerCase();
+                if (s === 'hecho' || s === 'paid') status = 'paid';
+                if (s === 'pendiente' || s === 'pending') status = 'pending';
+            }
+
+            // 4. Date (Fecha)
+            let dateIdx = new Date().toISOString();
+            if (props.Fecha && props.Fecha.date && props.Fecha.date.start) {
+                dateIdx = props.Fecha.date.start;
+            }
+
+            // Find or Create Folder
+            let folder = planes.find(f => f.name.toLowerCase() === folderName.toLowerCase());
+            if (!folder) {
+                folder = {
+                    id: 'folder_' + Date.now() + Math.random().toString(36).substr(2, 5),
+                    name: folderName,
+                    clients: []
+                };
+                planes.push(folder);
+            }
+
+            // Check if Client Exists (by Notion ID)
+            let existingClient = folder.clients.find(c => c.notion_id === page.id);
+
+            // Construct the HTML text format [DD/MM] Name
+            const dObj = new Date(dateIdx);
+            const dStr = dObj.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }).replace(',', '');
+            const newTextFormatted = `<b>[${dStr}]</b> ${text}`;
+
+            if (existingClient) {
+                // UPDATE Existing
+                existingClient.text = newTextFormatted;
+                existingClient.status = status;
+                existingClient.date = dateIdx;
+                updatedCount++;
+            } else {
+                // CREATE New
+                folder.clients.push({
+                    id: 'cli_' + Date.now() + Math.random().toString(36).substr(2, 5), // generate new local ID
+                    text: newTextFormatted,
+                    date: dateIdx,
+                    status: status,
+                    notion_id: page.id
+                });
+                restoredCount++;
+            }
+        });
+
+        savePlanesData(planes);
+        renderFolders(); // Refresh View
+        alert(`✅ Proceso finalizado.\n\n📥 Descargados: ${allPages.length}\n✨ Nuevos: ${restoredCount}\n🔄 Actualizados: ${updatedCount}`);
+
+    } catch (e) {
+        console.error(e);
+        alert("âŒ Error al importar: " + e.message);
+    } finally {
+        if (syncBtn) {
+            syncBtn.innerHTML = originalText || 'Importar Notion';
+            syncBtn.disabled = false;
+        }
+    }
+}
+
+
+// === AI MAGIC REWRITE ===
+
+// === AI MAGIC REWRITE (FINAL) ===

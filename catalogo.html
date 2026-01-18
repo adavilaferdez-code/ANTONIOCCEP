@@ -449,6 +449,23 @@
 
     </div>
 
+    <!-- NOTE SELECTION MODAL -->
+    <div id="noteSelectorModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+        <div
+            style="background:white; width:90%; max-width:400px; max-height:80vh; border-radius:16px; display:flex; flex-direction:column; overflow:hidden;">
+            <div
+                style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; background:#f9fafb;">
+                <h3 style="margin:0; font-size:1.1rem;">Seleccionar Nota</h3>
+                <button onclick="document.getElementById('noteSelectorModal').style.display='none'"
+                    style="background:none; border:none; font-size:1.2rem; cursor:pointer;">&times;</button>
+            </div>
+            <div id="noteSelectorBody" style="padding:15px; overflow-y:auto; flex:1;">
+                <!-- List will go here -->
+            </div>
+        </div>
+    </div>
+
     <script>
         // Transition Entry Script
         window.addEventListener('load', () => {
@@ -545,6 +562,133 @@
         let discounts = {}; // Store discount per product
         let checkedCategories = new Set(['todos']); // Default all
         let isListView = false; // State for view mode
+
+        // === INTEGRATION WITH NOTES ===
+        function getActiveNote() {
+            try {
+                // Priority: URL > LocalStorage
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlId = urlParams.get('nid');
+
+                let activeId = urlId || localStorage.getItem('activeNoteId');
+
+                if (!activeId) return null;
+
+                // If ID came from URL, sync it to LS for "stay active" behavior
+                if (urlId) localStorage.setItem('activeNoteId', urlId);
+
+                const planes = JSON.parse(localStorage.getItem('planesData') || '[]');
+                for (const folder of planes) {
+                    const client = folder.clients.find(c => c.id === activeId);
+                    if (client) return { planes, folder, client };
+                }
+            } catch (e) { console.error("Error reading notes:", e); }
+            return null;
+        }
+
+        const activeNoteContext = getActiveNote();
+        let lastUndoState = null; // Defined early to avoid TDZ
+
+        function addToActiveNote(id) {
+            const ctx = getActiveNote(); // Refresh
+            if (!ctx) {
+                alert("La nota ya no está activa.");
+                return;
+            }
+
+            const product = PRODUCTS.find(p => p.id === id);
+            if (!product) return;
+
+            // Get Values
+            const qty = quantities[id] || 0;
+            const discount = discounts[id] || 0;
+            const compPrice = parseFloat(competitorPrices[id] || 0);
+
+            // Calculate
+            const unitPrice = product.price * (1 - discount / 100);
+
+            // Build String
+            const time = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            let details = `<b>${product.name}</b>`;
+
+            if (qty > 0) details += ` | 📦 ${qty} cajas`;
+            if (discount > 0) details += ` | 📉 Dto: ${discount}% (€${unitPrice.toFixed(2)})`;
+            if (compPrice > 0) {
+                const diff = compPrice - unitPrice;
+                const diffStr = diff >= 0 ? `<span style="color:green">(-€${diff.toFixed(2)})</span>` : `<span style="color:red">(+€${Math.abs(diff).toFixed(2)})</span>`;
+                details += ` | ⚔️ Comp: €${compPrice.toFixed(2)} ${diffStr}`;
+            }
+
+            // Append formatted HTML
+            ctx.client.text += `<div style="margin-top:4px; padding-left:10px; border-left:3px solid #10b981; font-size:0.9em;"><small>[${time}]</small> ${details}</div>`;
+
+            // Save
+            localStorage.setItem('planesData', JSON.stringify(ctx.planes));
+
+            // Feedback
+            showToast(`✅ Añadido: ${product.name}`);
+        }
+
+        function showToast(msg) {
+            const div = document.createElement('div');
+            div.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:white; padding:12px 24px; border-radius:30px; z-index:9999; animation:fadeInOut 2s forwards; font-weight:bold;';
+            div.innerText = msg;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 2100);
+
+            // Add style for animation if not exists
+            if (!document.getElementById('toastStyle')) {
+                const style = document.createElement('style');
+                style.id = 'toastStyle';
+                style.innerHTML = '@keyframes fadeInOut { 0% {opacity:0; transform:translate(-50%, 20px);} 15% {opacity:1; transform:translate(-50%, 0);} 85% {opacity:1; transform:translate(-50%, 0);} 100% {opacity:0; transform:translate(-50%, -20px);} }';
+                document.head.appendChild(style);
+            }
+        }
+
+        // === NOTE SELECTOR LOGIC ===
+        function openNoteSelector() {
+            const modal = document.getElementById('noteSelectorModal');
+            const body = document.getElementById('noteSelectorBody');
+
+            const planes = JSON.parse(localStorage.getItem('planesData') || '[]');
+
+            if (planes.length === 0) {
+                body.innerHTML = '<p style="text-align:center; color:#999;">No hay carpetas creadas.</p>';
+            } else {
+                let html = '';
+                planes.forEach(folder => {
+                    if (folder.clients.length > 0) {
+                        html += `<div style="margin-bottom:10px; font-weight:bold; color:#333; background:#eee; padding:5px 10px; border-radius:6px;">📂 ${folder.name}</div>`;
+                        folder.clients.forEach(c => {
+                            // Clean Text
+                            const temp = document.createElement('div');
+                            temp.innerHTML = c.text;
+                            const plain = (temp.textContent || temp.innerText).substring(0, 50);
+
+                            html += `
+                                <div onclick="selectNote('${c.id}')" style="padding:10px; border-bottom:1px solid #f0f0f0; cursor:pointer; display:flex; align-items:center; gap:10px;">
+                                    <i class="fa-solid fa-file-pen" style="color:#aaa;"></i>
+                                    <div style="font-size:0.9rem;">${plain}</div>
+                                </div>
+                            `;
+                        });
+                    }
+                });
+                body.innerHTML = html || '<p style="text-align:center; color:#999;">Carpetas vacías.</p>';
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function selectNote(id) {
+            localStorage.setItem('activeNoteId', id);
+
+            // Reload with clean URL to avoid confusion if we had a param for a different ID
+            const url = new URL(window.location.href);
+            url.searchParams.set('nid', id);
+            window.location.href = url.toString();
+        }
+
 
         function toggleViewMode() {
             isListView = !isListView;
@@ -750,7 +894,19 @@
                 const compPrice = parseFloat(compPriceRaw) || 0;
                 const isSelected = selectedIds.has(id);
 
-                pricesContainer.innerHTML = generatePricesHTML(product, quantity, discount, isSelected, compPrice);
+                let html = generatePricesHTML(product, quantity, discount, isSelected, compPrice);
+
+                // Re-inject Add Button if Active Note
+                if (activeNoteContext) {
+                    html += `
+                    <button onclick="event.stopPropagation(); addToActiveNote(${product.id})" 
+                        style="width:100%; margin-top:8px; padding:8px 12px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 2px 4px rgba(16, 185, 129, 0.3); font-size:0.9rem;">
+                        <i class="fa-solid fa-plus"></i> AÑADIR
+                    </button>
+                    `;
+                }
+
+                pricesContainer.innerHTML = html;
             }
         }
 
@@ -953,6 +1109,13 @@
                     
                     <div class="prices" id="prices-${p.id}">
                         ${generatePricesHTML(p, quantity, discount, isSelected, compPrice)}
+                        
+                        ${activeNoteContext ? `
+                        <button onclick="event.stopPropagation(); addToActiveNote(${p.id})" 
+                            style="width:100%; margin-top:8px; padding:8px 12px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 2px 4px rgba(16, 185, 129, 0.3); font-size:0.9rem;">
+                            <i class="fa-solid fa-plus"></i> AÑADIR
+                        </button>
+                        ` : ''}
                     </div>
                 `;
                 grid.appendChild(card);
@@ -975,6 +1138,97 @@
         }
 
         renderCatalog();
+
+        if (activeNoteContext) {
+            updateBannerUI();
+        } else {
+            // SHOW 'SELECT NOTE' BANNER
+            const info = document.createElement('div');
+            info.innerHTML = `
+                <div style="background:#f3f4f6; color:#555; padding:12px 20px; border-radius:12px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; border:1px solid #ddd;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="background:#ccc; color:white; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-eye"></i></div>
+                         <div>
+                             <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:#777;">Modo Visualización</div>
+                             <div style="font-size:0.85rem;">¿Quieres añadir productos a una nota?</div>
+                        </div>
+                    </div>
+                     <button onclick="openNoteSelector()" 
+                        style="background:#3b82f6; border:none; color:white; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:0.85rem; font-weight:bold; box-shadow:0 2px 5px rgba(59, 130, 246, 0.3);">
+                        <i class="fa-solid fa-hand-pointer"></i> Elegir Nota
+                    </button>
+                </div>
+            `;
+            const searchPanel = document.querySelector('.search-panel');
+            if (searchPanel) searchPanel.parentNode.insertBefore(info, searchPanel);
+        }
+
+
+
+        function undoLast() {
+            if (!lastUndoState) return;
+
+            const ctx = getActiveNote();
+            if (ctx && ctx.client.id === lastUndoState.id) {
+                ctx.client.text = lastUndoState.text;
+                localStorage.setItem('planesData', JSON.stringify(ctx.planes));
+                lastUndoState = null;
+                showToast("↺ Última acción deshecha");
+                updateBannerUI();
+            }
+        }
+
+        // Separate banner render logic
+        function updateBannerUI() {
+            const searchPanel = document.querySelector('.search-panel');
+            if (!searchPanel) return;
+
+            // Remove existing
+            const existing = document.getElementById('activeNoteBanner');
+            if (existing) existing.remove();
+
+            const ctx = getActiveNote();
+            if (!ctx) return;
+
+            // Safer Name Extraction
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = ctx.client.text;
+            let rawText = tempDiv.textContent || tempDiv.innerText || '';
+            rawText = rawText.replace(/^\[.*?\]\s*/, '').trim();
+            if (!rawText) rawText = "Sin Título";
+
+            // Undo Button Visibility
+            const undoVisibility = lastUndoState ? 'block' : 'none';
+
+            const info = document.createElement('div');
+            info.id = 'activeNoteBanner';
+
+            info.innerHTML = `
+                <div style="background:#ecfdf5; color:#065f46; padding:10px 15px; border-radius:12px; margin-bottom:15px; display:flex; align-items:center; justify-content:space-between; border:1px solid #6ee7b7; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <div style="display:flex; align-items:center; gap:12px; overflow:hidden;">
+                         <div style="background:#10b981; color:white; min-width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="fa-solid fa-pen" style="font-size:0.8rem;"></i></div>
+                         <div style="display:flex; flex-direction:column; min-width:0;">
+                             <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:#059669; opacity:0.8; line-height:1;">MODO AÑADIR</div>
+                             <div style="font-weight:700; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${rawText}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button onclick="undoLast()" style="display:${undoVisibility}; background:#f59e0b; border:none; color:white; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.8rem; font-weight:bold; white-space:nowrap; flex-shrink:0;">
+                            <i class="fa-solid fa-rotate-left"></i> Deshacer
+                        </button>
+                        <button onclick="openNoteSelector()" 
+                            style="background:white; border:1px solid #bae6fd; color:#0284c7; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.8rem; font-weight:bold; white-space:nowrap; flex-shrink:0;">
+                            <i class="fa-solid fa-rotate"></i> Cambiar
+                        </button>
+                        <button onclick="localStorage.removeItem('activeNoteId'); location.reload();" 
+                            style="background:white; border:1px solid #fecaca; color:#dc2626; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.8rem; font-weight:bold; white-space:nowrap; flex-shrink:0;">
+                            <i class="fa-solid fa-stop"></i> Terminar
+                        </button>
+                    </div>
+                </div>
+            `;
+            searchPanel.parentNode.insertBefore(info, searchPanel);
+        }
 
     </script>
 </body>
