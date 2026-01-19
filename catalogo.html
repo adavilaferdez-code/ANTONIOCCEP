@@ -1260,3 +1260,87 @@
 </body>
 
 </html>
+    <!-- PRECIO TOTAL FLOTANTE -->
+    <div id='floatingTotal' style='position:fixed; bottom:20px; right:20px; background:white; padding:15px; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.2); display:none; flex-direction:column; gap:8px; z-index:9000; border:1px solid rgba(0,0,0,0.1); width:280px;'>
+        <div style='display:flex; justify-content:space-between; align-items:center;'>
+            <span style='font-size:0.9rem; color:#666; font-weight:bold;'>TOTAL ESTIMADO</span>
+            <span id='grandTotalDisplay' style='font-size:1.5rem; font-weight:900; color:#111;'>€0.00</span>
+        </div>
+        <div style='display:flex; gap:10px; margin-top:5px;'>
+             <button onclick='sendEmailOffer()' style='flex:1; background:#ea4335; color:white; border:none; padding:12px; border-radius:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;'>
+                <i class='fa-solid fa-envelope'></i> Enviar Email
+            </button>
+        </div>
+    </div>
+
+
+    <script>
+        // === EMAIL LOGIC ===
+        function updateFloatingTotal() {
+            let total = 0;
+            let count = 0;
+            
+            // Calculate Total
+            Object.keys(quantities).forEach(id => {
+                const qty = quantities[id];
+                const p = PRODUCTS.find(x => x.id == id);
+                if(p && qty > 0) {
+                    const discount = discounts[id] || 0;
+                    const price = p.price * (1 - discount/100);
+                    total += price * qty;
+                    count++;
+                }
+            });
+
+            const fab = document.getElementById('floatingTotal');
+            const display = document.getElementById('grandTotalDisplay');
+            
+            if(count > 0) {
+                fab.style.display = 'flex';
+                display.innerText = '€' + total.toFixed(2);
+            } else {
+                fab.style.display = 'none';
+            }
+        }
+
+        // Hook into update logic (SIMPLE OVERRIDE or APPEND)
+        const oldUpdate = window.updateCardCalculations; 
+        window.updateCardCalculations = function(id) {
+            if(oldUpdate) oldUpdate(id); // Call original
+            updateFloatingTotal(); // Update Total
+        };
+
+        function sendEmailOffer() {
+            let body = 'Hola,\n\nAdjunto te envío la propuesta de precios y pedido que hemos revisado:\n\n';
+            let total = 0;
+
+            Object.keys(quantities).forEach(id => {
+                const qty = quantities[id];
+                const p = PRODUCTS.find(x => x.id == id);
+                if(p && qty > 0) {
+                    const discount = discounts[id] || 0;
+                    const unitPrice = p.price * (1 - discount/100);
+                    const lineTotal = unitPrice * qty;
+                    total += lineTotal;
+
+                    body += '?? ' + qty + 'x ' + p.name + ' (' + p.envase + ')\n';
+                    if(discount > 0) {
+                         body += '   ?? Dto: ' + discount + '%  (Antes: €' + p.price.toFixed(2) + ')\n';
+                         body += '   ? Precio Neto: €' + unitPrice.toFixed(2) + ' / caja\n';
+                    } else {
+                         body += '   Precio: €' + unitPrice.toFixed(2) + ' / caja\n';
+                    }
+                     body += '   Subtotal: €' + lineTotal.toFixed(2) + '\n';
+                    body += '--------------------------------\n';
+                }
+            });
+
+            body += '\n?? TOTAL ESTIMADO: €' + total.toFixed(2);
+            body += '\n\nQuedo a la espera de tu OK para tramitarlo.\n\nSaludos,\nAntonio Dávila';
+
+            const subject = 'Propuesta de Pedido - ' + new Date().toLocaleDateString();
+            
+            window.location.href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+        }
+    </script>
+

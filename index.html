@@ -12,7 +12,6 @@
 </head>
 
 <body>
-
     <!-- Dynamic Background -->
     <div class="app-background"></div>
 
@@ -23,15 +22,19 @@
         <header class="app-header">
             <div class="brand-centered">
                 <img src="logo_antonio.png" alt="Antonio Dávila" class="main-logo">
-                <p style="color:white; font-size:10px; margin-top:5px;">V2.0 (Cache Bust)</p>
+                <p style="color:white; font-size:10px; margin-top:5px;">V2.1 (Showroom Ready)</p>
             </div>
+            <!-- Showroom Toggle -->
+            <button class="showroom-toggle" onclick="toggleShowroom()">
+                <i class="fa-solid fa-eye"></i>
+            </button>
         </header>
 
         <!-- Main Content -->
         <main class="app-main">
 
             <!-- Hero Search -->
-            <section class="search-hero">
+            <section class="search-hero commercial-data">
                 <div class="search-wrapper">
                     <i class="fa-solid fa-magnifying-glass search-icon"></i>
                     <input type="text" id="searchInput" class="search-input"
@@ -45,39 +48,40 @@
                 <div class="dashboard-card">
 
                     <!-- 1. Button -->
-                    <button class="btn-cerca" onclick="searchNearMe()">
+                    <button class="btn-cerca commercial-data" onclick="searchNearMe()">
                         <i class="fa-solid fa-location-crosshairs"></i> CERCA (100km)
                     </button>
 
                     <!-- 2. Shortcuts Grid -->
                     <div class="bento-grid">
                         <!-- 1. Productos -->
-                        <div class="bento-card" onclick="openCatalogWithNote()" style="cursor:pointer;">
+                        <div class="bento-card commercial-data" onclick="openCatalogWithNote()" style="cursor:pointer;">
                             <i class="fa-solid fa-box-open" style="color: #fbbf24;"></i>
                             <span>Productos</span>
                         </div>
 
                         <!-- 2. Power BI -->
-                        <div class="bento-card"
+                        <div class="bento-card sensitive-data"
                             onclick="window.open('https://app.powerbi.com/', '_blank'); return false;">
                             <i class="fa-solid fa-chart-pie" style="color: #f59e0b;"></i>
                             <span>Power BI</span>
                         </div>
 
                         <!-- 3. Checklist -->
-                        <div class="bento-card" onclick="openChecklist()">
+                        <div class="bento-card sensitive-data" onclick="openChecklist()">
                             <i class="fa-solid fa-clipboard-check" style="color: #d946ef;"></i>
                             <span>Checklist</span>
                         </div>
 
                         <!-- 4. Negociaciones -->
-                        <div class="bento-card" onclick="window.open('https://gemini.google.com', '_blank')">
+                        <div class="bento-card sensitive-data"
+                            onclick="window.open('https://gemini.google.com', '_blank')">
                             <i class="fa-solid fa-handshake" style="color: #10b981;"></i>
                             <span>Negociación</span>
                         </div>
 
                         <!-- 5. Catálogo Clientes -->
-                        <div class="bento-card" onclick="window.open('catalogo_2025.pdf', '_blank')"
+                        <div class="bento-card commercial-data" onclick="window.open('catalogo_2025.pdf', '_blank')"
                             style="cursor:pointer;">
                             <i class="fa-solid fa-images" style="color: #3b82f6;"></i>
                             <span>Catálogo</span>
@@ -85,7 +89,7 @@
                     </div>
 
                     <!-- 3. Distribuidores -->
-                    <div class="capsule-btn cap-blue" onclick="openDistribuidoresModal()"
+                    <div class="capsule-btn cap-blue sensitive-data" onclick="openDistribuidoresModal()"
                         style="width: 100%; justify-content: center; margin-top: 5px;">
                         <i class="fa-solid fa-truck-fast"></i> DISTRIBUIDORES
                     </div>
@@ -96,7 +100,7 @@
             <!-- 4. HERO IMAGES (RESTORED) -->
             <div class="hero-grid">
                 <!-- FOCOS -->
-                <div class="hero-card" onclick="openFocusModal()">
+                <div class="hero-card commercial-data" onclick="openFocusModal()">
                     <img src="focos_dashboard.jpg" class="hero-bg" alt="Focos">
                     <div class="hero-overlay">
                         <div class="hero-title"><i class="fa-solid fa-star"></i> FOCOS ENERO</div>
@@ -105,7 +109,7 @@
                 </div>
 
                 <!-- DEUDAS -->
-                <div class="hero-card" onclick="openDebtModal()">
+                <div class="hero-card sensitive-data" onclick="openDebtModal()">
                     <img src="deudas_v2.jpg" class="hero-bg" alt="Deudas">
                     <div class="hero-overlay">
                         <div class="hero-title"><i class="fa-solid fa-file-invoice-dollar"></i> DEUDAS</div>
@@ -145,39 +149,100 @@
                 <button class="close-btn" onclick="closeChecklist()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="checklist-container">
+                <!-- 1. Pre-Visit Analysis -->
+                <label class="check-item highlight-blue">
+                    <div class="check-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">VER COMPRAS ANTERIORES</span>
+                        <span class="check-sub">Analizar historial previo</span>
+                    </div>
+                    <input type="checkbox">
+                </label>
+
+                <!-- 2. Client Data -->
                 <label class="check-item">
                     <div class="check-icon"><i class="fa-solid fa-address-card"></i></div>
-                    <span>Datos Cliente</span>
+                    <div class="check-content">
+                        <span class="check-title">DATOS DEL CLIENTE</span>
+                        <span class="check-sub">Actualizar ficha</span>
+                    </div>
                     <input type="checkbox">
                 </label>
+
+                <!-- 2b. Invoice Support -->
                 <label class="check-item">
-                    <div class="check-icon"><i class="fa-solid fa-temperature-arrow-down"></i></div>
-                    <span>AUDIT FRÍO</span>
+                    <div class="check-icon"><i class="fa-solid fa-file-invoice"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">SOPORTE FACTURAS</span>
+                    </div>
                     <input type="checkbox">
                 </label>
-                <label class="check-item">
-                    <div class="check-icon"><i class="fa-solid fa-tags"></i></div>
-                    <span>Promociones Activas</span>
-                    <input type="checkbox">
-                </label>
-                <label class="check-item">
-                    <div class="check-icon"><i class="fa-solid fa-bullhorn"></i></div>
-                    <span>Material PLV</span>
-                    <input type="checkbox">
-                </label>
-                <label class="check-item">
+
+                <!-- 3. Debt (Critical) -->
+                <label class="check-item highlight-red">
                     <div class="check-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
-                    <span>Facturas Pendientes</span>
+                    <div class="check-content">
+                        <span class="check-title">DEUDA</span>
+                        <span class="check-sub">Verificar pendientes</span>
+                    </div>
                     <input type="checkbox">
                 </label>
+
+                <!-- 4. GDA Objectives -->
+                <label class="check-item highlight-gold">
+                    <div class="check-icon"><i class="fa-solid fa-bullseye"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">OBJETIVO GDA</span>
+                        <span class="check-sub">Volumen Fanta VR, CCZZ VR, AQ/Fuze</span>
+                    </div>
+                    <input type="checkbox">
+                </label>
+
+                <!-- 5. Upselling -->
                 <label class="check-item">
-                    <div class="check-icon"><i class="fa-solid fa-handshake"></i></div>
-                    <span>Soporte Comercial</span>
+                    <div class="check-icon"><i class="fa-solid fa-box-open"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">UNA CAJITA MÁS</span>
+                        <span class="check-sub">Limón, Agua, Gas, Sprite, Energy</span>
+                    </div>
                     <input type="checkbox">
                 </label>
+
+                <!-- 6. Captacion -->
+                <label class="check-item">
+                    <div class="check-icon"><i class="fa-solid fa-user-plus"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">CAPTACIÓN DE CLIENTES</span>
+                    </div>
+                    <input type="checkbox">
+                </label>
+
+                <!-- 7. ACTIVAR (High Energy) -->
+                <label class="check-item highlight-electric">
+                    <div class="check-icon"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">ACTIVAR!!!!!!!!!!!!!</span>
+                        <span class="check-sub">¡Energía a tope!</span>
+                    </div>
+                    <input type="checkbox">
+                </label>
+
+                <!-- 8. Audit -->
                 <label class="check-item">
                     <div class="check-icon"><i class="fa-solid fa-camera"></i></div>
-                    <span>Foto de Éxito</span>
+                    <div class="check-content">
+                        <span class="check-title">EEFF, AUDIT FOTOS</span>
+                    </div>
+                    <input type="checkbox">
+                </label>
+
+                <!-- 9. Sustainability -->
+                <label class="check-item highlight-green">
+                    <div class="check-icon"><i class="fa-solid fa-leaf"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">SOSTENIBILIDAD</span>
+                        <span class="check-sub">Por el Clima</span>
+                    </div>
                     <input type="checkbox">
                 </label>
             </div>
@@ -333,11 +398,11 @@
             <i class="fa-solid fa-calculator"></i>
             <span>Calculadora</span>
         </a>
-        <a href="#" class="nav-item" onclick="openPlanes(); return false;">
+        <a href="#" class="nav-item sensitive-data" onclick="openPlanes(); return false;">
             <i class="fa-solid fa-pen-to-square"></i>
             <span>Notas</span>
         </a>
-        <a href="https://www.office.com/launch/excel" target="_blank" class="nav-item">
+        <a href="https://www.office.com/launch/excel" target="_blank" class="nav-item sensitive-data">
             <i class="fa-solid fa-table-cells"></i>
             <span>EXCEL</span>
         </a>
@@ -504,3 +569,16 @@
 </body>
 
 </html>
+    <script>
+        function toggleShowroom() {
+            document.body.classList.toggle('showroom-mode');
+            const btn = document.querySelector('.showroom-toggle i');
+            if (document.body.classList.contains('showroom-mode')) {
+                btn.classList.remove('fa-eye');
+                btn.classList.add('fa-eye-slash');
+            } else {
+                btn.classList.remove('fa-eye-slash');
+                btn.classList.add('fa-eye');
+            }
+        }
+    </script>

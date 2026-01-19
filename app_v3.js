@@ -1512,6 +1512,12 @@ async function syncNotion_FINAL() {
                 let err = await response.json(); // Read once
                 console.warn("First attempt failed:", err);
 
+                // HANDLE INVALID TOKEN (Most common on iPad)
+                if (response.status === 401 || err.code === 'unauthorized') {
+                    alert(`❌ ERROR DE AUTENTICACIÓN (iPad/Móvil)\n\nTu "API Key" no está guardada en este dispositivo.\n\nSOLUCIÓN:\n1. Toca el botón de engranaje (⚙️) aquí abajo.\n2. Pega tu clave que empieza por "ntn_...".\n3. Guarda y prueba de nuevo.`);
+                    throw new Error("Clave inválida o no configurada en este dispositivo.");
+                }
+
                 // If we get ANY error (400, 404, 401), it means the ID is wrong OR we don't have access.
                 // Let's try to SEARCH for what databases we DO have access to.
                 if (response.status === 400 || response.status === 404 || err.code === 'object_not_found' || err.code === 'validation_error') {

@@ -892,3 +892,157 @@ body,
     pointer-events: none;
     transition: opacity 0.8s ease;
 }
+/* === CHECKLIST PRO STYLES === */
+.checklist-container {
+    gap: 12px !important;
+}
+
+.check-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    padding: 18px 20px;
+}
+
+.check-icon {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    width: 40px;
+    display: flex;
+    justify-content: center;
+}
+
+.check-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.check-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.check-sub {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    font-weight: 400;
+}
+
+/* Highlights */
+.check-item.highlight-blue {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), transparent);
+    border-left: 4px solid #3b82f6;
+}
+.check-item.highlight-blue .check-icon { color: #3b82f6; }
+
+.check-item.highlight-red {
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.15), transparent);
+    border-left: 4px solid #ef4444;
+}
+.check-item.highlight-red .check-icon { color: #ef4444; }
+
+.check-item.highlight-gold {
+    background: linear-gradient(90deg, rgba(234, 179, 8, 0.1), transparent);
+    border-left: 4px solid #eab308;
+}
+.check-item.highlight-gold .check-icon { color: #eab308; }
+
+.check-item.highlight-green {
+    background: linear-gradient(90deg, rgba(34, 197, 94, 0.1), transparent);
+    border-left: 4px solid #22c55e;
+}
+.check-item.highlight-green .check-icon { color: #22c55e; }
+
+/* ELECTRIC HIGHLIGHT (ACTIVAR) */
+@keyframes electricPulse {
+    0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.1); }
+    50% { box-shadow: 0 0 20px rgba(244, 0, 9, 0.4); border-color: rgba(255, 255, 255, 0.5); }
+    100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.1); }
+}
+
+.check-item.highlight-electric {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.2));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+    animation: electricPulse 2s infinite;
+}
+
+.check-item.highlight-electric .check-title {
+    color: #fbbf24;
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+    font-style: italic;
+    font-weight: 900;
+}
+
+.check-item.highlight-electric .check-icon {
+    color: #fbbf24;
+    filter: drop-shadow(0 0 5px #fbbf24);
+}
+
+
+/* === SHOWROOM MODE === */
+
+/* Toggle Button in Header */
+.showroom-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+.showroom-toggle:hover {
+    background: white;
+    color: black;
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Active Mode Styles */
+body.showroom-mode .sensitive-data {
+    display: none !important;
+}
+
+/* Enhancements for Showroom Mode */
+body.showroom-mode .bento-grid {
+    grid-template-columns: 1fr 1fr !important; /* Larger cards */
+    gap: 20px;
+}
+
+body.showroom-mode .bento-card {
+    min-height: 120px; /* Taller cards */
+}
+
+body.showroom-mode .bento-card i {
+    font-size: 2.5rem;
+}
+
+body.showroom-mode .bento-card span {
+    font-size: 1rem;
+}
+
+body.showroom-mode .hero-grid {
+    grid-template-columns: 1fr; /* Full width hero */
+}
+
+body.showroom-mode .app-header {
+    background: linear-gradient(to right, #000, #111); /* Cleaner header */
+    border-bottom: none;
+}
+
