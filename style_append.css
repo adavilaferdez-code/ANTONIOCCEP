@@ -892,6 +892,7 @@ body,
     pointer-events: none;
     transition: opacity 0.8s ease;
 }
+
 /* === CHECKLIST PRO STYLES === */
 .checklist-container {
     gap: 12px !important;
@@ -938,31 +939,52 @@ body,
     background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), transparent);
     border-left: 4px solid #3b82f6;
 }
-.check-item.highlight-blue .check-icon { color: #3b82f6; }
+
+.check-item.highlight-blue .check-icon {
+    color: #3b82f6;
+}
 
 .check-item.highlight-red {
     background: linear-gradient(90deg, rgba(239, 68, 68, 0.15), transparent);
     border-left: 4px solid #ef4444;
 }
-.check-item.highlight-red .check-icon { color: #ef4444; }
+
+.check-item.highlight-red .check-icon {
+    color: #ef4444;
+}
 
 .check-item.highlight-gold {
     background: linear-gradient(90deg, rgba(234, 179, 8, 0.1), transparent);
     border-left: 4px solid #eab308;
 }
-.check-item.highlight-gold .check-icon { color: #eab308; }
+
+.check-item.highlight-gold .check-icon {
+    color: #eab308;
+}
 
 .check-item.highlight-green {
     background: linear-gradient(90deg, rgba(34, 197, 94, 0.1), transparent);
     border-left: 4px solid #22c55e;
 }
-.check-item.highlight-green .check-icon { color: #22c55e; }
+
+.check-item.highlight-green .check-icon {
+    color: #22c55e;
+}
 
 /* ELECTRIC HIGHLIGHT (ACTIVAR) */
 @keyframes electricPulse {
-    0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.1); }
-    50% { box-shadow: 0 0 20px rgba(244, 0, 9, 0.4); border-color: rgba(255, 255, 255, 0.5); }
-    100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.1); }
+    0% {
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(244, 0, 9, 0.4);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    100% {
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+    }
 }
 
 .check-item.highlight-electric {
@@ -990,7 +1012,7 @@ body,
 /* Toggle Button in Header */
 .showroom-toggle {
     background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
     width: 45px;
     height: 45px;
@@ -1015,34 +1037,49 @@ body,
 }
 
 /* Active Mode Styles */
-body.showroom-mode .sensitive-data {
+body.showroom-mode .sensitive-data,
+body.showroom-mode .nav-item,
+body.showroom-mode .bottom-nav,
+body.showroom-mode .search-hero,
+body.showroom-mode .btn-cerca,
+body.showroom-mode .brand-centered p {
     display: none !important;
 }
 
 /* Enhancements for Showroom Mode */
 body.showroom-mode .bento-grid {
-    grid-template-columns: 1fr 1fr !important; /* Larger cards */
+    grid-template-columns: 1fr 1fr !important;
+    /* Larger cards */
     gap: 20px;
+    margin-top: 40px;
 }
 
 body.showroom-mode .bento-card {
-    min-height: 120px; /* Taller cards */
+    min-height: 250px;
+    /* Taller cards */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 body.showroom-mode .bento-card i {
-    font-size: 2.5rem;
+    font-size: 4rem;
+    margin-bottom: 20px;
 }
 
 body.showroom-mode .bento-card span {
-    font-size: 1rem;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
 }
 
 body.showroom-mode .hero-grid {
-    grid-template-columns: 1fr; /* Full width hero */
+    grid-template-columns: 1fr;
+    /* Full width hero */
+    margin-top: 40px;
 }
 
 body.showroom-mode .app-header {
-    background: linear-gradient(to right, #000, #111); /* Cleaner header */
+    background: linear-gradient(to right, #000, #111);
+    /* Cleaner header */
     border-bottom: none;
+    box-shadow: none;
 }
-

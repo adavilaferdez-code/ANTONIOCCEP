@@ -398,9 +398,9 @@
             <i class="fa-solid fa-calculator"></i>
             <span>Calculadora</span>
         </a>
-        <a href="#" class="nav-item sensitive-data" onclick="openPlanes(); return false;">
+        <a href="#" class="nav-item sensitive-data" onclick="openNotionApp(); return false;">
             <i class="fa-solid fa-pen-to-square"></i>
-            <span>Notas</span>
+            <span>NOTION</span>
         </a>
         <a href="https://www.office.com/launch/excel" target="_blank" class="nav-item sensitive-data">
             <i class="fa-solid fa-table-cells"></i>
@@ -514,6 +514,16 @@
                         URL).</p>
                 </div>
 
+                <div style="margin-bottom: 20px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:bold; color:var(--text-color);">📱 Deep
+                        Link (App Notion)</label>
+                    <input type="text" id="settingNotionAppUrl" placeholder="notion://..."
+                        style="width:100%; padding:10px; border-radius:8px; border:1px solid #444; background:#222; color:white;">
+                    <p style="font-size:12px; color:#aaa; margin-top:5px;">Pega el enlace de tu página y cambia
+                        <b>https</b> por <b>notion</b>.
+                    </p>
+                </div>
+
                 <div style="text-align: right;">
                     <button onclick="saveSettings()"
                         style="background:var(--primary-gradient); border:none; padding:10px 20px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">💾
@@ -569,16 +579,16 @@
 </body>
 
 </html>
-    <script>
-        function toggleShowroom() {
-            document.body.classList.toggle('showroom-mode');
-            const btn = document.querySelector('.showroom-toggle i');
-            if (document.body.classList.contains('showroom-mode')) {
-                btn.classList.remove('fa-eye');
-                btn.classList.add('fa-eye-slash');
-            } else {
-                btn.classList.remove('fa-eye-slash');
-                btn.classList.add('fa-eye');
-            }
+<script>
+    function toggleShowroom() {
+        document.body.classList.toggle('showroom-mode');
+        const btn = document.querySelector('.showroom-toggle i');
+        if (document.body.classList.contains('showroom-mode')) {
+            btn.classList.remove('fa-eye');
+            btn.classList.add('fa-eye-slash');
+        } else {
+            btn.classList.remove('fa-eye-slash');
+            btn.classList.add('fa-eye');
         }
-    </script>
+    }
+</script>

@@ -1178,14 +1178,44 @@ const CORS_PROXY = 'https://corsproxy.io/?';
 const settingsModal = document.getElementById('settingsModal');
 const settingNotionKey = document.getElementById('settingNotionKey');
 const settingNotionDb = document.getElementById('settingNotionDb');
+const settingNotionAppUrl = document.getElementById('settingNotionAppUrl');
+
+function openNotionApp() {
+    const storedUrl = localStorage.getItem('notionAppUrl');
+
+    // Check if we have a URL
+    if (storedUrl) {
+        // If user pasted normal https link, simple replace protocol (basic heuristic)
+        let finalUrl = storedUrl;
+        if (finalUrl.startsWith('https://')) {
+            finalUrl = finalUrl.replace('https://', 'notion://');
+        } else if (!finalUrl.startsWith('notion://')) {
+            // If it doesn't start with notion:// or https://, maybe assume notion://? 
+            // Or just try opening it. But user instruction says "change https to notion".
+            // Let's ensure protocol is notion://
+            if (!finalUrl.includes('://')) {
+                finalUrl = 'notion://' + finalUrl;
+            }
+        }
+        window.location.href = finalUrl;
+    } else {
+        // If not configured, try to show alert or open settings
+        if (confirm("⚠️ Aún no has configurado el enlace directo a la App de Notion.\n\n¿Quieres configurarlo ahora?")) {
+            configureSettings();
+        }
+    }
+}
 
 function configureSettings() { // Kept name for compatibility with existing button
     const currentKey = localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT;
     const currentDb = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
 
     // Pre-fill inputs
+    const currentAppUrl = localStorage.getItem('notionAppUrl') || '';
+
     if (settingNotionKey) settingNotionKey.value = currentKey;
     if (settingNotionDb) settingNotionDb.value = currentDb;
+    if (settingNotionAppUrl) settingNotionAppUrl.value = currentAppUrl;
 
     settingsModal.classList.add('open');
 }
@@ -1240,6 +1270,11 @@ function saveSettings() {
 
     localStorage.setItem('notionKey', newKey);
     localStorage.setItem('notionDb', formatUUID(newDb.replace(/-/g, '')));
+
+    // Save App URL
+    if (settingNotionAppUrl) {
+        localStorage.setItem('notionAppUrl', settingNotionAppUrl.value.trim());
+    }
 
     closeSettingsModal();
 
