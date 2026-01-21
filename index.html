@@ -442,41 +442,146 @@
 
 
     <!-- Calculator Modal -->
+    <!-- CALCULATOR MODAL (Wider for Commercial Use) -->
     <div id="calculatorModal" class="modal-overlay">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 900px; display:flex; flex-direction:column; max-height:85vh;">
+            <!-- Extended width and height -->
+
             <div class="modal-header">
-                <h2>Calculadora</h2>
+                <h2>Comercial & Calculadora</h2>
                 <button class="close-btn" onclick="closeCalculator()"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="calculator-body">
-                <input type="text" id="calcDisplay" readonly value="0">
-                <div class="calc-grid">
-                    <button class="calc-btn op" onclick="calcClear()">C</button>
-                    <button class="calc-btn op" onclick="calcAppend('/')">/</button>
-                    <button class="calc-btn op" onclick="calcAppend('*')">x</button>
-                    <button class="calc-btn op" onclick="calcBackspace()"><i
-                            class="fa-solid fa-delete-left"></i></button>
 
-                    <button class="calc-btn" onclick="calcAppend('7')">7</button>
-                    <button class="calc-btn" onclick="calcAppend('8')">8</button>
-                    <button class="calc-btn" onclick="calcAppend('9')">9</button>
-                    <button class="calc-btn op" onclick="calcAppend('-')">-</button>
+            <!-- MAIN LAYOUT: TWO COLUMNS -->
+            <div style="display:flex; flex:1; overflow:hidden; gap:20px; padding:10px;">
 
-                    <button class="calc-btn" onclick="calcAppend('4')">4</button>
-                    <button class="calc-btn" onclick="calcAppend('5')">5</button>
-                    <button class="calc-btn" onclick="calcAppend('6')">6</button>
-                    <button class="calc-btn op" onclick="calcAppend('+')">+</button>
+                <!-- LEFT COL: CALCULATOR (Fixed Width) -->
+                <div style="flex:0 0 320px; display:flex; flex-direction:column;">
 
-                    <button class="calc-btn" onclick="calcAppend('1')">1</button>
-                    <button class="calc-btn" onclick="calcAppend('2')">2</button>
-                    <button class="calc-btn" onclick="calcAppend('3')">3</button>
-                    <button class="calc-btn op equals" onclick="calcCalculate()">=</button>
+                    <!-- TABS SWITCHER -->
+                    <div class="calc-tabs" style="display:flex; border-bottom:1px solid #444; margin-bottom:15px;">
+                        <button class="tab-btn" onclick="switchCalcTab('basic')" id="tabBasic"
+                            style="flex:1; background:none; border:none; color:white; padding:10px; border-bottom:2px solid var(--primary-color); font-weight:bold; cursor:pointer;">Básica</button>
+                        <button class="tab-btn" onclick="switchCalcTab('offer')" id="tabOffer"
+                            style="flex:1; background:none; border:none; color:#aaa; padding:10px; border-bottom:2px solid transparent; cursor:pointer;">Bonif.</button>
+                    </div>
 
-                    <button class="calc-btn zero" onclick="calcAppend('0')">0</button>
-                    <button class="calc-btn" onclick="calcAppend('.')">.</button>
+                    <!-- VIEW 1: BASIC CALCULATOR -->
+                    <div id="calcBodyBasic" class="calculator-body">
+                        <input type="text" id="calcDisplay" readonly value="0">
+                        <div class="calc-grid">
+                            <button class="calc-btn op" onclick="calcClear()">C</button>
+                            <button class="calc-btn op" onclick="calcAppend('/')">/</button>
+                            <button class="calc-btn op" onclick="calcAppend('*')">x</button>
+                            <button class="calc-btn op" onclick="calcBackspace()"><i
+                                    class="fa-solid fa-delete-left"></i></button>
+
+                            <button class="calc-btn" onclick="calcAppend('7')">7</button>
+                            <button class="calc-btn" onclick="calcAppend('8')">8</button>
+                            <button class="calc-btn" onclick="calcAppend('9')">9</button>
+                            <button class="calc-btn op" onclick="calcAppend('-')">-</button>
+
+                            <button class="calc-btn" onclick="calcAppend('4')">4</button>
+                            <button class="calc-btn" onclick="calcAppend('5')">5</button>
+                            <button class="calc-btn" onclick="calcAppend('6')">6</button>
+                            <button class="calc-btn op" onclick="calcAppend('+')">+</button>
+
+                            <button class="calc-btn" onclick="calcAppend('1')">1</button>
+                            <button class="calc-btn" onclick="calcAppend('2')">2</button>
+                            <button class="calc-btn" onclick="calcAppend('3')">3</button>
+                            <button class="calc-btn op equals" onclick="calcCalculate()">=</button>
+
+                            <button class="calc-btn zero" onclick="calcAppend('0')">0</button>
+                            <button class="calc-btn" onclick="calcAppend('.')">.</button>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 2: BONIFICATION CALCULATOR -->
+                    <div id="calcBodyOffer" class="calculator-body" style="display:none; padding:5px;">
+                        <div style="display:flex; flex-direction:column; gap:12px;">
+
+                            <!-- Selected Product Info (Optional) -->
+                            <div id="selectedProdName"
+                                style="color:#fbbf24; font-size:0.9rem; text-align:center; height:20px;"></div>
+
+                            <div style="display:flex; gap:10px;">
+                                <div class="input-group" style="flex:1;">
+                                    <label style="color:#aaa; font-size:0.75rem;">Precio Tarifa (€)</label>
+                                    <input type="number" id="bonPrice" class="modal-input" placeholder="0.00"
+                                        step="0.01" style="text-align:center;">
+                                </div>
+                                <div class="input-group" style="flex:1;">
+                                    <label style="color:#aaa; font-size:0.75rem;">Dto. Factura (%)</label>
+                                    <input type="number" id="bonDisc" class="modal-input" placeholder="0" value="0"
+                                        style="text-align:center;">
+                                </div>
+                            </div>
+
+                            <div
+                                style="display:flex; gap:10px; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+                                <div class="input-group" style="flex:1;">
+                                    <label style="color:#fff; font-size:0.8rem; font-weight:bold;">COMPRA</label>
+                                    <input type="number" id="bonPaid" class="modal-input" placeholder="10" value="10"
+                                        style="text-align:center; font-weight:bold;">
+                                </div>
+                                <div style="display:flex; align-items:center; color:#fbbf24; font-size:1.2rem;">+</div>
+                                <div class="input-group" style="flex:1;">
+                                    <label style="color:#fbbf24; font-size:0.8rem; font-weight:bold;">REGALO</label>
+                                    <input type="number" id="bonFree" class="modal-input" placeholder="1" value="1"
+                                        style="text-align:center; border:1px solid #fbbf24; color:#fbbf24;">
+                                </div>
+                            </div>
+
+                            <hr style="border:0; border-top:1px solid #444; width:100%; margin:5px 0;">
+
+                            <div style="text-align:center;">
+                                <div style="font-size:0.9rem; color:#aaa; margin-bottom:5px;">PRECIO REAL / CAJA</div>
+                                <div id="bonResultPrice"
+                                    style="font-size:2.5rem; font-weight:900; color:#00ff88; font-family:'Montserrat', sans-serif;">
+                                    0.00 €</div>
+                                <div style="display:flex; justify-content:center; gap:15px; margin-top:10px;">
+                                    <span
+                                        style="background:#222; padding:4px 8px; border-radius:4px; font-size:0.8rem; color:#aaa;">Dto.
+                                        Total: <b id="bonResultPercent" style="color:white;">0%</b></span>
+                                    <span
+                                        style="background:#222; padding:4px 8px; border-radius:4px; font-size:0.8rem; color:#aaa;">Total:
+                                        <b id="bonResultTotal" style="color:white;">0€</b></span>
+                                </div>
+                            </div>
+                            <button onclick="clearBonification()"
+                                style="background:#444; color:white; border:none; padding:8px; border-radius:8px; margin-top:15px; width:100%;">
+                                <i class="fa-solid fa-rotate-right"></i> Borrar
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
+
+                <!-- RIGHT COL: PRODUCT CATALOG (New) -->
+                <div
+                    style="flex:1; background:rgba(0,0,0,0.2); border-radius:12px; padding:15px; display:flex; flex-direction:column; overflow:hidden;">
+
+                    <!-- Search Header -->
+                    <div style="margin-bottom:15px;">
+                        <input type="text" id="calcProdSearch" placeholder="🔍 Buscar producto..."
+                            onkeyup="filterCalcProducts()"
+                            style="width:100%; padding:12px; border-radius:8px; border:1px solid #444; background:#222; color:white;">
+                    </div>
+
+                    <!-- Scrollable Grid -->
+                    <div id="calcProdList"
+                        style="flex:1; overflow-y:auto; display:grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap:10px; align-content:start;">
+                        <!-- Products will be injected here via JS -->
+                        <div style="color:#aaa; text-align:center; grid-column:1/-1;">Cargando tarifas...</div>
+                    </div>
+
+                </div>
+
             </div>
+
         </div>
+    </div>
+    </div>
     </div>
 
     <!-- Debug Console Overlay -->

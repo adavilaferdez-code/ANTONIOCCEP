@@ -1110,10 +1110,115 @@ try {
 /* Calculator Logic */
 let calcExpression = '';
 
+// --- TAB SWITCHING ---
+function switchCalcTab(mode) {
+    const tabBasic = document.getElementById('tabBasic');
+    const tabOffer = document.getElementById('tabOffer');
+    const bodyBasic = document.getElementById('calcBodyBasic');
+    const bodyOffer = document.getElementById('calcBodyOffer');
+
+    if (mode === 'basic') {
+        // Activate Basic
+        tabBasic.style.borderBottom = '2px solid var(--primary-color)';
+        tabBasic.style.color = 'white';
+        tabBasic.style.fontWeight = 'bold';
+
+        tabOffer.style.borderBottom = '2px solid transparent';
+        tabOffer.style.color = '#aaa';
+        tabOffer.style.fontWeight = 'normal';
+
+        bodyBasic.style.display = 'block';
+        bodyOffer.style.display = 'none';
+
+        // Focus calc
+        setTimeout(() => document.getElementById('calcDisplay').focus(), 100);
+    } else {
+        // Activate Offer
+        tabOffer.style.borderBottom = '2px solid var(--primary-color)';
+        tabOffer.style.color = 'white';
+        tabOffer.style.fontWeight = 'bold';
+
+        tabBasic.style.borderBottom = '2px solid transparent';
+        tabBasic.style.color = '#aaa';
+        tabBasic.style.fontWeight = 'normal';
+
+        bodyOffer.style.display = 'block';
+        bodyBasic.style.display = 'none';
+
+        // Focus inputs
+        setTimeout(() => document.getElementById('bonPrice').focus(), 100);
+    }
+}
+
+// --- BONIFICATION LOGIC ---
+// Listeners
+const bonInputs = ['bonPrice', 'bonDisc', 'bonPaid', 'bonFree'];
+bonInputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', calculateBonification);
+});
+
+function calculateBonification() {
+    const price = parseFloat(document.getElementById('bonPrice').value) || 0;
+    const discount = parseFloat(document.getElementById('bonDisc').value) || 0;
+    const paid = parseFloat(document.getElementById('bonPaid').value) || 0;
+    const free = parseFloat(document.getElementById('bonFree').value) || 0;
+
+    if (paid === 0 && free === 0) return; // Divide by zero protection
+
+    // 1. Total Cost for Client = Paid Units * Price * (1 - Discount)
+    const totalCost = paid * price * (1 - (discount / 100));
+
+    // 2. Total Units Received = Paid + Free
+    const totalUnits = paid + free;
+
+    // 3. Real Unit Price = Total Cost / Total Units
+    let realPrice = 0;
+    if (totalUnits > 0) {
+        realPrice = totalCost / totalUnits;
+    }
+
+    // 4. Equivalent Discount %
+    // Diff between Original Price and Real Price
+    let realDiscount = 0;
+    if (price > 0) {
+        realDiscount = ((price - realPrice) / price) * 100;
+    }
+
+    // UPDATE UI
+    const formatter = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
+
+    document.getElementById('bonResultPrice').innerText = formatter.format(realPrice);
+    document.getElementById('bonResultPercent').innerText = realDiscount.toFixed(1) + '%';
+    document.getElementById('bonResultTotal').innerText = formatter.format(totalCost);
+}
+
+function clearBonification() {
+    document.getElementById('bonPrice').value = '';
+    document.getElementById('bonDisc').value = '';
+    document.getElementById('bonPaid').value = '10';
+    document.getElementById('bonFree').value = '1';
+
+    // Safety check for element existence before setting innerText
+    const selProdName = document.getElementById('selectedProdName');
+    if (selProdName) selProdName.innerText = '';
+
+    document.getElementById('bonResultPrice').innerText = '0,00 €';
+    document.getElementById('bonResultPercent').innerText = '0%';
+    document.getElementById('bonResultTotal').innerText = '0€';
+}
+
+
 function openCalculator() {
     document.getElementById('calculatorModal').classList.add('open');
+    switchCalcTab('basic'); // Reset to basic on open
     calcExpression = '';
     updateCalcDisplay();
+    // Render Products if empty and element exists
+    const prodList = document.getElementById('calcProdList');
+    if (prodList && prodList.children.length <= 1 && typeof renderCalcProducts === 'function') {
+        renderCalcProducts();
+    }
 }
 
 function closeCalculator() {
@@ -1167,6 +1272,82 @@ function calcCalculate() {
         calcExpression = 'Error';
     }
     updateCalcDisplay();
+}
+
+// --- PRODUCT CATALOG SIDEBAR (MOCK DATA) ---
+// --- PRODUCT CATALOG SIDEBAR (REAL DATA) ---
+const productCatalog = [
+    { name: 'Coca-Cola 2L (Caja)', price: 28.68, color: '#fca5a5' },
+    { name: 'Coca-Cola Zero 2L (Caja)', price: 28.68, color: '#000000' },
+    { name: 'Coca-Cola Zero Zero 2L (Caja)', price: 28.68, color: '#000000' },
+    // Placeholder for others, user will provide more
+    { name: 'Fanta Naranja 2L (Caja)', price: 27.06, color: '#fdba74' },
+    { name: 'Fanta Limón 2L (Caja)', price: 27.06, color: '#fde047' },
+    { name: 'Coca-Cola Lata 33cl (Caja)', price: 39.36, color: '#ef4444' },
+    { name: 'Coca-Cola Zero Lata 33cl (Caja)', price: 39.36, color: '#000000' },
+    { name: 'Coca-Cola Zero Zero Lata 33cl (Caja)', price: 39.36, color: '#000000' },
+    { name: 'Fanta Naranja Lata 33cl (Caja)', price: 37.68, color: '#fdba74' },
+    { name: 'Fanta Limón Lata 33cl (Caja)', price: 37.68, color: '#fde047' },
+    { name: 'Aquarius Limón Lata 33cl (Caja)', price: 41.04, color: '#93c5fd' },
+    { name: 'Aquarius Naranja Lata 33cl (Caja)', price: 41.04, color: '#fdba74' },
+    { name: 'Fuze Tea Lata 33cl (Caja)', price: 39.60, color: '#16a34a' },
+    { name: 'Royal Bliss Vidrio 20cl (Caja24)', price: 31.92, color: '#e879f9' },
+    { name: 'Monster Lata 50cl (Caja 24)', price: 56.16, color: '#bef264' },
+];
+
+function renderCalcProducts(filter = '') {
+    const list = document.getElementById('calcProdList');
+    if (!list) return;
+
+    list.innerHTML = ''; // Clear
+
+    const filtered = productCatalog.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
+
+    if (filtered.length === 0) {
+        list.innerHTML = '<div style="grid-column:1/-1; color:#aaa; text-align:center; padding:20px;">No encontrado</div>';
+        return;
+    }
+
+    filtered.forEach(p => {
+        const item = document.createElement('div');
+        item.style.cssText = 'background:#333; border-radius:8px; padding:10px; cursor:pointer; text-align:center; transition:0.2s; border:1px solid transparent;';
+        item.onmouseover = () => item.style.borderColor = '#666';
+        item.onmouseout = () => item.style.borderColor = 'transparent';
+        item.onclick = () => selectCalcProduct(p);
+
+        // Simulating a product card
+        item.innerHTML = `
+            <div style="width:30px; height:30px; background:${p.color}; border-radius:50%; margin:0 auto 5px; opacity:0.8;"></div>
+            <div style="font-size:0.75rem; font-weight:bold; color:white; margin-bottom:4px; height:32px; overflow:hidden;">${p.name}</div>
+            <div style="font-size:0.9rem; color:#4ade80; font-weight:bold;">${p.price.toFixed(2)}€</div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function filterCalcProducts() {
+    const text = document.getElementById('calcProdSearch').value;
+    renderCalcProducts(text);
+}
+
+function selectCalcProduct(product) {
+    // 1. Switch to Bonification Tab
+    switchCalcTab('offer');
+
+    // 2. Fill Price
+    const priceInput = document.getElementById('bonPrice');
+    priceInput.value = product.price;
+
+    // 3. Visual Feedback
+    const selProdInfo = document.getElementById('selectedProdName');
+    if (selProdInfo) selProdInfo.innerText = product.name;
+
+    // Highlight effect
+    priceInput.style.backgroundColor = '#4ade80';
+    setTimeout(() => priceInput.style.backgroundColor = 'var(--input-bg)', 300);
+
+    // 4. Trigger Recalc
+    calculateBonification();
 }
 
 // === NOTION INTEGRATION ===
