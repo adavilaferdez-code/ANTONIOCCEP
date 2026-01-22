@@ -352,25 +352,19 @@ body {
 .bento-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    /* 5 Columns in 1 Row */
     gap: 12px;
-    /* Slightly increased gap for glow clearance */
     margin-bottom: 25px;
     padding: 10px 5px;
-    /* Padding for shadows */
 }
 
-/* Base Polished Glass Style */
+/* Unified Glassmorphism Style */
 .bento-card {
     position: relative;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+    background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-top: 1px solid rgba(255, 255, 255, 0.4);
-    /* Highlight top edge */
-    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
     padding: 15px 5px;
     display: flex;
     flex-direction: column;
@@ -379,37 +373,35 @@ body {
     gap: 8px;
     cursor: pointer;
     text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-
-    /* Tactile/Physical Depth */
-    box-shadow:
-        inset 0 0 15px rgba(255, 255, 255, 0.05),
-        /* Inner light */
-        0 5px 15px rgba(0, 0, 0, 0.3);
-    /* Drop shadow */
-
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     min-height: 85px;
     overflow: hidden;
 }
 
-/* Glass Shine Reflection */
+/* Subtle top border on hover */
 .bento-card::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 50%;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), transparent);
-    border-radius: 20px 20px 80% 80% / 20px 20px 40px 40px;
-    opacity: 0.6;
-    pointer-events: none;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
-/* Hover Effect: Lift + Intensify */
+.bento-card:hover::before {
+    opacity: 1;
+}
+
+/* Hover Effect: Consistent with design system */
 .bento-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 .bento-card i {
@@ -528,56 +520,44 @@ body,
     color: #e5e5e5 !important;
 }
 
-/* Restore Blue Bar Logic - COBALT BLUE METALLIC UPDATE */
+/* Blue Distribution Button - Glassmorphism (Informative, not CTA) */
 .capsule-btn.cap-blue {
-    /* Cobalt Blue / Steel Metallic Finish */
-    background: linear-gradient(to bottom, #4c6ef5 0%, #1c3faa 45%, #00227a 50%, #001242 100%) !important;
-
-    /* 3D Volume & Reflections */
-    box-shadow:
-        0 5px 15px rgba(0, 0, 0, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.5),
-        0 0 15px rgba(59, 130, 246, 0.3) !important;
-
-    /* Light Blue/White Light Border Accent */
-    border: 1px solid rgba(147, 197, 253, 0.5) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.8) !important;
-    border-bottom: 1px solid #000 !important;
-
-    backdrop-filter: none !important;
-    color: white !important;
-
-    font-size: 1rem !important;
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.6), 0 2px 2px rgba(0, 0, 0, 0.8) !important;
-
+    background: rgba(59, 130, 246, 0.15) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    color: #60a5fa !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
     position: relative;
     overflow: hidden;
-    transition: transform 0.2s, filter 0.2s !important;
-    z-index: 10;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* Metallic Sheen Animation support */
-.capsule-btn.cap-blue::after {
+/* Subtle glow effect */
+.capsule-btn.cap-blue::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 50%;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
-    pointer-events: none;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.5), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.capsule-btn.cap-blue:hover::before {
+    opacity: 1;
 }
 
 .capsule-btn.cap-blue:hover {
-    transform: translateY(-2px) scale(1.01) !important;
-    filter: brightness(1.1) !important;
-    box-shadow: 0 8px 25px rgba(0, 30, 100, 0.6) !important;
+    background: rgba(59, 130, 246, 0.25) !important;
+    border-color: rgba(59, 130, 246, 0.5) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3) !important;
 }
 
 .capsule-btn.cap-blue i {
-    color: #fff !important;
-    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
+    color: #60a5fa !important;
 }
 
 /* 4. Floating Dock Navigation (macOS Style) */
@@ -1006,6 +986,691 @@ body,
     filter: drop-shadow(0 0 5px #fbbf24);
 }
 
+
+/* ============================================
+   HERO SECTION - PREMIUM ENTRANCE ANIMATIONS
+   ============================================ */
+
+/* Animated Background Gradient */
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.app-background {
+    background:
+        radial-gradient(circle at 10% 20%, rgba(244, 0, 9, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+        linear-gradient(-45deg, #050507, #0a0a0f, #0f0510, #050507);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+/* Logo Glow Effect */
+.main-logo {
+    animation: logoEntrance 1s ease-out, logoGlow 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(244, 0, 9, 0.4));
+    transition: all 0.3s ease;
+}
+
+@keyframes logoEntrance {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(-20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes logoGlow {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 20px rgba(244, 0, 9, 0.4));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 35px rgba(244, 0, 9, 0.7)) drop-shadow(0 0 50px rgba(244, 0, 9, 0.3));
+    }
+}
+
+.main-logo:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 40px rgba(244, 0, 9, 0.8)) drop-shadow(0 0 60px rgba(244, 0, 9, 0.4));
+}
+
+/* Entrance Animations for Main Elements */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Apply animations to page sections */
+.app-header {
+    animation: fadeInScale 0.6s ease-out;
+}
+
+.search-hero {
+    animation: fadeInUp 0.8s ease-out 0.2s backwards;
+}
+
+.actions-container {
+    animation: fadeInUp 0.8s ease-out 0.3s backwards;
+}
+
+.hero-grid {
+    animation: fadeInUp 0.8s ease-out 0.4s backwards;
+}
+
+/* Enhanced Search Bar with Glow */
+.search-wrapper {
+    position: relative;
+}
+
+.search-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50px;
+    background: linear-gradient(45deg,
+            rgba(244, 0, 9, 0.3),
+            rgba(59, 130, 246, 0.3),
+            rgba(139, 92, 246, 0.3),
+            rgba(244, 0, 9, 0.3));
+    background-size: 300% 300%;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s ease;
+    animation: gradientShift 4s ease infinite;
+}
+
+.search-wrapper:focus-within::before {
+    opacity: 1;
+}
+
+.search-input {
+    position: relative;
+    z-index: 1;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-input:focus {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(244, 0, 9, 0.5);
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(244, 0, 9, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Floating Animation for Hero Cards */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+.hero-card {
+    animation: float 6s ease-in-out infinite;
+}
+
+.hero-card:nth-child(2) {
+    animation-delay: 1s;
+}
+
+/* Bento Grid Enhanced */
+.bento-card {
+    animation: fadeInScale 0.5s ease-out backwards;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.bento-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.1),
+            transparent);
+    transition: left 0.5s ease;
+}
+
+.bento-card:hover::before {
+    left: 100%;
+}
+
+.bento-card:nth-child(1) {
+    animation-delay: 0.5s;
+}
+
+.bento-card:nth-child(2) {
+    animation-delay: 0.6s;
+}
+
+.bento-card:nth-child(3) {
+    animation-delay: 0.7s;
+}
+
+.bento-card:nth-child(4) {
+    animation-delay: 0.8s;
+}
+
+.bento-card:nth-child(5) {
+    animation-delay: 0.9s;
+}
+
+.bento-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Pulse effect for important buttons */
+@keyframes pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(244, 0, 9, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 10px rgba(244, 0, 9, 0);
+    }
+}
+
+.btn-cerca {
+    animation: pulse 2s ease infinite;
+}
+
+/* Shimmer effect on load */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.brand-centered {
+    animation: fadeInScale 0.8s ease-out;
+}
+
+/* ============================================
+   STATISTICS WIDGETS (DASHBOARD)
+   ============================================ */
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+    animation: fadeInUp 0.8s ease-out 0.5s backwards;
+}
+
+@media (max-width: 640px) {
+    .stats-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+}
+
+/* Stat Card */
+.stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg,
+            rgba(59, 130, 246, 0.5),
+            rgba(139, 92, 246, 0.5));
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.stat-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.stat-card:hover::before {
+    opacity: 1;
+}
+
+/* Stat Icon */
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s;
+}
+
+.stat-card:hover .stat-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.stat-icon-blue {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.stat-icon-orange {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.stat-icon-green {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+/* Stat Content */
+.stat-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-number {
+    font-size: 32px;
+    font-weight: 900;
+    color: white;
+    line-height: 1;
+    font-family: 'Montserrat', sans-serif;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.stat-label {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+@media (max-width: 640px) {
+    .stat-card {
+        padding: 16px;
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+
+    .stat-number {
+        font-size: 28px;
+    }
+
+    .stat-label {
+        font-size: 11px;
+    }
+}
+
+/* ============================================
+   SKELETON LOADERS
+   ============================================ */
+
+/* Shimmer Animation */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.05) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0.05) 100%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    border-radius: 8px;
+}
+
+/* Skeleton Card for Products */
+.skeleton-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.skeleton-header {
+    height: 120px;
+    border-radius: 12px;
+    background: linear-gradient(90deg,
+            rgba(37, 99, 235, 0.2) 0%,
+            rgba(79, 70, 229, 0.3) 50%,
+            rgba(37, 99, 235, 0.2) 100%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+}
+
+.skeleton-line {
+    height: 20px;
+    border-radius: 4px;
+}
+
+.skeleton-line.small {
+    width: 60%;
+}
+
+.skeleton-line.medium {
+    width: 80%;
+}
+
+.skeleton-line.large {
+    width: 100%;
+}
+
+.skeleton-price {
+    height: 60px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+/* Skeleton Grid */
+.skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+/* ============================================
+   TOAST NOTIFICATION SYSTEM
+   ============================================ */
+
+/* Toast Container */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+}
+
+@media (max-width: 640px) {
+    .toast-container {
+        top: auto;
+        bottom: 80px;
+        left: 20px;
+        right: 20px;
+    }
+}
+
+/* Toast Base Styles */
+.toast {
+    min-width: 320px;
+    max-width: 420px;
+    background: rgba(18, 18, 20, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    pointer-events: all;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: toastSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (max-width: 640px) {
+    .toast {
+        min-width: auto;
+        max-width: none;
+        width: 100%;
+    }
+}
+
+.toast:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 15px 50px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Toast Animations */
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(400px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes toastSlideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(400px);
+    }
+}
+
+.toast.removing {
+    animation: toastSlideOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Toast Icon */
+.toast-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* Toast Content */
+.toast-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.toast-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+}
+
+.toast-message {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+}
+
+/* Toast Close Button */
+.toast-close {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.toast-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Toast Types */
+.toast.success {
+    border-left: 4px solid #10b981;
+}
+
+.toast.success .toast-icon {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.toast.error {
+    border-left: 4px solid #ef4444;
+}
+
+.toast.error .toast-icon {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.toast.warning {
+    border-left: 4px solid #f59e0b;
+}
+
+.toast.warning .toast-icon {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.toast.info {
+    border-left: 4px solid #3b82f6;
+}
+
+.toast.info .toast-icon {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+}
+
+/* Toast Progress Bar */
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 0 0 12px 12px;
+    transform-origin: left;
+    animation: toastProgress 5s linear forwards;
+}
+
+@keyframes toastProgress {
+    from {
+        transform: scaleX(1);
+    }
+
+    to {
+        transform: scaleX(0);
+    }
+}
+
+.toast.success .toast-progress {
+    background: #10b981;
+}
+
+.toast.error .toast-progress {
+    background: #ef4444;
+}
+
+.toast.warning .toast-progress {
+    background: #f59e0b;
+}
+
+.toast.info .toast-progress {
+    background: #3b82f6;
+}
 
 /* === SHOWROOM MODE === */
 

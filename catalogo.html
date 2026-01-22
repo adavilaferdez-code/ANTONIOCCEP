@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -1204,52 +1204,107 @@
             }
         }
 
-        // Separate banner render logic
+        // Helper to save name changes
+        function updateClientName(newName) {
+            const ctx = getActiveNote();
+            if (ctx) {
+                // Update text content in the note object
+                // We assume the note text was just the name/title for simplicity in this mode
+                // Or we preserve the products list if they are appended? 
+                // Actually, the add logic appends divs. The Client Name is usually at the start or is the name of the note.
+                // Let's just update the CLIENT OBJECT text property which is what is displayed.
+                // However, 'ctx.client.text' usually contains HTML.
+                // If we want to just change the "Header", it might be tricky if mixed.
+                // BUT, looking at `addToActiveNote`, it appends. The "Title" is effectively `ctx.client.text`.
+                // Let's assume for this "Mode AÃ±adir", the user creates a note and `ctx.client.text` IS the name mostly.
+                // Or we can just store it in a separate property if we could, but we are limited to the existing structure.
+
+                // Let's just keep it simple: we update the UI activeNoteBanner input, 
+                // AND we try to update the `ctx.client.text` but we must be careful not to wipe content.
+                // The `rawText` extraction earlier was `ctx.client.text` stripped of tags?
+                // Actually `ctx.client.text` is the HTML content.
+                // If we want to rename the "Note" (Client Name), we should probably update `ctx.client.text` 
+                // BUT if it has products, replacing `text` wipes them?
+                // NO, `client.text` IS the content. 
+
+                // WAIT. The user wants to set the "Client Name" for the EMAIL subject.
+                // AND presumably for the note title?
+                // Let's persist it in localStorage separately as 'currentClientName' for this session 
+                // to avoid messing up the complex HTML note structure for now.
+                localStorage.setItem('currentClientName', newName);
+            }
+        }
+
         function updateBannerUI() {
             const searchPanel = document.querySelector('.search-panel');
             if (!searchPanel) return;
-
-            // Remove existing
             const existing = document.getElementById('activeNoteBanner');
             if (existing) existing.remove();
 
             const ctx = getActiveNote();
             if (!ctx) return;
 
-            // Safer Name Extraction
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = ctx.client.text;
-            let rawText = tempDiv.textContent || tempDiv.innerText || '';
-            rawText = rawText.replace(/^\[.*?\]\s*/, '').trim();
-            if (!rawText) rawText = "Sin TÃ­tulo";
+            // Load saved name or extract
+            let savedName = localStorage.getItem('currentClientName');
 
-            // Undo Button Visibility
+            // Fallback to extraction if no temp name
+            if (!savedName) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = ctx.client.text;
+                let raw = tempDiv.textContent || tempDiv.innerText || '';
+                savedName = raw.replace(/^\[.*?\]\s*/, '').trim() || "Sin TÃ­tulo";
+            }
+
+            // Load saved email
+            let savedEmail = localStorage.getItem('tempClientEmail') || '';
+
             const undoVisibility = lastUndoState ? 'block' : 'none';
 
             const info = document.createElement('div');
             info.id = 'activeNoteBanner';
-
             info.innerHTML = `
-                <div style="background:#ecfdf5; color:#065f46; padding:10px 15px; border-radius:12px; margin-bottom:15px; display:flex; align-items:center; justify-content:space-between; border:1px solid #6ee7b7; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-                    <div style="display:flex; align-items:center; gap:12px; overflow:hidden;">
-                         <div style="background:#10b981; color:white; min-width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="fa-solid fa-pen" style="font-size:0.8rem;"></i></div>
-                         <div style="display:flex; flex-direction:column; min-width:0;">
-                             <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:#059669; opacity:0.8; line-height:1;">MODO AÃ‘ADIR</div>
-                             <div style="font-weight:700; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${rawText}</div>
+                <div style="background:linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); color:#065f46; padding:15px 20px; border-radius:16px; margin-bottom:20px; display:flex; flex-direction:column; gap:12px; border:1px solid #6ee7b7; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);">
+                    
+                    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:15px;">
+                        
+                        <!-- ICONO -->
+                        <div style="background:#10b981; color:white; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 4px 6px rgba(16, 185, 129, 0.3);">
+                            <i class="fa-solid fa-user-pen" style="font-size:1.1rem;"></i>
                         </div>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <button onclick="undoLast()" style="display:${undoVisibility}; background:#f59e0b; border:none; color:white; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.8rem; font-weight:bold; white-space:nowrap; flex-shrink:0;">
-                            <i class="fa-solid fa-rotate-left"></i> Deshacer
-                        </button>
-                        <button onclick="openNoteSelector()" 
-                            style="background:white; border:1px solid #bae6fd; color:#0284c7; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.8rem; font-weight:bold; white-space:nowrap; flex-shrink:0;">
-                            <i class="fa-solid fa-rotate"></i> Cambiar
-                        </button>
-                        <button onclick="localStorage.removeItem('activeNoteId'); location.reload();" 
-                            style="background:white; border:1px solid #fecaca; color:#dc2626; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.8rem; font-weight:bold; white-space:nowrap; flex-shrink:0;">
-                            <i class="fa-solid fa-stop"></i> Terminar
-                        </button>
+
+                        <!-- INPUTS -->
+                        <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
+                            <div style="position:relative;">
+                                <label style="font-size:0.7rem; font-weight:800; color:#059669; text-transform:uppercase; margin-bottom:4px; display:block; padding-left:4px;">Nombre Cliente / Bar</label>
+                                <input id="clientNameInput" type="text" value="${savedName}" placeholder="Nombre del Cliente..." 
+                                    oninput="updateClientName(this.value)"
+                                    onclick="this.select()"
+                                    style="width:100%; border:1px solid #a7f3d0; background:white; font-weight:700; font-size:1.1rem; color:#064e3b; border-radius:10px; padding:10px 12px; outline:none; transition:all 0.2s; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
+                            </div>
+                            
+                            <div style="position:relative;">
+                                <label style="font-size:0.7rem; font-weight:800; color:#059669; text-transform:uppercase; margin-bottom:4px; display:block; padding-left:4px;">Email Destinatario</label>
+                                <input id="clientEmailInput" type="email" value="${savedEmail}" placeholder="ejemplo@correo.com" 
+                                    oninput="localStorage.setItem('tempClientEmail', this.value)"
+                                    onclick="this.select()"
+                                    style="width:100%; border:1px solid #a7f3d0; background:white; font-size:1rem; color:#047857; border-radius:10px; padding:10px 12px; outline:none; transition:all 0.2s;">
+                            </div>
+                        </div>
+
+                        <!-- ACTIONS -->
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                             <button onclick="localStorage.removeItem('activeNoteId'); localStorage.removeItem('currentClientName'); localStorage.removeItem('tempClientEmail'); location.reload();" 
+                                style="background:#fecaca; border:1px solid #f87171; color:#b91c1c; padding:8px 12px; border-radius:10px; cursor:pointer; font-size:0.8rem; font-weight:bold; transition:all 0.2s; display:flex; align-items:center; gap:6px; white-space:nowrap; justify-content:center;">
+                                <i class="fa-solid fa-xmark"></i> Salir
+                            </button>
+                             <button onclick="openNoteSelector()" 
+                                style="background:white; border:1px solid #bae6fd; color:#0284c7; padding:8px 12px; border-radius:10px; cursor:pointer; font-size:0.8rem; font-weight:bold; transition:all 0.2s; display:flex; align-items:center; gap:6px; white-space:nowrap; justify-content:center;">
+                                <i class="fa-solid fa-folder-open"></i> Cambiar
+                            </button>
+                             <button onclick="undoLast()" style="display:${undoVisibility}; background:#ffedd5; border:1px solid #fdba74; color:#c2410c; padding:8px 12px; border-radius:10px; cursor:pointer; font-size:0.8rem; font-weight:bold; transition:all 0.2s; align-items:center; gap:6px; white-space:nowrap; justify-content:center;">
+                                <i class="fa-solid fa-rotate-left"></i> Deshacer
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1260,87 +1315,108 @@
 </body>
 
 </html>
-    <!-- PRECIO TOTAL FLOTANTE -->
-    <div id='floatingTotal' style='position:fixed; bottom:20px; right:20px; background:white; padding:15px; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.2); display:none; flex-direction:column; gap:8px; z-index:9000; border:1px solid rgba(0,0,0,0.1); width:280px;'>
-        <div style='display:flex; justify-content:space-between; align-items:center;'>
-            <span style='font-size:0.9rem; color:#666; font-weight:bold;'>TOTAL ESTIMADO</span>
-            <span id='grandTotalDisplay' style='font-size:1.5rem; font-weight:900; color:#111;'>€0.00</span>
-        </div>
-        <div style='display:flex; gap:10px; margin-top:5px;'>
-             <button onclick='sendEmailOffer()' style='flex:1; background:#ea4335; color:white; border:none; padding:12px; border-radius:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;'>
-                <i class='fa-solid fa-envelope'></i> Enviar Email
-            </button>
-        </div>
+<!-- PRECIO TOTAL FLOTANTE -->
+<div id='floatingTotal'
+    style='position:fixed; bottom:20px; right:20px; background:white; padding:15px; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.2); display:none; flex-direction:column; gap:8px; z-index:9000; border:1px solid rgba(0,0,0,0.1); width:280px;'>
+    <div style='display:flex; justify-content:space-between; align-items:center;'>
+        <span style='font-size:0.9rem; color:#666; font-weight:bold;'>TOTAL ESTIMADO</span>
+        <span id='grandTotalDisplay' style='font-size:1.5rem; font-weight:900; color:#111;'>EUR0.00</span>
     </div>
+    <div style='display:flex; gap:10px; margin-top:5px;'>
+        <button onclick='sendEmailOffer()'
+            style='flex:1; background:#ea4335; color:white; border:none; padding:12px; border-radius:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;'>
+            <i class='fa-solid fa-envelope'></i> Enviar Email
+        </button>
+    </div>
+</div>
 
 
-    <script>
-        // === EMAIL LOGIC ===
-        function updateFloatingTotal() {
-            let total = 0;
-            let count = 0;
-            
-            // Calculate Total
-            Object.keys(quantities).forEach(id => {
-                const qty = quantities[id];
-                const p = PRODUCTS.find(x => x.id == id);
-                if(p && qty > 0) {
-                    const discount = discounts[id] || 0;
-                    const price = p.price * (1 - discount/100);
-                    total += price * qty;
-                    count++;
-                }
-            });
+<script>
+    // === EMAIL LOGIC ===
+    function updateFloatingTotal() {
+        let total = 0;
+        let count = 0;
 
-            const fab = document.getElementById('floatingTotal');
-            const display = document.getElementById('grandTotalDisplay');
-            
-            if(count > 0) {
-                fab.style.display = 'flex';
-                display.innerText = '€' + total.toFixed(2);
-            } else {
-                fab.style.display = 'none';
+        // Calculate Total
+        Object.keys(quantities).forEach(id => {
+            const qty = quantities[id];
+            const p = PRODUCTS.find(x => x.id == id);
+            if (p && qty > 0) {
+                const discount = discounts[id] || 0;
+                const price = p.price * (1 - discount / 100);
+                total += price * qty;
+                count++;
             }
+        });
+
+        const fab = document.getElementById('floatingTotal');
+        const display = document.getElementById('grandTotalDisplay');
+
+        if (count > 0) {
+            fab.style.display = 'flex';
+            display.innerText = 'EUR' + total.toFixed(2);
+        } else {
+            fab.style.display = 'none';
+        }
+    }
+
+    // Hook into update logic (SIMPLE OVERRIDE or APPEND)
+    const oldUpdate = window.updateCardCalculations;
+    window.updateCardCalculations = function (id) {
+        if (oldUpdate) oldUpdate(id); // Call original
+        updateFloatingTotal(); // Update Total
+    };
+
+    function sendEmailOffer() {
+        // GET CLIENT EMAIL FROM INPUT
+        let emailDestino = '';
+        const emailInput = document.getElementById('clientEmailInput');
+        if (emailInput && emailInput.value) {
+            emailDestino = emailInput.value.trim();
         }
 
-        // Hook into update logic (SIMPLE OVERRIDE or APPEND)
-        const oldUpdate = window.updateCardCalculations; 
-        window.updateCardCalculations = function(id) {
-            if(oldUpdate) oldUpdate(id); // Call original
-            updateFloatingTotal(); // Update Total
-        };
+        // GET CLIENT NAME IF NEEDED (Optional, but good for subject personalization)
+        const nameInput = document.getElementById('clientNameInput');
+        let clientName = nameInput ? nameInput.value : '';
 
-        function sendEmailOffer() {
-            let body = 'Hola,\n\nAdjunto te envío la propuesta de precios y pedido que hemos revisado:\n\n';
-            let total = 0;
+        // FECHA
+        const hoy = new Date();
+        const fecha = hoy.getDate() + '/' + (hoy.getMonth() + 1) + '/' + hoy.getFullYear();
+        let subject = 'Propuesta Comercial - ' + fecha;
+        if (clientName && clientName !== 'Sin TÃ­tulo' && clientName !== 'undefined') subject += ' - ' + clientName;
 
-            Object.keys(quantities).forEach(id => {
-                const qty = quantities[id];
-                const p = PRODUCTS.find(x => x.id == id);
-                if(p && qty > 0) {
-                    const discount = discounts[id] || 0;
-                    const unitPrice = p.price * (1 - discount/100);
-                    const lineTotal = unitPrice * qty;
-                    total += lineTotal;
+        // CUERPO - PROFESIONAL
+        let body = 'Estimado/a%20' + (clientName && clientName !== 'Sin TÃ­tulo' ? clientName : '') + ',%0D%0A%0D%0AEs un placer enviarle la propuesta comercial detallada con las condiciones especiales que hemos comentado.%0D%0AA continuacion, detallo los productos y precios acordados:%0D%0A%0D%0A';
+        let total = 0;
 
-                    body += '?? ' + qty + 'x ' + p.name + ' (' + p.envase + ')\n';
-                    if(discount > 0) {
-                         body += '   ?? Dto: ' + discount + '%  (Antes: €' + p.price.toFixed(2) + ')\n';
-                         body += '   ? Precio Neto: €' + unitPrice.toFixed(2) + ' / caja\n';
-                    } else {
-                         body += '   Precio: €' + unitPrice.toFixed(2) + ' / caja\n';
-                    }
-                     body += '   Subtotal: €' + lineTotal.toFixed(2) + '\n';
-                    body += '--------------------------------\n';
+        Object.keys(quantities).forEach(id => {
+            const qty = quantities[id];
+            const p = PRODUCTS.find(x => x.id == id);
+            if (p && qty > 0) {
+                const discount = discounts[id] || 0;
+                const unitPrice = p.price * (1 - discount / 100);
+                const lineTotal = unitPrice * qty;
+                total += lineTotal;
+
+                // FORMATO LIMPIO SIN CORCHETES
+                body += qty + ' cajas x ' + p.name + ' (' + p.envase + ')%0D%0A';
+
+                if (discount > 0) {
+                    body += 'PRECIO NETO: EUR' + unitPrice.toFixed(2) + ' / caja ' + '(Dto ' + discount + '%)%0D%0A';
+                } else {
+                    body += 'PRECIO NETO: EUR' + unitPrice.toFixed(2) + ' / caja%0D%0A';
                 }
-            });
 
-            body += '\n?? TOTAL ESTIMADO: €' + total.toFixed(2);
-            body += '\n\nQuedo a la espera de tu OK para tramitarlo.\n\nSaludos,\nAntonio Dávila';
+                body += 'Subtotal: EUR' + lineTotal.toFixed(2) + '%0D%0A';
+                body += '--------------------------------------------------%0D%0A';
+            }
+        });
 
-            const subject = 'Propuesta de Pedido - ' + new Date().toLocaleDateString();
-            
-            window.location.href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-        }
-    </script>
+        body += '%0D%0ATOTAL BASE IMPONIBLE: EUR' + total.toFixed(2) + '%0D%0A';
+        body += '(Impuestos no incluidos)%0D%0A';
+        body += '%0D%0AQuedo a su entera disposicion para formalizar el pedido o resolver cualquier duda que pueda surgir.%0D%0A%0D%0AAtentamente,%0D%0AAntonio Davila';
 
+        // CONSTRUIR MAILTO
+        window.location.href = 'mailto:' + emailDestino + '?subject=' + encodeURIComponent(subject) + '&body=' + body;
+    }
+</script>

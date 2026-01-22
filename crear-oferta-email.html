@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Creador de Ofertas - Email</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .product-list {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .product-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        button {
+            background: #0078d4;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #106ebe;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Creador de Ofertas por Email</h1>
+
+    <div class="product-list">
+        <h2>Productos seleccionados:</h2>
+        <div id="productList"></div>
+        <p><strong>Total: <span id="total">0.00</span> EUR</strong></p>
+    </div>
+
+    <button onclick="sendEmail()">Enviar por Email</button>
+
+    <script>
+        // Ejemplo de productos
+        const products = [
+            { name: 'COCA-COLA', envase: '24 botellas', price: 25.44, qty: 2 },
+            { name: 'FANTA', envase: '24 botellas', price: 25.44, qty: 1 }
+        ];
+
+        function displayProducts() {
+            const list = document.getElementById('productList');
+            let total = 0;
+
+            products.forEach(p => {
+                const subtotal = p.price * p.qty;
+                total += subtotal;
+                list.innerHTML += `<div class="product-item">
+                    ${p.name} - ${p.envase} x${p.qty} = ${subtotal.toFixed(2)} EUR
+                </div>`;
+            });
+
+            document.getElementById('total').textContent = total.toFixed(2);
+        }
+
+        function sendEmail() {
+            const subject = 'Propuesta de Pedido - Coca-Cola';
+            let body = 'Hola,%0D%0A%0D%0A';
+            body += 'Adjunto te envio la propuesta de precios:%0D%0A%0D%0A';
+
+            let total = 0;
+            products.forEach(p => {
+                const subtotal = p.price * p.qty;
+                total += subtotal;
+                body += `- ${p.name}%0D%0A`;
+                body += `  ${p.envase} x${p.qty}%0D%0A`;
+                body += `  Precio: ${subtotal.toFixed(2)} EUR%0D%0A%0D%0A`;
+            });
+
+            body += `TOTAL: ${total.toFixed(2)} EUR%0D%0A%0D%0A`;
+            body += 'Saludos cordiales';
+
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        }
+
+        displayProducts();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creador de Ofertas - Email</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .product-list {
+            margin-bottom: 30px;
+        }
+
+        .product-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .product-item:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-name {
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .product-details {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .product-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-qty {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #3b82f6;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .btn-qty:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+        }
+
+        .qty-display {
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .price {
+            font-weight: bold;
+            color: #2563eb;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .cart-summary {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #3b82f6;
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .total-label {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1e293b;
+        }
+
+        .total-amount {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .btn-email {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-email:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-email:active {
+            transform: translateY(0);
+        }
+
+        .empty-msg {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Crear Oferta por Email</h1>
+        <p class="subtitle">Selecciona cantidades y envia la propuesta</p>
+
+        <div class="product-list" id="productList"></div>
+
+        <div id="cartSummary" style="display: none;">
+            <div class="cart-summary">
+                <div class="cart-total">
+                    <span class="total-label">TOTAL:</span>
+                    <span class="total-amount" id="totalAmount">EUR0.00</span>
+                </div>
+                <button class="btn-email" onclick="enviarPorEmail()">Enviar por Email</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PRODUCTOS DE EJEMPLO
+        const productos = [
+            { id: 1, nombre: 'CC LIGHT / CC ZERO', envase: '24 botellas', precio: 25.44, descuento: 32, cantidad: 0 },
+            { id: 2, nombre: 'FANTA NARANJA', envase: '24 botellas', precio: 25.44, descuento: 28, cantidad: 0 },
+            { id: 3, nombre: 'SPRITE', envase: '24 latas', precio: 22.80, descuento: 25, cantidad: 0 },
+            { id: 4, nombre: 'AQUARIUS NARANJA', envase: '12 botellas', precio: 18.90, descuento: 20, cantidad: 0 },
+            { id: 5, nombre: 'COCA-COLA ORIGINAL', envase: '24 latas', precio: 28.50, descuento: 30, cantidad: 0 }
+        ];
+
+        function calcularPrecioNeto(precio, descuento) {
+            return precio * (1 - descuento / 100);
+        }
+
+        function renderProductos() {
+            const container = document.getElementById('productList');
+            container.innerHTML = productos.map(prod => {
+                const precioNeto = calcularPrecioNeto(prod.precio, prod.descuento);
+                const subtotal = precioNeto * prod.cantidad;
+
+                return `
+                    <div class="product-item">
+                        <div class="product-info">
+                            <div class="product-name">${prod.nombre}</div>
+                            <div class="product-details">${prod.envase} | Dto: ${prod.descuento}% | EUR${precioNeto.toFixed(2)}/caja</div>
+                        </div>
+                        <div class="product-actions">
+                            <div class="quantity-control">
+                                <button class="btn-qty" onclick="cambiarCantidad(${prod.id}, -1)">-</button>
+                                <span class="qty-display">${prod.cantidad}</span>
+                                <button class="btn-qty" onclick="cambiarCantidad(${prod.id}, 1)">+</button>
+                            </div>
+                            <div class="price">EUR${subtotal.toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            actualizarResumen();
+        }
+
+        function cambiarCantidad(id, delta) {
+            const producto = productos.find(p => p.id === id);
+            if (producto) {
+                producto.cantidad = Math.max(0, producto.cantidad + delta);
+                renderProductos();
+            }
+        }
+
+        function actualizarResumen() {
+            const total = productos.reduce((sum, prod) => {
+                const precioNeto = calcularPrecioNeto(prod.precio, prod.descuento);
+                return sum + (precioNeto * prod.cantidad);
+            }, 0);
+
+            const cartSummary = document.getElementById('cartSummary');
+            const totalAmount = document.getElementById('totalAmount');
+
+            const hayProductos = productos.some(p => p.cantidad > 0);
+
+            if (hayProductos) {
+                cartSummary.style.display = 'block';
+                totalAmount.textContent = 'EUR' + total.toFixed(2);
+            } else {
+                cartSummary.style.display = 'none';
+            }
+        }
+
+        // FUNCION DE EMAIL - ULTRA SIMPLE ASCII PURO
+        function enviarPorEmail() {
+            const productosSeleccionados = productos.filter(p => p.cantidad > 0);
+
+            if (productosSeleccionados.length === 0) {
+                alert('Selecciona al menos un producto');
+                return;
+            }
+
+            // Fecha actual
+            const hoy = new Date();
+            const fecha = hoy.getDate() + '/' + (hoy.getMonth() + 1) + '/' + hoy.getFullYear();
+
+            // Asunto SIN caracteres especiales
+            const asunto = 'Propuesta de Pedido - ' + fecha;
+
+            // Cuerpo ULTRA SIMPLE - solo letras, numeros, espacios y guiones
+            let cuerpo = 'Hola,%0D%0A%0D%0A';
+            cuerpo += 'Adjunto te envio la propuesta de precios y pedido que hemos revisado:%0D%0A%0D%0A';
+
+            let total = 0;
+            productosSeleccionados.forEach(function (prod) {
+                const precioNeto = calcularPrecioNeto(prod.precio, prod.descuento);
+                const subtotal = precioNeto * prod.cantidad;
+                total += subtotal;
+
+                // SOLO texto plano - SIN simbolos raros
+                cuerpo += prod.cantidad + 'x ' + prod.nombre + ' - ' + prod.envase + '%0D%0A';
+                cuerpo += 'Descuento: ' + prod.descuento + '% - Antes EUR' + prod.precio.toFixed(2) + '%0D%0A';
+                cuerpo += 'Precio Neto: EUR' + precioNeto.toFixed(2) + ' por caja%0D%0A';
+                cuerpo += 'Subtotal: EUR' + subtotal.toFixed(2) + '%0D%0A';
+                cuerpo += '-------------------------------%0D%0A';
+            });
+
+            cuerpo += '%0D%0A';
+            cuerpo += 'TOTAL ESTIMADO: EUR' + total.toFixed(2) + '%0D%0A';
+            cuerpo += '%0D%0A';
+            cuerpo += 'Quedo a tu disposicion para cualquier consulta.%0D%0A%0D%0A';
+            cuerpo += 'Saludos cordiales';
+
+            // Construir mailto
+            const mailto = 'mailto:?subject=' + encodeURIComponent(asunto) + '&body=' + cuerpo;
+
+            // Abrir cliente de correo
+            window.location.href = mailto;
+        }
+
+        // INICIALIZAR
+        renderProductos();
+    </script>
+</body>
+
+</html>
