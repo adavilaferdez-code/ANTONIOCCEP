@@ -296,6 +296,9 @@ debtSearchName.addEventListener('input', filterDebts);
 debtSearchDate.addEventListener('input', filterDebts);
 debtFilterGreen.addEventListener('change', filterDebts);
 debtFilterRed.addEventListener('change', filterDebts);
+// iPad Fix: Add click listeners for better touch response
+debtFilterGreen.addEventListener('click', () => setTimeout(filterDebts, 50));
+debtFilterRed.addEventListener('click', () => setTimeout(filterDebts, 50));
 
 function filterDebts() {
     const termName = debtSearchName.value.toLowerCase();
@@ -607,8 +610,14 @@ const notesFilterGreen = document.getElementById('notesFilterGreen');
 const notesFilterRed = document.getElementById('notesFilterRed');
 
 if (notesSearchInput) notesSearchInput.addEventListener('input', filterNotes);
-if (notesFilterGreen) notesFilterGreen.addEventListener('change', filterNotes);
-if (notesFilterRed) notesFilterRed.addEventListener('change', filterNotes);
+if (notesFilterGreen) {
+    notesFilterGreen.addEventListener('change', filterNotes);
+    notesFilterGreen.addEventListener('click', () => setTimeout(filterNotes, 50)); // Touch fix
+}
+if (notesFilterRed) {
+    notesFilterRed.addEventListener('change', filterNotes);
+    notesFilterRed.addEventListener('click', () => setTimeout(filterNotes, 50)); // Touch fix
+}
 
 let currentFolderId = null;
 
