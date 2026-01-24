@@ -22,7 +22,6 @@
         <header class="app-header">
             <div class="brand-centered">
                 <img src="logo_antonio.png" alt="Antonio Dávila" class="main-logo">
-                <p style="color:white; font-size:10px; margin-top:5px;">V2.1 (Showroom Ready)</p>
             </div>
             <!-- Showroom Toggle -->
             <button class="showroom-toggle" onclick="toggleShowroom()">
@@ -117,11 +116,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Link to AI Chat (kept as extra or moved? Screenshot didn't show it explicitly but good to keep) -->
-            <!-- Suggest keeping it as a small link footer or removing if strict adherence. 
-                  User said "ESTO SI QUIERO" showing the screenshot.
-                  Screenshot doesn't show AI Chat. I'll hide it for now to match exactly. -->
 
             <!-- Results List Removed from Main Flow -->
 
@@ -444,26 +438,31 @@
     <!-- Calculator Modal -->
     <!-- CALCULATOR MODAL (Wider for Commercial Use) -->
     <div id="calculatorModal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 900px; display:flex; flex-direction:column; max-height:85vh;">
+        <div class="modal-content"
+            style="width: 95vw; max-width: 1400px; display:flex; flex-direction:column; max-height:90vh;">
             <!-- Extended width and height -->
 
             <div class="modal-header">
                 <h2>Comercial & Calculadora</h2>
-                <button class="close-btn" onclick="closeCalculator()"><i class="fa-solid fa-xmark"></i></button>
+                <div style="display:flex; gap:10px;">
+                    <button class="close-btn" onclick="toggleOutdoorMode()" title="Modo Exterior"
+                        style="background:rgba(255,255,255,0.1);"><i class="fa-solid fa-sun"></i></button>
+                    <button class="close-btn" onclick="closeCalculator()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
             </div>
 
             <!-- MAIN LAYOUT: TWO COLUMNS -->
-            <div style="display:flex; flex:1; overflow:hidden; gap:20px; padding:10px;">
+            <div style="display:flex; flex:1; gap:20px; padding:10px;">
 
                 <!-- LEFT COL: CALCULATOR (Fixed Width) -->
-                <div style="flex:0 0 320px; display:flex; flex-direction:column;">
+                <div style="flex:0 0 360px; display:flex; flex-direction:column; padding-right:5px;">
 
                     <!-- TABS SWITCHER -->
-                    <div class="calc-tabs" style="display:flex; border-bottom:1px solid #444; margin-bottom:15px;">
+                    <div class="calc-tabs" style="display:flex; border-bottom:1px solid #444; margin-bottom:10px;">
                         <button class="tab-btn" onclick="switchCalcTab('basic')" id="tabBasic"
-                            style="flex:1; background:none; border:none; color:white; padding:10px; border-bottom:2px solid var(--primary-color); font-weight:bold; cursor:pointer;">Básica</button>
+                            style="flex:1; background:none; border:none; color:white; padding:8px; border-bottom:2px solid var(--primary-color); font-weight:bold; cursor:pointer;">Básica</button>
                         <button class="tab-btn" onclick="switchCalcTab('offer')" id="tabOffer"
-                            style="flex:1; background:none; border:none; color:#aaa; padding:10px; border-bottom:2px solid transparent; cursor:pointer;">Bonif.</button>
+                            style="flex:1; background:none; border:none; color:#aaa; padding:8px; border-bottom:2px solid transparent; cursor:pointer;">Bonif.</button>
                     </div>
 
                     <!-- VIEW 1: BASIC CALCULATOR -->
@@ -497,75 +496,111 @@
                     </div>
 
                     <!-- VIEW 2: BONIFICATION CALCULATOR -->
-                    <div id="calcBodyOffer" class="calculator-body" style="display:none; padding:5px;">
-                        <div style="display:flex; flex-direction:column; gap:12px;">
+                    <!-- VIEW 2: BONIFICATION CALCULATOR -->
+                    <div id="calcBodyOffer" class="calculator-body" style="display:none; padding:0; height: 100%;">
 
-                            <!-- Selected Product Info (Optional) -->
-                            <div id="selectedProdName"
-                                style="color:#fbbf24; font-size:0.9rem; text-align:center; height:20px;"></div>
+                        <!-- FLEX CONTAINER WRAPPER -->
+                        <div style="display:flex; flex-direction:column; height:100%; overflow:hidden;">
 
-                            <div style="display:flex; gap:10px;">
-                                <div class="input-group" style="flex:1;">
-                                    <label style="color:#aaa; font-size:0.75rem;">Precio Tarifa (€)</label>
-                                    <input type="number" id="bonPrice" class="modal-input" placeholder="0.00"
-                                        step="0.01" style="text-align:center;">
-                                </div>
-                                <div class="input-group" style="flex:1;">
-                                    <label style="color:#aaa; font-size:0.75rem;">Dto. Factura (%)</label>
-                                    <input type="number" id="bonDisc" class="modal-input" placeholder="0" value="0"
-                                        style="text-align:center;">
+                            <!-- SCROLLABLE LIST AREA -->
+                            <div style="flex:1; overflow-y:auto; padding:5px; padding-bottom:10px; min-height:0;">
+                                <div style="display:flex; flex-direction:column; gap:10px;">
+
+                                    <!-- BUY LIST SECTION -->
+                                    <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+                                        <div
+                                            style="font-size:0.8rem; color:#aaa; margin-bottom:8px; font-weight:bold; display:flex; justify-content:space-between;">
+                                            <span>🛒 LISTA DE COMPRA</span>
+                                            <button onclick="clearCalcCart('buy')"
+                                                style="background:none; border:none; color:#f87171; cursor:pointer; font-size:0.75rem;">Limpiar</button>
+                                        </div>
+                                        <div id="calcListBuy" style="display:flex; flex-direction:column; gap:8px;">
+                                            <!-- Items injected via JS -->
+                                            <div
+                                                style="color:#666; font-size:0.8rem; text-align:center; padding:10px; border:1px dashed #444; border-radius:4px;">
+                                                Selecciona productos del catálogo
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- GIFT LIST SECTION -->
+                                    <div
+                                        style="background:rgba(251, 191, 36, 0.1); padding:10px; border-radius:8px; border:1px solid rgba(251, 191, 36, 0.2);">
+                                        <div
+                                            style="font-size:0.8rem; color:#fbbf24; margin-bottom:8px; font-weight:bold; display:flex; justify-content:space-between;">
+                                            <span>🎁 LISTA DE REGALOS</span>
+                                            <button onclick="clearCalcCart('gift')"
+                                                style="background:none; border:none; color:#f87171; cursor:pointer; font-size:0.75rem;">Limpiar</button>
+                                        </div>
+                                        <div id="calcListGift" style="display:flex; flex-direction:column; gap:8px;">
+                                            <!-- Items injected via JS -->
+                                            <div style="color:#666; font-size:0.8rem; text-align:center; padding:5px;">
+                                                (Opcional) Añade regalos con 🎁
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
+                            <!-- END SCROLLABLE AREA -->
 
+                            <!-- FIXED FOOTER AREA -->
                             <div
-                                style="display:flex; gap:10px; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
-                                <div class="input-group" style="flex:1;">
-                                    <label style="color:#fff; font-size:0.8rem; font-weight:bold;">COMPRA</label>
-                                    <input type="number" id="bonPaid" class="modal-input" placeholder="10" value="10"
-                                        style="text-align:center; font-weight:bold;">
-                                </div>
-                                <div style="display:flex; align-items:center; color:#fbbf24; font-size:1.2rem;">+</div>
-                                <div class="input-group" style="flex:1;">
-                                    <label style="color:#fbbf24; font-size:0.8rem; font-weight:bold;">REGALO</label>
-                                    <input type="number" id="bonFree" class="modal-input" placeholder="1" value="1"
-                                        style="text-align:center; border:1px solid #fbbf24; color:#fbbf24;">
-                                </div>
-                            </div>
+                                style="background:rgba(0,0,0,0.3); border-top:1px solid #333; padding:10px; padding-top:15px; flex-shrink:0;">
 
-                            <hr style="border:0; border-top:1px solid #444; width:100%; margin:5px 0;">
-
-                            <div style="text-align:center;">
-                                <div style="font-size:0.9rem; color:#aaa; margin-bottom:5px;">PRECIO REAL / CAJA</div>
-                                <div id="bonResultPrice"
-                                    style="font-size:2.5rem; font-weight:900; color:#00ff88; font-family:'Montserrat', sans-serif;">
-                                    0.00 €</div>
-                                <div style="display:flex; justify-content:center; gap:15px; margin-top:10px;">
-                                    <span
-                                        style="background:#222; padding:4px 8px; border-radius:4px; font-size:0.8rem; color:#aaa;">Dto.
-                                        Total: <b id="bonResultPercent" style="color:white;">0%</b></span>
-                                    <span
-                                        style="background:#222; padding:4px 8px; border-radius:4px; font-size:0.8rem; color:#aaa;">Total:
-                                        <b id="bonResultTotal" style="color:white;">0€</b></span>
+                                <!-- RESULTS SECTION -->
+                                <div style="text-align:center;">
+                                    <div style="font-size:0.85rem; color:#aaa; margin-bottom:5px;">PRECIO MEDIO REAL /
+                                        CAJA
+                                    </div>
+                                    <div id="bonResultPrice"
+                                        style="font-size:2.2rem; font-weight:900; color:#00ff88; font-family:'Montserrat', sans-serif;">
+                                        0.00 €</div>
                                 </div>
+
+                                <!-- Invoice Summary Section -->
+                                <div
+                                    style="background:rgba(255,255,255,0.05); border-radius:8px; padding:10px; margin-top:10px;">
+                                    <div
+                                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                        <span style="color:#aaa; font-size:0.75rem;">📦 Total Compradas:</span>
+                                        <span id="bonPaidQty" style="color:white; font-weight:bold;">0</span>
+                                    </div>
+                                    <div
+                                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                        <span style="color:#aaa; font-size:0.75rem;">🎁 Total Regalo:</span>
+                                        <span id="bonFreeQty" style="color:#fbbf24; font-weight:bold;">0</span>
+                                    </div>
+                                    <hr style="border:0; border-top:1px solid #333; margin:5px 0;">
+                                    <div
+                                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                        <span style="color:#aaa; font-size:0.85rem;">💰 Total Factura:</span>
+                                        <span id="bonResultTotal"
+                                            style="color:#4ade80; font-weight:bold; font-size:1.1rem;">0€</span>
+                                    </div>
+                                </div>
+                                <button onclick="clearBonification()"
+                                    style="background:#444; color:white; border:none; padding:8px; border-radius:8px; margin-top:15px; width:100%;">
+                                    <i class="fa-solid fa-rotate-right"></i> Borrar Todo
+                                </button>
                             </div>
-                            <button onclick="clearBonification()"
-                                style="background:#444; color:white; border:none; padding:8px; border-radius:8px; margin-top:15px; width:100%;">
-                                <i class="fa-solid fa-rotate-right"></i> Borrar
-                            </button>
+                            <!-- END FOOTER -->
+
                         </div>
                     </div>
-
                 </div>
+                <!-- END LEFT COLUMN -->
 
-                <!-- RIGHT COL: PRODUCT CATALOG (New) -->
+
+                <!-- RIGHT COL: PRODUCT CATALOG -->
                 <div
-                    style="flex:1; background:rgba(0,0,0,0.2); border-radius:12px; padding:15px; display:flex; flex-direction:column; overflow:hidden;">
+                    style="flex:1; min-width:300px; background:rgba(0,0,0,0.2); border-radius:12px; padding:15px; display:flex; flex-direction:column; overflow:hidden;">
 
                     <!-- Search Header -->
-                    <div style="margin-bottom:15px;">
+                    <div style="margin-bottom:12px;">
                         <input type="text" id="calcProdSearch" placeholder="🔍 Buscar producto..."
                             onkeyup="filterCalcProducts()"
-                            style="width:100%; padding:12px; border-radius:8px; border:1px solid #444; background:#222; color:white;">
+                            style="width:100%; padding:12px; border-radius:8px; border:1px solid #444; background:#222; color:white; font-size:0.9rem;">
                     </div>
 
                     <!-- Scrollable Grid -->
@@ -576,13 +611,14 @@
                     </div>
 
                 </div>
+                <!-- END RIGHT COLUMN -->
 
             </div>
+            <!-- END MAIN TWO-COLUMN LAYOUT -->
 
         </div>
     </div>
-    </div>
-    </div>
+    <!-- END CALCULATOR MODAL -->
 
     <!-- Debug Console Overlay -->
 
@@ -615,12 +651,14 @@
                         Database ID</label>
                     <input type="text" id="settingNotionDb" placeholder="32 caracteres hex..."
                         style="width:100%; padding:10px; border-radius:8px; border:1px solid #444; background:#222; color:white;">
-                    <p style="font-size:12px; color:#aaa; margin-top:5px;">El ID de la base de datos (normalmente en la
+                    <p style="font-size:12px; color:#aaa; margin-top:5px;">El ID de la base de datos (normalmente en
+                        la
                         URL).</p>
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <label style="display:block; margin-bottom:8px; font-weight:bold; color:var(--text-color);">📱 Deep
+                    <label style="display:block; margin-bottom:8px; font-weight:bold; color:var(--text-color);">📱
+                        Deep
                         Link (App Notion)</label>
                     <input type="text" id="settingNotionAppUrl" placeholder="notion://..."
                         style="width:100%; padding:10px; border-radius:8px; border:1px solid #444; background:#222; color:white;">
@@ -638,7 +676,7 @@
         </div>
     </div>
 
-    <script src="app_v3.js"></script>
+    <script src="app_v4.js?v=final"></script>
     <script src="toast.js"></script>
     <script>
         // Simple Date Script

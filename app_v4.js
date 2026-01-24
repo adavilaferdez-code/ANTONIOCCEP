@@ -1250,29 +1250,30 @@ function renderBonificationLists() {
     } else {
         calcCart.buy.forEach((item, index) => {
             const row = document.createElement('div');
-            row.style.cssText = 'display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.03); padding:5px; border-radius:4px; border-left: 2px solid #4ade80;';
+            row.className = 'cart-item';
+            row.style.cssText = 'display:flex; align-items:center; gap:8px; padding:10px; margin-bottom:5px;';
             row.innerHTML = `
                 <div style="flex:1; overflow:hidden;">
                     <div style="font-size:0.75rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
                     <div style="font-size:0.7rem; color:#4ade80;">${item.price.toFixed(2)}€</div>
                 </div>
-                <div style="display:flex; flex-direction:column; width:80px; align-items:center;">
+                <div style="display:flex; flex-direction:column; min-width:130px; align-items:center;">
                     <label style="font-size:0.65rem; color:#aaa;">Cant.</label>
-                    <div style="display:flex; align-items:center; gap:2px;">
-                        <button onclick="changeQty('buy', ${index}, -1)" style="background:#444; color:white; border:none; width:20px; height:20px; border-radius:3px; cursor:pointer;">-</button>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <button onclick="changeQty('buy', ${index}, -1)" class="btn-touch calc-btn op" style="border:none;">-</button>
                         <input type="number" value="${item.qty}" min="1" 
                             onchange="updateCartItem('buy', ${index}, 'qty', this.value)"
-                            style="width:35px; background:#222; border:1px solid #444; color:white; border-radius:3px; padding:2px; text-align:center; font-size:0.8rem;">
-                        <button onclick="changeQty('buy', ${index}, 1)" style="background:#444; color:white; border:none; width:20px; height:20px; border-radius:3px; cursor:pointer;">+</button>
+                            style="width:50px; background:#222; border:1px solid #444; color:white; border-radius:6px; padding:5px; text-align:center; font-size:1.1rem; font-weight:bold;">
+                        <button onclick="changeQty('buy', ${index}, 1)" class="btn-touch calc-btn op" style="border:none;">+</button>
                     </div>
                 </div>
-                <div style="display:flex; flex-direction:column; width:45px;">
+                <div style="display:flex; flex-direction:column; width:50px;">
                     <label style="font-size:0.65rem; color:#aaa;">Dto%</label>
                     <input type="number" value="${item.discount}" min="0" max="100" 
                         onchange="updateCartItem('buy', ${index}, 'discount', this.value)"
-                        style="width:100%; background:#222; border:1px solid #444; color:white; border-radius:3px; padding:2px; text-align:center; font-size:0.8rem;">
+                        style="width:100%; background:#222; border:1px solid #444; color:white; border-radius:6px; padding:5px; text-align:center; font-size:1.2rem; font-weight:bold;">
                 </div>
-                <button onclick="removeCartItem('buy', ${index})" style="background:none; border:none; color:#f87171; cursor:pointer; font-size:0.9rem; padding:0 5px;">&times;</button>
+                <button onclick="removeCartItem('buy', ${index})" class="btn-touch btn-action-delete" style="border:none; color:#ef4444; font-size:1.5rem;">&times;</button>
             `;
             buyContainer.appendChild(row);
         });
@@ -1285,29 +1286,31 @@ function renderBonificationLists() {
     } else {
         calcCart.gift.forEach((item, index) => {
             const row = document.createElement('div');
-            row.style.cssText = 'display:flex; align-items:center; gap:8px; background:rgba(251, 191, 36, 0.05); padding:5px; border-radius:4px; border-left: 2px solid #fbbf24;';
+            row.className = 'cart-item';
+            // Keep gold accent for gifts only
+            row.style.cssText = 'display:flex; align-items:center; gap:8px; padding:10px; margin-bottom:5px; border-left: 2px solid #fbbf24;';
             row.innerHTML = `
                 <div style="flex:1; overflow:hidden;">
                     <div style="font-size:0.75rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
                     <div style="font-size:0.7rem; color:#fbbf24;">(Valor: ${(item.price * (1 - item.discount / 100)).toFixed(2)}€)</div>
                 </div>
-                <div style="display:flex; flex-direction:column; width:75px; align-items:center;">
+                <div style="display:flex; flex-direction:column; min-width:130px; align-items:center;">
                     <label style="font-size:0.65rem; color:#aaa;">Cant.</label>
-                    <div style="display:flex; align-items:center; gap:2px;">
-                        <button onclick="changeQty('gift', ${index}, -1)" style="background:rgba(251, 191, 36, 0.2); color:#fbbf24; border:none; width:20px; height:20px; border-radius:3px; cursor:pointer;">-</button>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <button onclick="changeQty('gift', ${index}, -1)" class="btn-touch calc-btn op" style="background:rgba(251, 191, 36, 0.2); color:#fbbf24; border:none;">-</button>
                         <input type="number" value="${item.qty}" min="1" 
                             onchange="updateCartItem('gift', ${index}, 'qty', this.value)"
-                            style="width:35px; background:rgba(251, 191, 36, 0.1); border:1px solid rgba(251, 191, 36, 0.3); color:#fbbf24; border-radius:3px; padding:2px; text-align:center; font-size:0.8rem; font-weight:bold;">
-                        <button onclick="changeQty('gift', ${index}, 1)" style="background:rgba(251, 191, 36, 0.2); color:#fbbf24; border:none; width:20px; height:20px; border-radius:3px; cursor:pointer;">+</button>
+                            style="width:50px; background:rgba(251, 191, 36, 0.1); border:1px solid rgba(251, 191, 36, 0.3); color:#fbbf24; border-radius:6px; padding:5px; text-align:center; font-size:1.1rem; font-weight:bold;">
+                        <button onclick="changeQty('gift', ${index}, 1)" class="btn-touch calc-btn op" style="background:rgba(251, 191, 36, 0.2); color:#fbbf24; border:none;">+</button>
                     </div>
                 </div>
-                <div style="display:flex; flex-direction:column; width:45px;">
+                <div style="display:flex; flex-direction:column; width:50px;">
                     <label style="font-size:0.65rem; color:#aaa;">Dto%</label>
                     <input type="number" value="${item.discount}" min="0" max="100" 
                         onchange="updateCartItem('gift', ${index}, 'discount', this.value)"
-                        style="width:100%; background:rgba(251, 191, 36, 0.1); border:1px solid rgba(251, 191, 36, 0.3); color:#fbbf24; border-radius:3px; padding:2px; text-align:center; font-size:0.8rem;">
+                        style="width:100%; background:rgba(251, 191, 36, 0.1); border:1px solid rgba(251, 191, 36, 0.3); color:#fbbf24; border-radius:6px; padding:5px; text-align:center; font-size:1.2rem; font-weight:bold;">
                 </div>
-                <button onclick="removeCartItem('gift', ${index})" style="background:none; border:none; color:#f87171; cursor:pointer; font-size:0.9rem; padding:0 5px;">&times;</button>
+                <button onclick="removeCartItem('gift', ${index})" class="btn-touch btn-action-delete" style="border:none; color:#ef4444; font-size:1.5rem;">&times;</button>
             `;
             giftContainer.appendChild(row);
         });
@@ -1473,22 +1476,22 @@ function calcCalculate() {
 // --- PRODUCT CATALOG SIDEBAR (MOCK DATA) ---
 // --- PRODUCT CATALOG SIDEBAR (REAL DATA) ---
 const productCatalog = [
-    { name: 'Coca-Cola 2L (Caja)', price: 28.68, color: '#fca5a5' },
-    { name: 'Coca-Cola Zero 2L (Caja)', price: 28.68, color: '#000000' },
-    { name: 'Coca-Cola Zero Zero 2L (Caja)', price: 28.68, color: '#000000' },
+    { name: 'Coca-Cola 2L (Caja)', price: 28.68, image: 'cocacola_logo.jpg', defaultDiscount: 71 },
+    { name: 'Coca-Cola Zero 2L (Caja)', price: 28.68, image: 'cocacola_logo.jpg', defaultDiscount: 71 },
+    { name: 'Coca-Cola Zero Zero 2L (Caja)', price: 28.68, image: 'cocacola_logo.jpg', defaultDiscount: 71 },
     // Placeholder for others, user will provide more
-    { name: 'Fanta Naranja 2L (Caja)', price: 27.06, color: '#fdba74' },
-    { name: 'Fanta Limón 2L (Caja)', price: 27.06, color: '#fde047' },
-    { name: 'Coca-Cola Lata 33cl (Caja)', price: 39.36, color: '#ef4444' },
-    { name: 'Coca-Cola Zero Lata 33cl (Caja)', price: 39.36, color: '#000000' },
-    { name: 'Coca-Cola Zero Zero Lata 33cl (Caja)', price: 39.36, color: '#000000' },
-    { name: 'Fanta Naranja Lata 33cl (Caja)', price: 37.68, color: '#fdba74' },
-    { name: 'Fanta Limón Lata 33cl (Caja)', price: 37.68, color: '#fde047' },
-    { name: 'Aquarius Limón Lata 33cl (Caja)', price: 41.04, color: '#93c5fd' },
-    { name: 'Aquarius Naranja Lata 33cl (Caja)', price: 41.04, color: '#fdba74' },
-    { name: 'Fuze Tea Lata 33cl (Caja)', price: 39.60, color: '#16a34a' },
-    { name: 'Royal Bliss Vidrio 20cl (Caja24)', price: 31.92, color: '#e879f9' },
-    { name: 'Monster Lata 50cl (Caja 24)', price: 56.16, color: '#bef264' },
+    { name: 'Fanta Naranja 2L (Caja)', price: 27.06, image: 'fanta_logo.jpg', defaultDiscount: 71 },
+    { name: 'Fanta Limón 2L (Caja)', price: 27.06, image: 'fanta_logo.jpg', defaultDiscount: 71 },
+    { name: 'Coca-Cola Lata 33cl (Caja)', price: 39.36, image: 'cocacola_logo.jpg', defaultDiscount: 62 },
+    { name: 'Coca-Cola Zero Lata 33cl (Caja)', price: 39.36, image: 'cocacola_logo.jpg', defaultDiscount: 62 },
+    { name: 'Coca-Cola Zero Zero Lata 33cl (Caja)', price: 39.36, image: 'cocacola_logo.jpg', defaultDiscount: 62 },
+    { name: 'Fanta Naranja Lata 33cl (Caja)', price: 37.68, image: 'fanta_logo.jpg', defaultDiscount: 62 },
+    { name: 'Fanta Limón Lata 33cl (Caja)', price: 37.68, image: 'fanta_logo.jpg', defaultDiscount: 62 },
+    { name: 'Aquarius Limón Lata 33cl (Caja)', price: 41.04, image: 'aquarius_logo.png', defaultDiscount: 60 },
+    { name: 'Aquarius Naranja Lata 33cl (Caja)', price: 41.04, image: 'aquarius_logo.png', defaultDiscount: 60 },
+    { name: 'Fuze Tea Lata 33cl (Caja)', price: 39.60, image: 'fuzetea_logo.jpg', defaultDiscount: 60 },
+    { name: 'Royal Bliss Vidrio 20cl (Caja24)', price: 31.92, image: 'royalbliss_logo.png', defaultDiscount: 0 },
+    { name: 'Monster Lata 50cl (Caja 24)', price: 56.16, image: 'monster_logo.jpg', defaultDiscount: 50 },
 ];
 
 function renderCalcProducts(filter = '') {
@@ -1519,9 +1522,10 @@ function renderCalcProducts(filter = '') {
             selectCalcProduct(p);
         });
 
-        // Product Color/Icon
-        const icon = document.createElement('div');
-        icon.style.cssText = `width:30px; height:30px; background:${p.color}; border-radius:50%; margin-bottom:5px; opacity:0.8;`;
+        // Product Image (Replaces Color Dot)
+        const icon = document.createElement('img');
+        icon.src = p.image || 'cocacola_logo.jpg'; // Fallback
+        icon.style.cssText = `width:40px; height:40px; object-fit:contain; margin-bottom:5px; border-radius:4px;`;
 
         // Product Name
         const name = document.createElement('div');
@@ -1563,23 +1567,30 @@ function renderCalcProducts(filter = '') {
 }
 
 function selectCalcProduct(product) {
-    // Switch to Bonification Tab
-    switchCalcTab('offer');
+    // 1. Check if product already in buy list
+    const existingIndex = calcCart.buy.findIndex(item => item.name === product.name);
 
-    // Fill Price
-    const priceInput = document.getElementById('bonPrice');
-    priceInput.value = product.price;
+    if (existingIndex !== -1) {
+        // Increment Qty
+        calcCart.buy[existingIndex].qty++;
+        // Maintain user edited discount!
+    } else {
+        // Add new with DEFAULT Auto-Discount
+        calcCart.buy.push({
+            name: product.name,
+            price: product.price,
+            qty: 1,
+            discount: product.defaultDiscount !== undefined ? product.defaultDiscount : 0
+        });
+    }
 
-    // Visual Feedback
-    const selProdInfo = document.getElementById('selectedProdName');
-    if (selProdInfo) selProdInfo.innerText = product.name;
+    renderBonificationLists();
 
-    // Highlight effect
-    priceInput.style.backgroundColor = '#4ade80';
-    setTimeout(() => priceInput.style.backgroundColor = 'var(--input-bg)', 300);
-
-    // Trigger Recalc
-    calculateBonification();
+    // Toast Feedback
+    if (typeof showToast === 'function') {
+        const discountMsg = product.defaultDiscount ? ` (Dto: ${product.defaultDiscount}%)` : '';
+        showToast(`Añadido: ${product.name}${discountMsg}`, 'success');
+    }
 }
 
 function filterCalcProducts() {
