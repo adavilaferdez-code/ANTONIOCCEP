@@ -123,7 +123,6 @@
                     <!-- 2. Shortcuts Grid -->
                     <div class="bento-grid">
                         <!-- 1. Productos -->
-                        <!-- 1. Productos -->
                         <div class="bento-card commercial-data" onclick="window.location.href='catalogo_premium.html'"
                             style="cursor:pointer; border: 2px solid #00ff00;">
                             <i class="fa-solid fa-box-open" style="color: #fbbf24;"></i>
@@ -761,11 +760,10 @@
         updateDate();
 
         // Screen Transition Script
-        // Screen Transition Script
         document.addEventListener('DOMContentLoaded', () => {
             const overlay = document.getElementById('transitionOverlay');
             // Intercept links to catalogo.html
-            const catalogLinks = document.querySelectorAll('a[href="catalogo.html"]');
+            const catalogLinks = document.querySelectorAll('a[href="catalogo_v2.html"]');
 
             catalogLinks.forEach(link => {
                 link.addEventListener('click', (e) => {
@@ -774,10 +772,10 @@
                         overlay.classList.add('active-slide-up');
                         // Wait for animation then navigate
                         setTimeout(() => {
-                            window.location.href = 'catalogo.html?v=final_fix';
+                            window.location.href = 'catalogo_v2.html';
                         }, 600);
                     } else {
-                        window.location.href = 'catalogo.html?v=final_fix';
+                        window.location.href = 'catalogo_v2.html';
                     }
                 });
             });
@@ -786,9 +784,9 @@
         function openCatalogWithNote() {
             const activeId = localStorage.getItem('activeNoteId');
             if (activeId) {
-                window.location.href = `catalogo.html?v=final_fix&nid=${activeId}`;
+                window.location.href = `catalogo_v2.html?nid=${activeId}`;
             } else {
-                window.location.href = 'catalogo.html?v=final_fix';
+                window.location.href = 'catalogo_v2.html';
             }
         }
     </script>

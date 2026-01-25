@@ -1,0 +1,393 @@
+/* === EXECUTIVE DASHBOARD THEME (2025) === */
+
+:root {
+    --exec-bg-dark: #0a0a0a;
+    --exec-glass: rgba(255, 255, 255, 0.03);
+    --exec-border: rgba(255, 255, 255, 0.1);
+
+    /* Neon Palette */
+    --neon-red: #ef4444;
+    --neon-gold: #fbbf24;
+    --neon-blue: #3b82f6;
+    --neon-green: #10b981;
+    --neon-purple: #a855f7;
+    --neon-bronze: #d97706;
+}
+
+body {
+    background: var(--exec-bg-dark);
+    font-family: 'Montserrat', sans-serif;
+    color: white;
+    overflow-x: hidden;
+}
+
+.app-background {
+    /* Subtle abstract background */
+    background: radial-gradient(circle at 50% 10%, rgba(20, 20, 20, 1) 0%, rgba(0, 0, 0, 1) 100%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.executive-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 600px;
+    margin: 0 auto;
+    background: rgba(0, 0, 0, 0.5);
+    /* Slight tint */
+}
+
+/* 1. HEADER GLOW */
+.exec-header {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+.brand-glow-container {
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.05);
+    /* Subtle Coca-Cola Red Glow */
+    backdrop-filter: blur(10px);
+}
+
+.exec-logo {
+    height: 40px;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+}
+
+.exec-toggle {
+    background: transparent;
+    border: none;
+    color: #333;
+    /* Stealth Mode */
+    font-size: 1.2rem;
+}
+
+/* 2. HERO SEARCH & CTA */
+.exec-hero {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.exec-search-wrapper {
+    width: 100%;
+    position: relative;
+}
+
+.exec-search-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px 20px;
+    border-radius: 30px;
+    color: white;
+    font-size: 1rem;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.exec-search-input:focus {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.3);
+    outline: none;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+}
+
+.exec-search-icon {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* PRIMARY CTA BUTTON */
+.exec-cta-container {
+    width: 100%;
+    padding: 0 20px;
+    /* Indent */
+}
+
+.exec-btn-primary {
+    width: 100%;
+    background: linear-gradient(145deg, #b91c1c, #991b1b);
+    border: 1px solid #ff4444;
+    padding: 18px;
+    border-radius: 50px;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.exec-btn-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    color: white;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    z-index: 2;
+    position: relative;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.btn-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 0, 0, 0.4) 0%, transparent 70%);
+    opacity: 0.5;
+    animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+    0% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+}
+
+/* 3. OPERATIONAL GRID */
+.exec-grid {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px 15px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.exec-card {
+    flex: 1;
+    min-width: 80px;
+    height: 90px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.exec-card:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.card-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 0 8px currentColor);
+}
+
+.card-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+}
+
+/* Color Themes */
+.card-gold {
+    border-bottom: 3px solid var(--neon-gold);
+    color: var(--neon-gold);
+}
+
+.card-blue {
+    border-bottom: 3px solid var(--neon-blue);
+    color: var(--neon-blue);
+}
+
+.card-green {
+    border-bottom: 3px solid var(--neon-green);
+    color: var(--neon-green);
+}
+
+.card-bronze {
+    border-bottom: 3px solid var(--neon-bronze);
+    color: var(--neon-bronze);
+}
+
+.card-purple {
+    border-bottom: 3px solid var(--neon-purple);
+    color: var(--neon-purple);
+}
+
+
+/* 4. MID METRICS */
+.exec-mid-metrics {
+    margin-top: 30px;
+    padding: 0 20px;
+}
+
+.metric-divider {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.glass-pill {
+    background: rgba(59, 130, 246, 0.15);
+    /* Tinted Blue */
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    padding: 8px 25px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: #93c5fd;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+    cursor: pointer;
+}
+
+.data-stream {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    opacity: 0.3;
+    /* Subtle background Data */
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    color: #aaa;
+    pointer-events: none;
+    /* Decoration only */
+}
+
+/* 5. DOCK (Footer) */
+.exec-dock {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 500px;
+    z-index: 100;
+}
+
+.dock-tray {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(15px);
+    padding: 12px 15px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.dock-item {
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: #888;
+    cursor: pointer;
+    transition: 0.2s;
+    min-width: 50px;
+}
+
+.dock-item i {
+    font-size: 1.3rem;
+    transition: 0.2s;
+}
+
+.dock-item span {
+    font-size: 0.6rem;
+    font-weight: 600;
+}
+
+.dock-item:hover {
+    color: white;
+}
+
+.dock-item:hover i {
+    transform: translateY(-3px);
+    text-shadow: 0 0 10px currentColor;
+}
+
+.highlight-yellow {
+    color: #fde047;
+}
+
+.highlight-yellow:hover {
+    color: #facc15;
+}
+
+.dock-separator {
+    width: 1px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0 5px;
+}
+
+.item-alert {
+    color: var(--neon-red);
+}
+
+.item-alert .icon-wrapper {
+    background: rgba(239, 68, 68, 0.15);
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+}
+
+.item-alert i {
+    font-size: 1rem;
+}
+
+/* HIDE ORIGINAL NAV & HEADER */
+.app-header,
+.bottom-nav {
+    display: none !important;
+}

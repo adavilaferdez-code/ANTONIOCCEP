@@ -32,10 +32,8 @@
             display: flex;
             align-items: center;
             gap: 20px;
-            margin-bottom: 10px;
-            /* Reduced from 40px */
-            padding: 10px 0;
-            /* Reduced from 20px */
+            margin-bottom: 40px;
+            padding: 20px 0;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
 
@@ -63,8 +61,7 @@
         }
 
         .catalog-title {
-            font-size: 1.8rem;
-            /* Reduced from 2.2rem */
+            font-size: 2.2rem;
             font-weight: 800;
             background: linear-gradient(90deg, #111, #444);
             background-clip: text;
@@ -79,10 +76,8 @@
             background: white;
             border: 1px solid rgba(0, 0, 0, 0.05);
             border-radius: 24px;
-            padding: 15px;
-            /* Compact */
-            margin-bottom: 10px;
-            /* Compact */
+            padding: 30px;
+            margin-bottom: 40px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
         }
 
@@ -98,8 +93,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--text-secondary);
-            margin-bottom: 4px;
-            /* Compact */
+            margin-bottom: 8px;
             display: block;
             font-weight: 700;
         }
@@ -109,11 +103,9 @@
             background: #f9fafb;
             border: 1px solid #e5e7eb;
             border-radius: 12px;
-            padding: 8px 12px;
-            /* Compact */
+            padding: 12px 16px;
             color: var(--text-main);
-            font-size: 0.95rem;
-            /* Slightly smaller text */
+            font-size: 1rem;
             transition: 0.3s;
         }
 
@@ -201,33 +193,17 @@
             flex-grow: 1;
         }
 
-        .search-panel {
-            background: #ffffff;
-            border-radius: 20px;
-            padding: 15px;
-            /* Reduced from default */
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            margin-bottom: 10px;
-            /* Tighter separation */
-            border: 1px solid rgba(0, 0, 0, 0.03);
-            position: relative;
-            z-index: 50;
-        }
-
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            /* Reduced from 320px */
-            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
         }
 
         .product-card {
             background: white;
             border: 1px solid rgba(0, 0, 0, 0.05);
-            border-radius: 20px;
-            /* Smaller radius */
-            padding: 12px;
-            /* Tighter padding */
+            border-radius: 24px;
+            padding: 24px;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
@@ -239,62 +215,56 @@
         }
 
         .product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
-            border-color: rgba(rgba(0, 0, 0, 0.1));
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 0, 0, 0.1);
         }
 
         .product-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 10px;
-            /* Reduced from 20 */
+            margin-bottom: 20px;
         }
 
         .product-name {
             font-weight: 800;
-            font-size: 1rem;
-            /* Reduced from 1.25rem */
-            line-height: 1.1;
-            margin-bottom: 4px;
+            font-size: 1.25rem;
+            line-height: 1.2;
+            margin-bottom: 8px;
             color: #111;
         }
 
         .product-cat {
-            font-size: 0.7rem;
+            font-size: 0.8rem;
             color: #d946ef;
+            /* Bright purple */
             text-transform: uppercase;
             font-weight: 700;
             letter-spacing: 0.5px;
         }
 
         .product-icon-wrapper {
-            width: 40px;
-            /* Reduced from 56 */
-            height: 40px;
-            /* Reduced from 56 */
+            width: 56px;
+            height: 56px;
             background: linear-gradient(135deg, #f3f4f6, #fff);
-            border-radius: 12px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            font-size: 1.8rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
             border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .product-envase {
             display: inline-block;
             background: #f3f4f6;
-            padding: 4px 8px;
-            /* Compact */
+            padding: 6px 12px;
             border-radius: 50px;
-            font-size: 0.65rem;
-            /* Smaller */
+            font-size: 0.75rem;
             color: #666;
-            margin-bottom: 10px;
-            /* Reduced */
+            margin-bottom: 20px;
             font-weight: 600;
             width: fit-content;
         }
@@ -302,18 +272,13 @@
         .prices {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            /* Reduced */
+            gap: 12px;
             margin-top: auto;
             background: #f9fafb;
-            padding: 10px;
-            /* Reduced */
-            border-radius: 12px;
+            padding: 15px;
+            border-radius: 16px;
             border: 1px solid rgba(0, 0, 0, 0.03);
         }
-
-
-
 
         .price-row {
             display: flex;
@@ -340,58 +305,16 @@
         }
 
         .discount-badge {
-            padding: 6px 10px;
-            /* Larger padding */
-            border-radius: 8px;
-            font-size: 1rem;
-            /* SIGNIFICANTLY LARGER */
-            font-weight: 800;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            display: inline-block;
-        }
-
-        .badge-green {
-            background: #10b981;
-            /* Solid Emerald */
-            color: white;
-            border: 2px solid #059669;
-        }
-
-        .badge-orange {
-            background: #f97316;
-            /* Solid Orange */
-            color: white;
-            border: 2px solid #ea580c;
-        }
-
-        .badge-red {
-            background: #ef4444;
-            /* Solid Red */
-            color: white;
-            border: 2px solid #b91c1c;
-            animation: pulse-red 2s infinite;
-        }
-
-        @keyframes pulse-red {
-            0% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-            }
-
-            70% {
-                transform: scale(1.05);
-                box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
-            }
-
-            100% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
-            }
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
         }
 
         .final-price {
-            color: #111;
-            /* Neutral Black */
+            color: #16a34a;
             font-size: 1.6rem;
             font-weight: 900;
         }
@@ -563,7 +486,8 @@
         <header class="catalog-header">
             <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
             <div>
-                <h1 class="catalog-title">Catálogo</h1>
+                <h1 class="catalog-title">Catálogo <span
+                        style="background:red; color:white; font-size:12px; padding:3px;">(V2 - FIXED)</span></h1>
                 <p style="color: var(--text-secondary); margin-top:5px;">Calculadora de Precios</p>
             </div>
             <button
@@ -594,21 +518,6 @@
                     <option value="price-asc">💰 Precio: Menor a Mayor</option>
                     <option value="price-desc">💎 Precio: Mayor a Menor</option>
                 </select>
-            </div>
-            <!-- RESTORED CATEGORY SELECTOR -->
-            <div class="input-group" style="margin:0;">
-                <label>Categorías</label>
-                <div class="custom-select-container" style="position:relative;">
-                    <div class="select-trigger modal-input" onclick="toggleDropdown()"
-                        style="cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
-                        <span>📦 Todas</span>
-                        <i class="fa-solid fa-chevron-down" style="font-size:0.8rem;"></i>
-                    </div>
-                    <div id="categoryOptions" class="custom-select-options"
-                        style="display:none; position:absolute; top:100%; left:0; width:100%; background:white; border:1px solid #ddd; border-radius:8px; z-index:1000; max-height:300px; overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.1);">
-                        <!-- Injected by JS -->
-                    </div>
-                </div>
             </div>
         </div>
         </div>
@@ -656,14 +565,14 @@
             // ... (PRODUCTS array remains unchanged) ...
             // 1. COCA-COLA (All)
             { id: 1, name: 'COCA-COLA', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
-            { id: 2, name: 'CC LIGHT / CC ZERO', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas', icon: '<img src="cocacola_zero_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
-            { id: 16, name: 'COCA-COLA / CC ZERO / CC LIGHT', category: 'VNR 1 LIT.', price: 18.66, envase: '12 botellas', icon: '<img src="cocacola_zero_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 2, name: 'CC LIGHT / CC ZERO', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 16, name: 'COCA-COLA / CC ZERO / CC LIGHT', category: 'VNR 1 LIT.', price: 18.66, envase: '12 botellas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 17, name: 'COCA-COLA', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
-            { id: 18, name: 'COCA-COLA LIGHT / CC ZERO / CCZZ', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas', icon: '<img src="cocacola_zero_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 18, name: 'COCA-COLA LIGHT / CC ZERO / CCZZ', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 29, name: 'COCA-COLA', category: 'Lata 33cl', price: 39.36, envase: '24 latas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
-            { id: 30, name: 'CCL / CCZ / CCZZ / CCSC / CCLSC', category: 'Lata 33cl', price: 39.36, envase: '24 latas', icon: '<img src="cocacola_zero_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 30, name: 'CCL / CCZ / CCZZ / CCSC / CCLSC', category: 'Lata 33cl', price: 39.36, envase: '24 latas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 34, name: 'COCA-COLA VR 350', category: 'Vidrio 350ml', price: 29.28, envase: '12 botellas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
-            { id: 39, name: 'CC REGULAR / CCZ / CCZZ / CCL / CCSC', category: 'PET 2,0 Lts', price: 28.68, envase: '6 botellas', icon: '<img src="cocacola_zero_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
+            { id: 39, name: 'CC REGULAR / CCZ / CCZZ / CCL / CCSC', category: 'PET 2,0 Lts', price: 28.68, envase: '6 botellas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
 
             // 2. FANTA (All)
             { id: 3, name: 'FANTA NARANJA', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas', icon: '<img src="fanta_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
@@ -940,12 +849,6 @@
             container.innerHTML = html;
         }
 
-        function getUnits(envaseStr) {
-            // Extract first number found in string
-            const match = envaseStr.match(/(\d+)/);
-            return match ? parseInt(match[1]) : 1;
-        }
-
         // Initial Render
         function renderCatalog() {
             const grid = document.getElementById('catalogGrid');
@@ -963,25 +866,7 @@
             });
 
             // Sort
-            if (sort === 'default') {
-                filtered.sort((a, b) => {
-                    // Priority 1: Category VR 23.7 (Vidrio Rellenable 23,7cl)
-                    const aVR = a.category.includes('23,7');
-                    const bVR = b.category.includes('23,7');
-                    if (aVR && !bVR) return -1;
-                    if (!aVR && bVR) return 1;
-
-                    // Priority 2: Coca-Cola Name
-                    // Note: We only sort by name priority if both are NOT VR (or both ARE VR, which preserves internal order usually)
-                    // But wait, user said "todas las colas" meaning other formats of Coke too.
-                    const aCoke = a.name.includes('COCA-COLA');
-                    const bCoke = b.name.includes('COCA-COLA');
-                    if (aCoke && !bCoke) return -1;
-                    if (!aCoke && bCoke) return 1;
-
-                    return 0; // Keep original order
-                });
-            } else if (sort === 'name') {
+            if (sort === 'name') {
                 filtered.sort((a, b) => a.name.localeCompare(b.name));
             } else if (sort === 'price-asc') {
                 filtered.sort((a, b) => a.price - b.price);
@@ -989,7 +874,6 @@
                 filtered.sort((a, b) => b.price - a.price);
             }
 
-            // Render
             // Render
             grid.innerHTML = filtered.map(p => {
                 const isSelected = selectedIds.has(p.id);
@@ -1000,16 +884,6 @@
                 // Price CALC
                 const hasDiscount = discount > 0;
                 const finalPrice = p.price * (1 - discount / 100);
-
-                const units = getUnits(p.envase);
-                const unitPrice = finalPrice / units;
-
-                // Common controls HTML for reuse
-                const discountInput = `<input type="number" id="discount-${p.id}" class="modal-input" placeholder="0" onclick="event.stopPropagation()" 
-                                oninput="updateDiscount(${p.id}, this.value)" value="${discount > 0 ? parseFloat(discount.toFixed(2)) : ''}" step="0.1">`;
-
-                const compInput = `<input type="number" id="comp-${p.id}" class="modal-input" placeholder="€ / Caja" onclick="event.stopPropagation()" 
-                                oninput="updateCompPrice(${p.id}, this.value)" value="${compPrice}" step="0.01">`;
 
                 if (isListView) {
                     return `
@@ -1022,24 +896,27 @@
                                 <div class="product-envase">${p.envase}</div>
                             </div>
 
-                            <div class="prices" id="price-container-${p.id}">
-                                <div class="price-row" style="flex-direction:row; align-items:center; gap:10px;">
-                                    <span class="final-price" style="font-size:1.4rem;">${unitPrice.toFixed(2)}€/ud</span>
-                                     ${hasDiscount ? `<span class="discount-badge badge-${discount > 40 ? 'red' : (discount > 20 ? 'orange' : 'green')}" style="font-size:0.7rem; padding:2px 6px;">-${Math.round(discount)}%</span>` : ''}
-                                </div>
-                                <div class="price-row" style="margin-top:2px;">
-                                     <span class="price-label" style="font-size:0.75rem;">Caja: ${finalPrice.toFixed(2)}€</span>
-                                </div>
+                            <div class="prices">
+                                ${hasDiscount ?
+                            `<div class="old-price">EUR${p.price.toFixed(2)}</div>
+                                     <div class="final-price">EUR${finalPrice.toFixed(2)}</div>`
+                            :
+                            `<div class="final-price">EUR${p.price.toFixed(2)}</div>`
+                        }
                             </div>
 
                             <div class="product-controls">
                                 <div class="input-group-compact">
-                                    <label>Paralelo</label>
-                                    ${compInput}
+                                    <label>Dto%</label> 
+                                    <input type="number" class="modal-input" style="width:60px; padding:5px;" placeholder="0" 
+                                        onclick="event.stopPropagation()" 
+                                        oninput="updateDiscount(${p.id}, this.value)" value="${discount > 0 ? discount : ''}">
                                 </div>
                                 <div class="input-group-compact">
-                                    <label>Dto%</label> 
-                                    ${discountInput}
+                                    <label>Comp (Caja)</label>
+                                    <input type="number" class="modal-input" style="width:70px; padding:5px;" placeholder="€" 
+                                        onclick="event.stopPropagation()" 
+                                        oninput="updateCompPrice(${p.id}, this.value)" value="${compPrice}">
                                 </div>
                                 ${isSelected ?
                             `<button onclick="event.stopPropagation(); addToActiveNote(${p.id})" style="grid-column:1/-1; background:#10b981; color:white; border:none; padding:8px; border-radius:6px; cursor:pointer; font-weight:bold;">
@@ -1066,46 +943,33 @@
                         <div class="product-envase">${p.envase}</div>
 
                         <div class="input-group" style="margin-bottom:10px;">
-                            <label>Precio Paralelo (CAJA)</label>
-                            ${compInput}
+                            <label>Descuento (%)</label>
+                            <input type="number" class="modal-input" placeholder="0" onclick="event.stopPropagation()" 
+                                oninput="updateDiscount(${p.id}, this.value)" value="${discount > 0 ? discount : ''}">
                         </div>
 
                         <div class="input-group" style="margin-bottom:15px;">
-                            <label>Descuento (%)</label>
-                            ${discountInput}
+                            <label>Precio Competencia (CAJA)</label>
+                            <input type="number" class="modal-input" placeholder="€ / Caja" onclick="event.stopPropagation()" 
+                                oninput="updateCompPrice(${p.id}, this.value)" value="${compPrice}">
                         </div>
 
                         <!-- Price Display -->
-                        <div class="prices" id="price-container-${p.id}">
-                            ${hasDiscount ? (() => {
-                        let badgeClass = 'badge-green';
-                        if (discount >= 20 && discount <= 40) badgeClass = 'badge-orange';
-                        if (discount > 40) badgeClass = 'badge-red';
-
-                        return `
-                                <div class="price-row" style="align-items:flex-end;">
-                                    <div style="display:flex; flex-direction:column;">
-                                        <span class="price-label">Precio Unidad</span>
-                                        <span class="final-price" style="font-size:1.8rem;">${unitPrice.toFixed(2)}€</span>
-                                    </div>
-                                    <span class="discount-badge ${badgeClass}">-${parseFloat(discount.toFixed(2))}%</span>
+                        <div class="prices">
+                            ${hasDiscount ?
+                        `<div class="price-row">
+                                    <span class="price-label">Original</span>
+                                    <span class="old-price">EUR${p.price.toFixed(2)}</span>
                                 </div>
-                                <div class="price-row" style="margin-top:8px; padding-top:8px; border-top:1px solid #eee;">
-                                    <span class="price-label" style="font-size:0.8rem;">Caja: EUR${finalPrice.toFixed(2)}</span>
-                                    <span class="old-price" style="font-size:0.8rem;">Ant: EUR${p.price.toFixed(2)}</span>
-                                </div>`;
-                    })() :
-                        `
                                 <div class="price-row">
-                                    <div style="display:flex; flex-direction:column;">
-                                        <span class="price-label">Precio Unidad</span>
-                                        <span class="final-price" style="font-size:1.8rem;">${unitPrice.toFixed(2)}€</span>
-                                    </div>
-                                </div>
-                                <div class="price-row" style="margin-top:8px; padding-top:8px; border-top:1px solid #eee;">
-                                    <span class="price-label" style="font-size:0.8rem;">Precio Caja: EUR${p.price.toFixed(2)}</span>
-                                </div>
-                            `
+                                    <span class="discount-badge">-${discount}%</span>
+                                    <span class="final-price">EUR${finalPrice.toFixed(2)}</span>
+                                </div>`
+                        :
+                        `<div class="price-row">
+                                    <span class="price-label">Precio Caja</span>
+                                    <span class="final-price">EUR${p.price.toFixed(2)}</span>
+                                </div>`
                     }
                         </div>
 
@@ -1128,96 +992,16 @@
 
         function updateDiscount(id, val) {
             discounts[id] = parseFloat(val) || 0;
-            // Only update visual of price, don't re-render entire grid to keep focus
-            updateCardPriceUI(id);
+            renderCatalog();
         }
 
         function updateCompPrice(id, val) {
             competitorPrices[id] = val;
-
-            // Reverse Logic: Calc Discount needed to match this price
-            const product = PRODUCTS.find(p => p.id === id);
-            if (product && val) {
-                const targetPrice = parseFloat(val);
-                if (targetPrice > 0) {
-                    // Discount % = (1 - Target/Base) * 100
-                    let newDiscount = (1 - (targetPrice / product.price)) * 100;
-                    // Cap at 0-100 logically, but business might want negative (markups)? Assuming 0-100 for now.
-                    // But user asked for "what discount to make", so if target > price, discount is negative (markup) or 0.
-                    // Let's float it.
-                    discounts[id] = newDiscount;
-
-                    // Update Discount Input
-                    const discInput = document.getElementById(`discount-${id}`);
-                    if (discInput) {
-                        discInput.value = newDiscount.toFixed(2);
-                    }
-
-                    // Update Price UI
-                    updateCardPriceUI(id);
-                }
-            }
-        }
-
-        // Helper to update just the pricing part of a card
-        function updateCardPriceUI(id) {
-            const product = PRODUCTS.find(p => p.id === id);
-            if (!product) return;
-
-            const discount = discounts[id] || 0;
-            const finalPrice = product.price * (1 - discount / 100);
-            const hasDiscount = discount !== 0; // Show even if negative? Usually discount > 0
-
-            const container = document.getElementById(`price-container-${id}`);
-            if (container) {
-
-                const units = getUnits(product.envase);
-                const unitPrice = finalPrice / units;
-
-                if (hasDiscount) {
-                    let badgeClass = 'badge-green';
-                    if (discount >= 20 && discount <= 40) badgeClass = 'badge-orange';
-                    if (discount > 40) badgeClass = 'badge-red';
-
-                    container.innerHTML = `
-                        <div class="price-row" style="align-items:flex-end;">
-                            <div style="display:flex; flex-direction:column;">
-                                <span class="price-label">Precio Unidad</span>
-                                <span class="final-price" style="font-size:1.8rem;">${unitPrice.toFixed(2)}€</span>
-                            </div>
-                            <span class="discount-badge ${badgeClass}">-${parseFloat(discount.toFixed(2))}%</span>
-                        </div>
-                        <div class="price-row" style="margin-top:8px; padding-top:8px; border-top:1px solid #eee;">
-                            <span class="price-label" style="font-size:0.8rem;">Caja: EUR${finalPrice.toFixed(2)}</span>
-                            <span class="old-price" style="font-size:0.8rem;">Ant: EUR${product.price.toFixed(2)}</span>
-                        </div>
-                     `;
-                } else {
-                    container.innerHTML = `
-                        <div class="price-row">
-                           <div style="display:flex; flex-direction:column;">
-                                <span class="price-label">Precio Unidad</span>
-                                <span class="final-price" style="font-size:1.8rem;">${unitPrice.toFixed(2)}€</span>
-                           </div>
-                        </div>
-                        <div class="price-row" style="margin-top:8px; padding-top:8px; border-top:1px solid #eee;">
-                            <span class="price-label" style="font-size:0.8rem;">Precio Caja: EUR${product.price.toFixed(2)}</span>
-                        </div>
-                     `;
-                }
-            }
         }
 
         // Initialize
-        try {
-            console.log("Initializing Catalog...");
-            initCategories();
-            renderCatalog();
-            console.log("Catalog Rendered.");
-        } catch (e) {
-            alert("Error cargando catálogo: " + e.message);
-            console.error(e);
-        }
+        initCategories();
+        renderCatalog();
 
         // Check Outdoor Mode on Load
         if (localStorage.getItem('outdoorMode') === 'true') {

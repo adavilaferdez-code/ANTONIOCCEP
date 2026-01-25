@@ -5,79 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HostelHub Premium</title>
-    <link rel="stylesheet" href="style.css?v=999">
+    <link rel="stylesheet" href="style.css?v=white_final_v3">
     <link rel="stylesheet" href="style_append.css?v=999">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <style>
-        /* OUTDOOR MODE STYLES - GLOBAL & AGGRESSIVE */
-        body.outdoor-mode,
-        body.outdoor-mode .app-container,
-        body.outdoor-mode .modal-content,
-        body.outdoor-mode .calculator-body,
-        body.outdoor-mode .dashboard-card,
-        body.outdoor-mode .bento-card,
-        body.outdoor-mode .search-hero,
-        body.outdoor-mode .bottom-nav {
-            background-color: #ffffff !important;
-            background: #ffffff !important;
-            color: #000000 !important;
-            text-shadow: none !important;
-            box-shadow: none !important;
-        }
-
-        /* Override Transparency/Darkness in Calculator Columns */
-        body.outdoor-mode #calculatorModal .modal-content,
-        body.outdoor-mode #calculatorModal div[style*="background"],
-        body.outdoor-mode #calculatorModal .calculator-body {
-            background: #ffffff !important;
-            border-color: #000000 !important;
-            color: #000000 !important;
-        }
-
-        /* Product Cards in Calculator */
-        body.outdoor-mode #calcProdList div {
-            background: #ffffff !important;
-            color: #000000 !important;
-            border: 2px solid #000000 !important;
-            box-shadow: none !important;
-        }
-
-        /* Text Contrast */
-        body.outdoor-mode .venue-name,
-        body.outdoor-mode .product-name,
-        body.outdoor-mode div,
-        body.outdoor-mode span,
-        body.outdoor-mode p {
-            color: #000000 !important;
-            text-shadow: none !important;
-        }
-
-        /* Hide Dark Backgrounds */
-        body.outdoor-mode .app-background {
-            display: none !important;
-        }
-
-        /* Borders and Inputs */
-        body.outdoor-mode .calc-btn,
-        body.outdoor-mode input,
-        body.outdoor-mode .bento-card {
-            background: #ffffff !important;
-            color: #000000 !important;
-            border: 2px solid #000000 !important;
-        }
-
-        /* Specific fix for inputs placeholder if needed */
-        body.outdoor-mode ::placeholder {
-            color: #666 !important;
-            opacity: 1;
-        }
-
-        /* Icons */
-        body.outdoor-mode i {
-            color: #000000 !important;
-        }
-    </style>
 </head>
 
 <body>
@@ -123,11 +54,9 @@
                     <!-- 2. Shortcuts Grid -->
                     <div class="bento-grid">
                         <!-- 1. Productos -->
-                        <!-- 1. Productos -->
-                        <div class="bento-card commercial-data" onclick="window.location.href='catalogo_premium.html'"
-                            style="cursor:pointer; border: 2px solid #00ff00;">
+                        <div class="bento-card commercial-data" onclick="openCatalogWithNote()" style="cursor:pointer;">
                             <i class="fa-solid fa-box-open" style="color: #fbbf24;"></i>
-                            <span>CATÁLOGO</span>
+                            <span>Productos</span>
                         </div>
 
                         <!-- 2. Power BI -->
@@ -747,7 +676,7 @@
         </div>
     </div>
 
-    <script src="app_v3.js?v=user_fix"></script>
+    <script src="app_v4.js?v=final_fix"></script>
     <script src="toast.js"></script>
     <script>
         // Simple Date Script
@@ -761,7 +690,6 @@
         updateDate();
 
         // Screen Transition Script
-        // Screen Transition Script
         document.addEventListener('DOMContentLoaded', () => {
             const overlay = document.getElementById('transitionOverlay');
             // Intercept links to catalogo.html
@@ -774,10 +702,10 @@
                         overlay.classList.add('active-slide-up');
                         // Wait for animation then navigate
                         setTimeout(() => {
-                            window.location.href = 'catalogo.html?v=final_fix';
+                            window.location.href = 'catalogo.html';
                         }, 600);
                     } else {
-                        window.location.href = 'catalogo.html?v=final_fix';
+                        window.location.href = 'catalogo.html';
                     }
                 });
             });
@@ -786,9 +714,9 @@
         function openCatalogWithNote() {
             const activeId = localStorage.getItem('activeNoteId');
             if (activeId) {
-                window.location.href = `catalogo.html?v=final_fix&nid=${activeId}`;
+                window.location.href = `catalogo.html?nid=${activeId}`;
             } else {
-                window.location.href = 'catalogo.html?v=final_fix';
+                window.location.href = 'catalogo.html';
             }
         }
     </script>
@@ -805,26 +733,6 @@
         } else {
             btn.classList.remove('fa-eye-slash');
             btn.classList.add('fa-eye');
-        }
-    }
-
-    // OUTDOOR MODE LOGIC
-    function toggleOutdoorMode() {
-        document.body.classList.toggle('outdoor-mode');
-        const isOutdoor = document.body.classList.contains('outdoor-mode');
-
-        // Find the button inside the modal
-        const btn = document.querySelector('#calculatorModal .close-btn[onclick*="toggleOutdoorMode"]');
-        if (btn) {
-            if (isOutdoor) {
-                btn.innerHTML = '<i class="fa-solid fa-moon"></i>';
-                btn.style.background = '#000';
-                btn.style.color = '#fff';
-            } else {
-                btn.innerHTML = '<i class="fa-solid fa-sun"></i>';
-                btn.style.background = 'rgba(255,255,255,0.1)';
-                btn.style.color = '';
-            }
         }
     }
 </script>
