@@ -78,7 +78,7 @@
             color: #000000 !important;
         }
 
-        /* === FORCED ANIMATION INJECTION (DIAGNOSTIC MODE) === */
+        /* === CUSTOM ANIMATIONS (Overriding defaults) === */
         @keyframes glassUnfoldFinal {
             0% {
                 opacity: 0;
@@ -490,7 +490,7 @@
             <i class="fa-solid fa-pen-to-square"></i>
             <span>NOTION</span>
         </a>
-        <a href="https://www.office.com/launch/excel" target="_blank" class="nav-item sensitive-data">
+        <a href="#" onclick="openExcelSmart(); return false;" class="nav-item sensitive-data">
             <i class="fa-solid fa-table-cells"></i>
             <span>EXCEL</span>
         </a>

@@ -1503,6 +1503,19 @@ function renderCalcProducts(filter = '') {
         return;
     }
 
+    // SMART EXCEL LAUNCHER
+    window.openExcelSmart = function () {
+        // 1. Try to open native App (Deep Link)
+        // This attempt happens silently in the background
+        window.location.href = 'ms-excel:';
+
+        // 2. Fallback to Web after a short delay (if app doesn't take over)
+        setTimeout(() => {
+            // Use main Office dashboard which is more stable than direct excel launch
+            window.open('https://www.office.com', '_blank');
+        }, 1500);
+    };
+
     filtered.forEach(p => {
         const item = document.createElement('div');
         // TOUCH FIX: Removed complex border transitions that might block clicks
