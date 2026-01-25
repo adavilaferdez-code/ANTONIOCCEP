@@ -1503,17 +1503,10 @@ function renderCalcProducts(filter = '') {
         return;
     }
 
-    // SMART EXCEL LAUNCHER
+    // SMART EXCEL LAUNCHER (WEB ONLY MODE)
     window.openExcelSmart = function () {
-        // 1. Try to open native App (Deep Link)
-        // This attempt happens silently in the background
-        window.location.href = 'ms-excel:';
-
-        // 2. Fallback to Web after a short delay (if app doesn't take over)
-        setTimeout(() => {
-            // Use main Office dashboard which is more stable than direct excel launch
-            window.open('https://www.office.com', '_blank');
-        }, 1500);
+        // Direct link to dashboard to avoid iOS "Open in App?" prompts
+        window.open('https://www.office.com', '_blank');
     };
 
     filtered.forEach(p => {
