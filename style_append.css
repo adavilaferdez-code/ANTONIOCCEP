@@ -2509,3 +2509,175 @@ body.outdoor-mode #calcListGift>div {
     margin-top: -10px;
     display: block;
 }
+
+/* === EXECUTIVE DARK CALCULATOR THEME === */
+
+/* 1. Modal Container - Dark Glass */
+#calculatorModal .modal-content {
+    background: rgba(18, 18, 20, 0.95);
+    /* Deep dark background */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+}
+
+/* 2. Calculator Display */
+#calcDisplay {
+    background: rgba(0, 0, 0, 0.3);
+    color: #4ade80;
+    /* Neon Green Text */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    font-family: 'Montserrat', monospace;
+    font-weight: 600;
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+    /* Subtle glow */
+}
+
+/* 3. Calculator Buttons */
+.calc-btn {
+    background: rgba(255, 255, 255, 0.05);
+    /* Glassy button */
+    color: #e5e5e5;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(4px);
+}
+
+.calc-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.calc-btn:active {
+    transform: scale(0.95);
+}
+
+/* Operators (Blue Neon) */
+.calc-btn.op {
+    background: rgba(37, 99, 235, 0.15);
+    /* Blue tint */
+    color: #60a5fa;
+    /* Blue neon */
+    border-color: rgba(37, 99, 235, 0.3);
+}
+
+.calc-btn.op:hover {
+    background: rgba(37, 99, 235, 0.3);
+    box-shadow: 0 0 15px rgba(37, 99, 235, 0.3);
+}
+
+/* Equals (Solid Neon Gradient) */
+.calc-btn.equals {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+    border: none;
+}
+
+.calc-btn.equals:hover {
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+    transform: translateY(-2px);
+}
+
+/* 4. Product Grid - Glass Cards */
+#calcProdList div {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+#calcProdList div:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Product Icons */
+#calcProdList div div:first-child {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    /* Glow for icons */
+}
+
+/* Price Text */
+#calcProdList div div:nth-child(3) div:first-child {
+    color: #4ade80 !important;
+    /* Neon Green Price */
+    text-shadow: 0 0 8px rgba(74, 222, 128, 0.3);
+}
+
+/* Gift Button */
+.gift-btn {
+    background: rgba(251, 191, 36, 0.1) !important;
+    border: 1px solid rgba(251, 191, 36, 0.3) !important;
+    box-shadow: 0 0 5px rgba(251, 191, 36, 0.1);
+}
+
+.gift-btn:hover {
+    background: rgba(251, 191, 36, 0.3) !important;
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+}
+
+/* 5. Tabs */
+.tab-btn {
+    transition: all 0.3s;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+/* 6. Inputs in Bonification Panel */
+#calcBodyOffer input[type='number'] {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    border-radius: 6px;
+    padding: 5px;
+    text-align: center;
+}
+
+#calcBodyOffer input[type='number']:focus {
+    border-color: #60a5fa !important;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+}
+
+/* Force override of Outdoor Mode styles if they leak */
+body.outdoor-mode #calculatorModal .modal-content {
+    background: #ffffff !important;
+    /* Only in explicit outdoor mode */
+}
+
+
+/* === GLASS UNFOLD ANIMATION (OPTION 3) === */
+@keyframes glassUnfold {
+    0% {
+        opacity: 0;
+        transform: scale(0.9) translateY(40px) rotateX(10deg);
+        filter: blur(12px);
+    }
+
+    60% {
+        opacity: 1;
+        filter: blur(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0) rotateX(0deg);
+        filter: blur(0);
+    }
+}
+
+#calculatorModal.open .modal-content {
+    animation: glassUnfold 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    transition: none !important;
+    /* FIX: Disable base slide-up transition */
+    will-change: transform, opacity, filter;
+    /* Reset text rendering for clarity after animation */
+}
