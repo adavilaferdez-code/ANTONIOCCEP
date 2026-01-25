@@ -1194,7 +1194,7 @@ function selectCalcProduct(product) {
             name: product.name,
             price: product.price,
             qty: 1,
-            discount: 0
+            discount: product.defaultDiscount !== undefined ? product.defaultDiscount : 0
         });
         renderBonificationLists();
     }
@@ -1473,22 +1473,21 @@ function calcCalculate() {
 // --- PRODUCT CATALOG SIDEBAR (MOCK DATA) ---
 // --- PRODUCT CATALOG SIDEBAR (REAL DATA) ---
 const productCatalog = [
-    { name: 'Coca-Cola 2L (Caja)', price: 28.68, color: '#fca5a5' },
-    { name: 'Coca-Cola Zero 2L (Caja)', price: 28.68, color: '#000000' },
-    { name: 'Coca-Cola Zero Zero 2L (Caja)', price: 28.68, color: '#000000' },
-    // Placeholder for others, user will provide more
-    { name: 'Fanta Naranja 2L (Caja)', price: 27.06, color: '#fdba74' },
-    { name: 'Fanta Limón 2L (Caja)', price: 27.06, color: '#fde047' },
-    { name: 'Coca-Cola Lata 33cl (Caja)', price: 39.36, color: '#ef4444' },
-    { name: 'Coca-Cola Zero Lata 33cl (Caja)', price: 39.36, color: '#000000' },
-    { name: 'Coca-Cola Zero Zero Lata 33cl (Caja)', price: 39.36, color: '#000000' },
-    { name: 'Fanta Naranja Lata 33cl (Caja)', price: 37.68, color: '#fdba74' },
-    { name: 'Fanta Limón Lata 33cl (Caja)', price: 37.68, color: '#fde047' },
-    { name: 'Aquarius Limón Lata 33cl (Caja)', price: 41.04, color: '#93c5fd' },
-    { name: 'Aquarius Naranja Lata 33cl (Caja)', price: 41.04, color: '#fdba74' },
-    { name: 'Fuze Tea Lata 33cl (Caja)', price: 39.60, color: '#16a34a' },
-    { name: 'Royal Bliss Vidrio 20cl (Caja24)', price: 31.92, color: '#e879f9' },
-    { name: 'Monster Lata 50cl (Caja 24)', price: 56.16, color: '#bef264' },
+    { name: 'Coca-Cola 2L (Caja)', price: 28.68, image: 'cocacola_logo.jpg', defaultDiscount: 71 },
+    { name: 'Coca-Cola Zero 2L (Caja)', price: 28.68, image: 'cocacola_zero_logo.png', defaultDiscount: 71 },
+    { name: 'Coca-Cola Zero Zero 2L (Caja)', price: 28.68, image: 'cocacola_zero_logo.png', defaultDiscount: 71 },
+    { name: 'Fanta Naranja 2L (Caja)', price: 27.06, image: 'fanta_logo.jpg', defaultDiscount: 71 },
+    { name: 'Fanta Limón 2L (Caja)', price: 27.06, image: 'fanta_logo.jpg', defaultDiscount: 71 },
+    { name: 'Coca-Cola Lata 33cl (Caja)', price: 39.36, image: 'cocacola_logo.jpg', defaultDiscount: 62 },
+    { name: 'Coca-Cola Zero Lata 33cl (Caja)', price: 39.36, image: 'cocacola_zero_logo.png', defaultDiscount: 62 },
+    { name: 'Coca-Cola Zero Zero Lata 33cl (Caja)', price: 39.36, image: 'cocacola_zero_logo.png', defaultDiscount: 62 },
+    { name: 'Fanta Naranja Lata 33cl (Caja)', price: 37.68, image: 'fanta_logo.jpg', defaultDiscount: 62 },
+    { name: 'Fanta Limón Lata 33cl (Caja)', price: 37.68, image: 'fanta_logo.jpg', defaultDiscount: 62 },
+    { name: 'Aquarius Limón Lata 33cl (Caja)', price: 41.04, image: 'aquarius_logo.png', defaultDiscount: 60 },
+    { name: 'Aquarius Naranja Lata 33cl (Caja)', price: 41.04, image: 'aquarius_logo.png', defaultDiscount: 60 },
+    { name: 'Fuze Tea Lata 33cl (Caja)', price: 39.60, image: 'fuzetea_logo.jpg', defaultDiscount: 60 },
+    { name: 'Royal Bliss Vidrio 20cl (Caja24)', price: 31.92, image: 'royalbliss_logo.png', defaultDiscount: 0 },
+    { name: 'Monster Lata 50cl (Caja 24)', price: 56.16, image: 'monster_logo.jpg', defaultDiscount: 50 },
 ];
 
 function renderCalcProducts(filter = '') {
@@ -1506,50 +1505,52 @@ function renderCalcProducts(filter = '') {
 
     filtered.forEach(p => {
         const item = document.createElement('div');
-        item.style.cssText = 'background:#333; border-radius:8px; padding:10px; position:relative; text-align:center; transition:0.2s; border:1px solid transparent; display:flex; flex-direction:column; align-items:center;';
+        // TOUCH FIX: Removed complex border transitions that might block clicks
+        item.style.cssText = 'background:rgba(255,255,255,0.05); border-radius:12px; padding:10px; position:relative; text-align:center; border:1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; align-items:center; cursor:pointer; min-height:120px;';
 
-        // Hover effect for main card
-        item.onmouseover = (e) => {
-            if (!e.target.closest('.gift-btn')) item.style.borderColor = '#666';
-        };
-        item.onmouseout = () => item.style.borderColor = 'transparent';
+        // TOUCH FIX: Use onclick directly and ensure it's clickable
+        item.onclick = (e) => {
+            // Check if we clicked the gift button
+            if (e.target.closest('.gift-btn')) return;
 
-        // Main Click -> Select Purchase Product
-        item.addEventListener('click', (e) => {
+            // Visual feedback for touch
+            item.style.transform = 'scale(0.95)';
+            setTimeout(() => item.style.transform = 'scale(1)', 100);
+
             selectCalcProduct(p);
-        });
+        };
 
-        // Product Color/Icon
-        const icon = document.createElement('div');
-        icon.style.cssText = `width:30px; height:30px; background:${p.color}; border-radius:50%; margin-bottom:5px; opacity:0.8;`;
+        // Product IMAGE (Logo)
+        const icon = document.createElement('img');
+        icon.src = p.image || 'cocacola_logo.jpg';
+        icon.style.cssText = 'width:50px; height:50px; object-fit:contain; margin-bottom:8px; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));';
+        icon.onerror = function () { this.src = 'cocacola_logo.jpg'; }; // Fallback
 
         // Product Name
         const name = document.createElement('div');
-        name.style.cssText = 'font-size:0.75rem; font-weight:bold; color:white; margin-bottom:4px; height:32px; overflow:hidden; width:100%;';
-        name.innerText = p.name;
+        name.style.cssText = 'font-size:0.7rem; font-weight:600; color:#e5e5e5; margin-bottom:4px; line-height:1.2; flex:1; display:flex; align-items:center; justify-content:center; width:100%;';
+        name.innerText = p.name.replace('(Caja)', '').replace('(Caja 24)', ''); // Cleaner names
 
         // Price Row
         const priceRow = document.createElement('div');
-        priceRow.style.cssText = 'display:flex; justify-content:center; align-items:center; gap:8px; width:100%; margin-top:auto;';
+        priceRow.style.cssText = 'display:flex; justify-content:center; align-items:center; gap:8px; width:100%; margin-top:5px;';
 
         // Price
         const price = document.createElement('div');
-        price.style.cssText = 'font-size:0.9rem; color:#4ade80; font-weight:bold;';
+        price.style.cssText = 'font-size:0.95rem; color:#4ade80; font-weight:800; font-family:monospace;';
         price.innerText = p.price.toFixed(2) + '€';
 
         // Gift Button (Small icon)
         const giftBtn = document.createElement('button');
         giftBtn.className = 'gift-btn';
-        giftBtn.innerHTML = '🎁';
+        giftBtn.innerHTML = '<i class="fa-solid fa-gift"></i>';
         giftBtn.title = 'Seleccionar como Regalo';
-        giftBtn.style.cssText = 'background:rgba(251, 191, 36, 0.2); border:1px solid #fbbf24; color:#fbbf24; border-radius:4px; padding:2px 6px; cursor:pointer; font-size:0.8rem; transition:0.2s;';
-        giftBtn.onmouseover = () => giftBtn.style.background = 'rgba(251, 191, 36, 0.4)';
-        giftBtn.onmouseout = () => giftBtn.style.background = 'rgba(251, 191, 36, 0.2)';
+        giftBtn.style.cssText = 'background:none; border:none; color:#fbbf24; cursor:pointer; font-size:1.1rem; padding:5px;';
 
-        giftBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Stop bubbling to main card
+        giftBtn.onclick = (e) => {
+            e.stopPropagation(); // Stop bubbling
             selectGiftProduct(p);
-        });
+        };
 
         priceRow.appendChild(price);
         priceRow.appendChild(giftBtn);
@@ -1562,25 +1563,7 @@ function renderCalcProducts(filter = '') {
     });
 }
 
-function selectCalcProduct(product) {
-    // Switch to Bonification Tab
-    switchCalcTab('offer');
 
-    // Fill Price
-    const priceInput = document.getElementById('bonPrice');
-    priceInput.value = product.price;
-
-    // Visual Feedback
-    const selProdInfo = document.getElementById('selectedProdName');
-    if (selProdInfo) selProdInfo.innerText = product.name;
-
-    // Highlight effect
-    priceInput.style.backgroundColor = '#4ade80';
-    setTimeout(() => priceInput.style.backgroundColor = 'var(--input-bg)', 300);
-
-    // Trigger Recalc
-    calculateBonification();
-}
 
 function filterCalcProducts() {
     const text = document.getElementById('calcProdSearch').value;

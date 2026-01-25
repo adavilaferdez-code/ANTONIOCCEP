@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HostelHub Premium</title>
+    <link rel="stylesheet" href="style.css?v=999">
+    <link rel="stylesheet" href="style_append.css?v=999">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* OUTDOOR MODE STYLES - GLOBAL & AGGRESSIVE */
+        body.outdoor-mode,
+        body.outdoor-mode .app-container,
+        body.outdoor-mode .modal-content,
+        body.outdoor-mode .calculator-body,
+        body.outdoor-mode .dashboard-card,
+        body.outdoor-mode .bento-card,
+        body.outdoor-mode .search-hero,
+        body.outdoor-mode .bottom-nav {
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            text-shadow: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Override Transparency/Darkness in Calculator Columns */
+        body.outdoor-mode #calculatorModal .modal-content,
+        body.outdoor-mode #calculatorModal div[style*="background"],
+        body.outdoor-mode #calculatorModal .calculator-body {
+            background: #ffffff !important;
+            border-color: #000000 !important;
+            color: #000000 !important;
+        }
+
+        /* Product Cards in Calculator */
+        body.outdoor-mode #calcProdList div {
+            background: #ffffff !important;
+            color: #000000 !important;
+            border: 2px solid #000000 !important;
+            box-shadow: none !important;
+        }
+
+        /* Text Contrast */
+        body.outdoor-mode .venue-name,
+        body.outdoor-mode .product-name,
+        body.outdoor-mode div,
+        body.outdoor-mode span,
+        body.outdoor-mode p {
+            color: #000000 !important;
+            text-shadow: none !important;
+        }
+
+        /* Hide Dark Backgrounds */
+        body.outdoor-mode .app-background {
+            display: none !important;
+        }
+
+        /* Borders and Inputs */
+        body.outdoor-mode .calc-btn,
+        body.outdoor-mode input,
+        body.outdoor-mode .bento-card {
+            background: #ffffff !important;
+            color: #000000 !important;
+            border: 2px solid #000000 !important;
+        }
+
+        /* Specific fix for inputs placeholder if needed */
+        body.outdoor-mode ::placeholder {
+            color: #666 !important;
+            opacity: 1;
+        }
+
+        /* Icons */
+        body.outdoor-mode i {
+            color: #000000 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Dynamic Background -->
+    <div class="app-background"></div>
+
+    <div class="app-container">
+
+        <!-- Header -->
+        <!-- Header Removed -->
+        <header class="app-header">
+            <div class="brand-centered">
+                <img src="logo_antonio.png" alt="Antonio Dávila" class="main-logo">
+            </div>
+            <!-- Showroom Toggle -->
+            <button class="showroom-toggle" onclick="toggleShowroom()">
+                <i class="fa-solid fa-eye"></i>
+            </button>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-main">
+
+            <!-- Hero Search -->
+            <section class="search-hero commercial-data">
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input"
+                        placeholder="Buscar bar, restaurante, ciudad...">
+                </div>
+            </section>
+
+            <div class="actions-container">
+
+                <!-- DASHBOARD CARD (Grupos unificados) -->
+                <div class="dashboard-card">
+
+                    <!-- 1. Button -->
+                    <button class="btn-cerca commercial-data" onclick="searchNearMe()">
+                        <i class="fa-solid fa-location-crosshairs"></i> CERCA (100km)
+                    </button>
+
+                    <!-- 2. Shortcuts Grid -->
+                    <div class="bento-grid">
+                        <!-- 1. Productos -->
+                        <div class="bento-card commercial-data" onclick="window.location.href='catalogo_premium.html'"
+                            style="cursor:pointer; border: 2px solid #00ff00;">
+                            <i class="fa-solid fa-box-open" style="color: #fbbf24;"></i>
+                            <span>CATÁLOGO</span>
+                        </div>
+
+                        <!-- 2. Power BI -->
+                        <div class="bento-card sensitive-data"
+                            onclick="window.open('https://app.powerbi.com/', '_blank'); return false;">
+                            <i class="fa-solid fa-chart-pie" style="color: #f59e0b;"></i>
+                            <span>Power BI</span>
+                        </div>
+
+                        <!-- 3. Checklist -->
+                        <div class="bento-card sensitive-data" onclick="openChecklist()">
+                            <i class="fa-solid fa-clipboard-check" style="color: #d946ef;"></i>
+                            <span>Checklist</span>
+                        </div>
+
+                        <!-- 4. Negociaciones -->
+                        <div class="bento-card sensitive-data"
+                            onclick="window.open('https://gemini.google.com', '_blank')">
+                            <i class="fa-solid fa-handshake" style="color: #10b981;"></i>
+                            <span>Negociación</span>
+                        </div>
+
+                        <!-- 5. Catálogo Clientes -->
+                        <div class="bento-card commercial-data" onclick="window.open('catalogo_2025.pdf', '_blank')"
+                            style="cursor:pointer;">
+                            <i class="fa-solid fa-images" style="color: #3b82f6;"></i>
+                            <span>Catálogo</span>
+                        </div>
+                    </div>
+
+                    <!-- 3. Distribuidores -->
+                    <div class="capsule-btn cap-blue sensitive-data" onclick="openDistribuidoresModal()"
+                        style="width: 100%; justify-content: center; margin-top: 5px;">
+                        <i class="fa-solid fa-truck-fast"></i> DISTRIBUIDORES
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 4. HERO IMAGES (RESTORED) -->
+            <div class="hero-grid">
+                <!-- FOCOS -->
+                <div class="hero-card commercial-data" onclick="openFocusModal()">
+                    <img src="focos_dashboard.jpg" class="hero-bg" alt="Focos">
+                    <div class="hero-overlay">
+                        <div class="hero-title"><i class="fa-solid fa-star"></i> FOCOS ENERO</div>
+                        <div class="hero-sub">Clic para ver novedades</div>
+                    </div>
+                </div>
+
+                <!-- DEUDAS -->
+                <div class="hero-card sensitive-data" onclick="openDebtModal()">
+                    <img src="deudas_v2.jpg" class="hero-bg" alt="Deudas">
+                    <div class="hero-overlay">
+                        <div class="hero-title"><i class="fa-solid fa-file-invoice-dollar"></i> DEUDAS</div>
+                        <div class="hero-sub">Clic para ver listado oficial</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results List Removed from Main Flow -->
+
+        </main>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Search Results Modal -->
+    <div id="searchResultsModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Resultados</h2>
+                <button class="close-btn" onclick="closeSearchResultsModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="venueList" class="venue-list"></div>
+        </div>
+    </div>
+
+    <!-- Checklist Modal -->
+    <div id="checklistModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Checklist</h2>
+                <button class="close-btn" onclick="closeChecklist()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="checklist-container">
+                <!-- 1. Pre-Visit Analysis -->
+                <label class="check-item highlight-blue">
+                    <div class="check-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">VER COMPRAS ANTERIORES</span>
+                        <span class="check-sub">Analizar historial previo</span>
+                    </div>
+                    <input type="checkbox">
+                </label>
+
+                <!-- 2. Client Data -->
+                <label class="check-item">
+                    <div class="check-icon"><i class="fa-solid fa-address-card"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">DATOS DEL CLIENTE</span>
+                        <span class="check-sub">Actualizar ficha</span>
+                    </div>
+                    <input type="checkbox">
+                </label>
+
+                <!-- 2b. Invoice Support -->
+                <label class="check-item">
+                    <div class="check-icon"><i class="fa-solid fa-file-invoice"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">SOPORTE FACTURAS</span>
+                    </div>
+                    <input type="checkbox">
+                </label>
+
+                <!-- 3. Debt (Critical) -->
+                <label class="check-item highlight-red">
+                    <div class="check-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">DEUDA</span>
+                        <span class="check-sub">Verificar pendientes</span>
+                    </div>
+                    <input type="checkbox">
+                </label>
+
+                <!-- 4. GDA Objectives -->
+                <label class="check-item highlight-gold">
+                    <div class="check-icon"><i class="fa-solid fa-bullseye"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">OBJETIVO GDA</span>
+                        <span class="check-sub">Volumen Fanta VR, CCZZ VR, AQ/Fuze</span>
+                    </div>
+                    <input type="checkbox">
+                </label>
+
+                <!-- 5. Upselling -->
+                <label class="check-item">
+                    <div class="check-icon"><i class="fa-solid fa-box-open"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">UNA CAJITA MÁS</span>
+                        <span class="check-sub">Limón, Agua, Gas, Sprite, Energy</span>
+                    </div>
+                    <input type="checkbox">
+                </label>
+
+                <!-- 6. Captacion -->
+                <label class="check-item">
+                    <div class="check-icon"><i class="fa-solid fa-user-plus"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">CAPTACIÓN DE CLIENTES</span>
+                    </div>
+                    <input type="checkbox">
+                </label>
+
+                <!-- 7. ACTIVAR (High Energy) -->
+                <label class="check-item highlight-electric">
+                    <div class="check-icon"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">ACTIVAR!!!!!!!!!!!!!</span>
+                        <span class="check-sub">¡Energía a tope!</span>
+                    </div>
+                    <input type="checkbox">
+                </label>
+
+                <!-- 8. Audit -->
+                <label class="check-item">
+                    <div class="check-icon"><i class="fa-solid fa-camera"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">EEFF, AUDIT FOTOS</span>
+                    </div>
+                    <input type="checkbox">
+                </label>
+
+                <!-- 9. Sustainability -->
+                <label class="check-item highlight-green">
+                    <div class="check-icon"><i class="fa-solid fa-leaf"></i></div>
+                    <div class="check-content">
+                        <span class="check-title">SOSTENIBILIDAD</span>
+                        <span class="check-sub">Por el Clima</span>
+                    </div>
+                    <input type="checkbox">
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Focus Modal (Image View) -->
+    <div id="focusModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Focos Enero</h2>
+                <button class="close-btn" onclick="closeFocusModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <img src="focos_dashboard.jpg" class="modal-image-view">
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Detalle</h2>
+                <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>Nombre</label>
+                    <input type="text" id="inputName" class="modal-input">
+                </div>
+                <div class="input-group">
+                    <label>Dirección</label>
+                    <input type="text" id="inputAddress" class="modal-input">
+                </div>
+                <div class="input-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="inputPhone" class="modal-input">
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="inputEmail" class="modal-input">
+                </div>
+                <div class="input-group">
+                    <label>Notas</label>
+                    <textarea id="inputNotes" class="modal-input" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <a id="btnCall" href="#" class="action-capsule call"><i class="fa-solid fa-phone"></i> Llamar</a>
+                    <a id="btnEmail" href="#" class="action-capsule email"><i class="fa-solid fa-envelope"></i>
+                        Correo</a>
+                    <button onclick="saveToDebts()" class="action-capsule save"><i class="fa-solid fa-floppy-disk"></i>
+                        GUARDAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Distribuidores Modal -->
+    <div id="distribuidoresModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Distribuidores</h2>
+                <button class="close-btn" onclick="closeDistribuidoresModal()"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- HTML TABLE REPLACEMENT -->
+            <table class="dist-table">
+                <tr class="header-row">
+                    <th>DISTRIBUIDOR</th>
+                    <th>RUTA</th>
+                    <th>RESPONSABLE</th>
+                </tr>
+                <!-- AMAGOSA -->
+                <tr class="row-amagosa">
+                    <td>AMAGOSA</td>
+                    <td>RUTA 2QA</td>
+                    <td>MANOLO</td>
+                </tr>
+                <tr class="row-amagosa">
+                    <td></td>
+                    <td>RUTA 2QB</td>
+                    <td>JESUS</td> <!-- CHANGED FROM ALFONSITO -->
+                </tr>
+                <tr class="row-amagosa">
+                    <td></td>
+                    <td>RUTA 2QC</td>
+                    <td>MANOLO</td>
+                </tr>
+                <tr class="row-amagosa">
+                    <td></td>
+                    <td>RUTA 2QF</td>
+                    <td>GASOLINERA</td>
+                </tr>
+                <!-- ESCUDERO -->
+                <tr class="row-escudero">
+                    <td>ESCUDERO VENTA</td>
+                    <td>RUTA 2QO</td>
+                    <td>JOSEMARI</td>
+                </tr>
+                <!-- LORENZO -->
+                <tr class="row-lorenzo">
+                    <td>LORENZO GALLARDO</td>
+                    <td>RUTA 2QP</td>
+                    <td>PACO PEPE</td>
+                </tr>
+                <!-- MIGUEL -->
+                <tr class="row-miguel">
+                    <td>MIGUEL POZO</td>
+                    <td>RUTA 1QK</td>
+                    <td>DIEGO</td>
+                </tr>
+                <tr class="row-miguel">
+                    <td></td>
+                    <td>RUTA 1QL</td>
+                    <td>JAVI</td>
+                </tr>
+            </table>
+
+        </div>
+    </div>
+
+    <!-- Debt Modal -->
+    <div id="debtModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Deudas y Notas</h2>
+                <div id="saveIndicatorDebt"
+                    style="font-size: 0.8rem; color: var(--success); margin-right: 10px; opacity: 0; transition: opacity 0.3s;">
+                    <i class="fa-solid fa-check"></i> Guardado
+                </div>
+                <button class="close-btn" onclick="closeDebtModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <!-- Debt Image Header -->
+            <img src="deudas_v2.jpg" class="modal-image-view" style="margin-bottom: 20px;"
+                onclick="openZoomModal(this.src)">
+
+            <div class="filter-bar">
+                <input type="text" id="debtSearchName" placeholder="Buscar nombre..." class="filter-input">
+                <input type="text" id="debtSearchDate" placeholder="Fecha..." class="filter-input">
+                <div class="toggles">
+                    <label><input type="checkbox" id="debtFilterGreen"> <span class="dot-green"></span></label>
+                    <label><input type="checkbox" id="debtFilterRed"> <span class="dot-red"></span></label>
+                </div>
+            </div>
+            <div id="debtPad" class="debt-pad"></div>
+            <button onclick="addDebtRow()" class="add-btn"><i class="fa-solid fa-plus"></i> Nueva Nota</button>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item" onclick="openCalculator(); return false;">
+            <i class="fa-solid fa-calculator"></i>
+            <span>Calculadora</span>
+        </a>
+        <a href="#" class="nav-item sensitive-data" onclick="openNotionApp(); return false;">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span>NOTION</span>
+        </a>
+        <a href="https://www.office.com/launch/excel" target="_blank" class="nav-item sensitive-data">
+            <i class="fa-solid fa-table-cells"></i>
+            <span>EXCEL</span>
+        </a>
+        <a href="mailto:adavila@ccep.com" class="nav-item">
+            <i class="fa-solid fa-envelope"></i>
+            <span>Correo</span>
+        </a>
+    </nav>
+
+    <!-- Planes Modal (Persistent Folders/Notas) -->
+    <div id="planesModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="planesTitle">Notas (Carpetas)</h2>
+                <div id="saveIndicator"
+                    style="font-size: 0.8rem; color: var(--success); margin-right: 10px; opacity: 0; transition: opacity 0.3s;">
+                    <i class="fa-solid fa-check"></i> Guardado
+                </div>
+                <button class="close-btn" onclick="closePlanes()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <!-- Filter Bar for Notes -->
+            <div class="filter-bar" style="margin-bottom: 15px;">
+                <input type="text" id="notesSearchInput" placeholder="Buscar en notas..." class="filter-input">
+                <div class="toggles">
+                    <label><input type="checkbox" id="notesFilterGreen"> <span class="dot-green"></span></label>
+                    <label><input type="checkbox" id="notesFilterRed"> <span class="dot-red"></span></label>
+                </div>
+            </div>
+
+            <!-- Dynamic Content Area -->
+            <div id="planesContent" class="debt-pad" style="min-height: 300px;"></div>
+
+            <!-- Controls (Will be rendered by JS based on view) -->
+            <div id="planesControls" style="display:flex; justify-content:center; gap:10px; margin-top:15px;"></div>
+        </div>
+    </div>
+
+
+    <!-- Calculator Modal -->
+    <!-- CALCULATOR MODAL (Wider for Commercial Use) -->
+    <div id="calculatorModal" class="modal-overlay">
+        <div class="modal-content"
+            style="width: 95vw; max-width: 1400px; display:flex; flex-direction:column; max-height:90vh;">
+            <!-- Extended width and height -->
+
+            <div class="modal-header">
+                <h2>Comercial & Calculadora</h2>
+                <div style="display:flex; gap:10px;">
+                    <button class="close-btn" onclick="toggleOutdoorMode()" title="Modo Exterior"
+                        style="background:rgba(255,255,255,0.1);"><i class="fa-solid fa-sun"></i></button>
+                    <button class="close-btn" onclick="closeCalculator()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+
+            <!-- MAIN LAYOUT: TWO COLUMNS -->
+            <div style="display:flex; flex:1; gap:20px; padding:10px;">
+
+                <!-- LEFT COL: CALCULATOR (Fixed Width) -->
+                <div style="flex:0 0 360px; display:flex; flex-direction:column; padding-right:5px;">
+
+                    <!-- TABS SWITCHER -->
+                    <div class="calc-tabs" style="display:flex; border-bottom:1px solid #444; margin-bottom:10px;">
+                        <button class="tab-btn" onclick="switchCalcTab('basic')" id="tabBasic"
+                            style="flex:1; background:none; border:none; color:white; padding:8px; border-bottom:2px solid var(--primary-color); font-weight:bold; cursor:pointer;">Básica</button>
+                        <button class="tab-btn" onclick="switchCalcTab('offer')" id="tabOffer"
+                            style="flex:1; background:none; border:none; color:#aaa; padding:8px; border-bottom:2px solid transparent; cursor:pointer;">Bonif.</button>
+                    </div>
+
+                    <!-- VIEW 1: BASIC CALCULATOR -->
+                    <div id="calcBodyBasic" class="calculator-body">
+                        <input type="text" id="calcDisplay" readonly value="0">
+                        <div class="calc-grid">
+                            <button class="calc-btn op" onclick="calcClear()">C</button>
+                            <button class="calc-btn op" onclick="calcAppend('/')">/</button>
+                            <button class="calc-btn op" onclick="calcAppend('*')">x</button>
+                            <button class="calc-btn op" onclick="calcBackspace()"><i
+                                    class="fa-solid fa-delete-left"></i></button>
+
+                            <button class="calc-btn" onclick="calcAppend('7')">7</button>
+                            <button class="calc-btn" onclick="calcAppend('8')">8</button>
+                            <button class="calc-btn" onclick="calcAppend('9')">9</button>
+                            <button class="calc-btn op" onclick="calcAppend('-')">-</button>
+
+                            <button class="calc-btn" onclick="calcAppend('4')">4</button>
+                            <button class="calc-btn" onclick="calcAppend('5')">5</button>
+                            <button class="calc-btn" onclick="calcAppend('6')">6</button>
+                            <button class="calc-btn op" onclick="calcAppend('+')">+</button>
+
+                            <button class="calc-btn" onclick="calcAppend('1')">1</button>
+                            <button class="calc-btn" onclick="calcAppend('2')">2</button>
+                            <button class="calc-btn" onclick="calcAppend('3')">3</button>
+                            <button class="calc-btn op equals" onclick="calcCalculate()">=</button>
+
+                            <button class="calc-btn zero" onclick="calcAppend('0')">0</button>
+                            <button class="calc-btn" onclick="calcAppend('.')">.</button>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 2: BONIFICATION CALCULATOR -->
+                    <!-- VIEW 2: BONIFICATION CALCULATOR -->
+                    <div id="calcBodyOffer" class="calculator-body" style="display:none; padding:0; height: 100%;">
+
+                        <!-- FLEX CONTAINER WRAPPER -->
+                        <div style="display:flex; flex-direction:column; height:100%; overflow:hidden;">
+
+                            <!-- SCROLLABLE LIST AREA -->
+                            <div style="flex:1; overflow-y:auto; padding:5px; padding-bottom:10px; min-height:0;">
+                                <div style="display:flex; flex-direction:column; gap:10px;">
+
+                                    <!-- BUY LIST SECTION -->
+                                    <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+                                        <div
+                                            style="font-size:0.8rem; color:#aaa; margin-bottom:8px; font-weight:bold; display:flex; justify-content:space-between;">
+                                            <span>🛒 LISTA DE COMPRA</span>
+                                            <button onclick="clearCalcCart('buy')"
+                                                style="background:none; border:none; color:#f87171; cursor:pointer; font-size:0.75rem;">Limpiar</button>
+                                        </div>
+                                        <div id="calcListBuy" style="display:flex; flex-direction:column; gap:8px;">
+                                            <!-- Items injected via JS -->
+                                            <div
+                                                style="color:#666; font-size:0.8rem; text-align:center; padding:10px; border:1px dashed #444; border-radius:4px;">
+                                                Selecciona productos del catálogo
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- GIFT LIST SECTION -->
+                                    <div
+                                        style="background:rgba(251, 191, 36, 0.1); padding:10px; border-radius:8px; border:1px solid rgba(251, 191, 36, 0.2);">
+                                        <div
+                                            style="font-size:0.8rem; color:#fbbf24; margin-bottom:8px; font-weight:bold; display:flex; justify-content:space-between;">
+                                            <span>🎁 LISTA DE REGALOS</span>
+                                            <button onclick="clearCalcCart('gift')"
+                                                style="background:none; border:none; color:#f87171; cursor:pointer; font-size:0.75rem;">Limpiar</button>
+                                        </div>
+                                        <div id="calcListGift" style="display:flex; flex-direction:column; gap:8px;">
+                                            <!-- Items injected via JS -->
+                                            <div style="color:#666; font-size:0.8rem; text-align:center; padding:5px;">
+                                                (Opcional) Añade regalos con 🎁
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <!-- END SCROLLABLE AREA -->
+
+                            <!-- FIXED FOOTER AREA -->
+                            <div
+                                style="background:rgba(0,0,0,0.3); border-top:1px solid #333; padding:10px; padding-top:15px; flex-shrink:0;">
+
+                                <!-- RESULTS SECTION -->
+                                <div style="text-align:center;">
+                                    <div style="font-size:0.85rem; color:#aaa; margin-bottom:5px;">PRECIO MEDIO REAL /
+                                        CAJA
+                                    </div>
+                                    <div id="bonResultPrice"
+                                        style="font-size:2.2rem; font-weight:900; color:#00ff88; font-family:'Montserrat', sans-serif;">
+                                        0.00 €</div>
+                                </div>
+
+                                <!-- Invoice Summary Section -->
+                                <div
+                                    style="background:rgba(255,255,255,0.05); border-radius:8px; padding:10px; margin-top:10px;">
+                                    <div
+                                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                        <span style="color:#aaa; font-size:0.75rem;">📦 Total Compradas:</span>
+                                        <span id="bonPaidQty" style="color:white; font-weight:bold;">0</span>
+                                    </div>
+                                    <div
+                                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                        <span style="color:#aaa; font-size:0.75rem;">🎁 Total Regalo:</span>
+                                        <span id="bonFreeQty" style="color:#fbbf24; font-weight:bold;">0</span>
+                                    </div>
+                                    <hr style="border:0; border-top:1px solid #333; margin:5px 0;">
+                                    <div
+                                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                        <span style="color:#aaa; font-size:0.85rem;">💰 Total Factura:</span>
+                                        <span id="bonResultTotal"
+                                            style="color:#4ade80; font-weight:bold; font-size:1.1rem;">0€</span>
+                                    </div>
+                                </div>
+                                <button onclick="clearBonification()"
+                                    style="background:#444; color:white; border:none; padding:8px; border-radius:8px; margin-top:15px; width:100%;">
+                                    <i class="fa-solid fa-rotate-right"></i> Borrar Todo
+                                </button>
+                            </div>
+                            <!-- END FOOTER -->
+
+                        </div>
+                    </div>
+                </div>
+                <!-- END LEFT COLUMN -->
+
+
+                <!-- RIGHT COL: PRODUCT CATALOG -->
+                <div
+                    style="flex:1; min-width:300px; background:rgba(0,0,0,0.2); border-radius:12px; padding:15px; display:flex; flex-direction:column; overflow:hidden;">
+
+                    <!-- Search Header -->
+                    <div style="margin-bottom:12px;">
+                        <input type="text" id="calcProdSearch" placeholder="🔍 Buscar producto..."
+                            onkeyup="filterCalcProducts()"
+                            style="width:100%; padding:12px; border-radius:8px; border:1px solid #444; background:#222; color:white; font-size:0.9rem;">
+                    </div>
+
+                    <!-- Scrollable Grid -->
+                    <div id="calcProdList"
+                        style="flex:1; overflow-y:auto; display:grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap:10px; align-content:start;">
+                        <!-- Products will be injected here via JS -->
+                        <div style="color:#aaa; text-align:center; grid-column:1/-1;">Cargando tarifas...</div>
+                    </div>
+
+                </div>
+                <!-- END RIGHT COLUMN -->
+
+            </div>
+            <!-- END MAIN TWO-COLUMN LAYOUT -->
+
+        </div>
+    </div>
+    <!-- END CALCULATOR MODAL -->
+
+    <!-- Debug Console Overlay -->
+
+
+    <div id="transitionOverlay" class="transition-overlay"></div>
+
+    <!-- Hidden Backup Input for Restore Functionality -->
+    <input type="file" id="backupInput" style="display:none;" accept=".json" onchange="importBackup(this)">
+
+    <!-- Settings Modal (New) -->
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>⚙️ Configuración Notion</h2>
+                <button class="close-btn" onclick="closeSettingsModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:bold; color:var(--text-color);">🔑
+                        Internal Integration Secret</label>
+                    <input type="password" id="settingNotionKey" placeholder="secret_..."
+                        style="width:100%; padding:10px; border-radius:8px; border:1px solid #444; background:#222; color:white;">
+                    <p style="font-size:12px; color:#aaa; margin-top:5px;">Empieza por "secret_". Consíguelo en <a
+                            href="https://www.notion.so/my-integrations" target="_blank"
+                            style="color:#3b82f6;">notion.so/my-integrations</a></p>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:bold; color:var(--text-color);">🗄️
+                        Database ID</label>
+                    <input type="text" id="settingNotionDb" placeholder="32 caracteres hex..."
+                        style="width:100%; padding:10px; border-radius:8px; border:1px solid #444; background:#222; color:white;">
+                    <p style="font-size:12px; color:#aaa; margin-top:5px;">El ID de la base de datos (normalmente en
+                        la
+                        URL).</p>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:bold; color:var(--text-color);">📱
+                        Deep
+                        Link (App Notion)</label>
+                    <input type="text" id="settingNotionAppUrl" placeholder="notion://..."
+                        style="width:100%; padding:10px; border-radius:8px; border:1px solid #444; background:#222; color:white;">
+                    <p style="font-size:12px; color:#aaa; margin-top:5px;">Pega el enlace de tu página y cambia
+                        <b>https</b> por <b>notion</b>.
+                    </p>
+                </div>
+
+                <div style="text-align: right;">
+                    <button onclick="saveSettings()"
+                        style="background:var(--primary-gradient); border:none; padding:10px 20px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">💾
+                        Guardar y Probar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app_v3.js?v=user_fix"></script>
+    <script src="toast.js"></script>
+    <script>
+        // Simple Date Script
+        function updateDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            // Check if element exists before setting (in case removed)
+            const dateEl = document.getElementById('fecha');
+            if (dateEl) dateEl.textContent = now.toLocaleDateString('es-ES', options);
+        }
+        updateDate();
+
+        // Screen Transition Script
+        document.addEventListener('DOMContentLoaded', () => {
+            const overlay = document.getElementById('transitionOverlay');
+            // Intercept links to catalogo.html
+            const catalogLinks = document.querySelectorAll('a[href="catalogo_v2.html"]');
+
+            catalogLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (overlay) {
+                        overlay.classList.add('active-slide-up');
+                        // Wait for animation then navigate
+                        setTimeout(() => {
+                            window.location.href = 'catalogo_v2.html';
+                        }, 600);
+                    } else {
+                        window.location.href = 'catalogo_v2.html';
+                    }
+                });
+            });
+        });
+
+        function openCatalogWithNote() {
+            const activeId = localStorage.getItem('activeNoteId');
+            if (activeId) {
+                window.location.href = `catalogo_v2.html?nid=${activeId}`;
+            } else {
+                window.location.href = 'catalogo_v2.html';
+            }
+        }
+    </script>
+</body>
+
+</html>
+<script>
+    function toggleShowroom() {
+        document.body.classList.toggle('showroom-mode');
+        const btn = document.querySelector('.showroom-toggle i');
+        if (document.body.classList.contains('showroom-mode')) {
+            btn.classList.remove('fa-eye');
+            btn.classList.add('fa-eye-slash');
+        } else {
+            btn.classList.remove('fa-eye-slash');
+            btn.classList.add('fa-eye');
+        }
+    }
+
+    // OUTDOOR MODE LOGIC
+    function toggleOutdoorMode() {
+        document.body.classList.toggle('outdoor-mode');
+        const isOutdoor = document.body.classList.contains('outdoor-mode');
+
+        // Find the button inside the modal
+        const btn = document.querySelector('#calculatorModal .close-btn[onclick*="toggleOutdoorMode"]');
+        if (btn) {
+            if (isOutdoor) {
+                btn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+                btn.style.background = '#000';
+                btn.style.color = '#fff';
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+                btn.style.background = 'rgba(255,255,255,0.1)';
+                btn.style.color = '';
+            }
+        }
+    }
+</script>
