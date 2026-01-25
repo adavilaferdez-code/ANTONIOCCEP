@@ -54,11 +54,13 @@
 
     color: white;
     border: 1px solid rgba(255, 100, 100, 0.4);
-    padding: 16px 45px;
+    padding: 10px 30px;
+    /* Reduced from 16px 45px */
     border-radius: 50px;
     /* Capsule */
 
-    font-size: 1.2rem;
+    font-size: 1rem;
+    /* Reduced from 1.2rem */
     font-weight: 900;
     letter-spacing: 1px;
 
@@ -109,7 +111,8 @@
 }
 
 .capsule-btn {
-    padding: 12px 25px;
+    padding: 10px 20px;
+    /* Smaller padding */
     border-radius: 30px;
     font-weight: 700;
     color: white;
@@ -350,32 +353,49 @@ body {
 
 /* === BENTO GRID STYLES (COMPACT ROW) === */
 .bento-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
-    margin-bottom: 25px;
-    padding: 10px 5px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    /* Reduced gap */
+    margin-bottom: 15px;
+    /* Reduced margin */
+    padding: 5px;
+    /* Reduced padding */
+    max-width: 800px;
+    /* Constrain width to prevent lines of 6 */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Unified Glassmorphism Style */
 .bento-card {
     position: relative;
+    /* Flex Sizing - COMPACT MODE */
+    flex: 1 1 90px;
+    /* Smaller base */
+    max-width: 110px;
+    /* Narrower max */
+
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 15px 5px;
+    border-radius: 14px;
+    padding: 10px 4px;
+    /* Reduced padding */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 5px;
+    /* Tighter gap */
     cursor: pointer;
     text-decoration: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    min-height: 85px;
+    min-height: 70px;
+    /* Shorter card */
     overflow: hidden;
 }
 
@@ -487,6 +507,17 @@ body {
 .bento-card:nth-child(5):hover {
     box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4), inset 0 0 20px rgba(59, 130, 246, 0.1);
     border-color: #60a5fa;
+}
+
+/* 6. Compartir (QR): White/Silver Glow */
+.bento-card:nth-child(6) i {
+    color: #ffffff;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+}
+
+.bento-card:nth-child(6):hover {
+    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1);
+    border-color: #ffffff;
 }
 
 /* === PREMIUM DESIGN UPDATE === */
@@ -2645,6 +2676,11 @@ body.outdoor-mode #calcListGift>div {
     border-color: #60a5fa !important;
     outline: none;
     box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+}
+
+/* === SHOWROOM MODE LOGIC === */
+body.showroom-mode .sensitive-data {
+    display: none !important;
 }
 
 /* Force override of Outdoor Mode styles if they leak */
