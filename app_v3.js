@@ -2181,3 +2181,24 @@ async function syncNotion_FINAL() {
 // === AI MAGIC REWRITE ===
 
 // === AI MAGIC REWRITE (FINAL) ===
+
+// === QR SHARE LOGIC ===
+const qrModal = document.getElementById('qrModal');
+const qrImage = document.getElementById('qrImage');
+const qrLink = document.getElementById('qrLink');
+
+function openQRModal() {
+    const url = window.location.href;
+    // Generate QR using API
+    const qrSource = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
+
+    qrImage.src = qrSource;
+    qrLink.textContent = url;
+
+    qrModal.classList.add('open');
+}
+
+function closeQRModal() {
+    qrModal.classList.remove('open');
+    qrImage.src = ''; // Clear to prevent stale image
+}
