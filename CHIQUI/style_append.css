@@ -1,0 +1,2750 @@
+/* === RESTORED LAYOUT STYLES === */
+
+/* Full Screen Neon Border (Option 1) */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 3px solid #ef4444;
+    /* Balanced Neon Red */
+    border-radius: 0;
+    /* Full screen usually square, or adjust if body has radius */
+    box-shadow: inset 0 0 25px rgba(239, 68, 68, 0.6), 0 0 25px rgba(239, 68, 68, 0.6);
+    /* Cleaner Glow */
+    pointer-events: none;
+    /* Let clicks pass through */
+    z-index: 9999;
+    /* On top of everything */
+    opacity: 0.8;
+}
+
+.actions-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+.dashboard-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.brand-centered {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    /* Left align */
+    margin-bottom: 10px;
+    padding-left: 10px;
+}
+
+.main-logo {
+    height: 70px;
+    /* Increased size */
+    width: auto;
+    object-fit: contain;
+    mix-blend-mode: lighten;
+    /* Better for red on dark */
+    filter: contrast(1.2) brightness(1.1);
+    /* Pop a bit more */
+    z-index: 10;
+    transition: transform 0.3s ease;
+}
+
+.main-logo:hover {
+    transform: scale(1.05);
+}
+
+/* CERCA CAPSULE */
+/* CERCA BUTTON - RUBY GEM EFFECT */
+.btn-cerca {
+    /* Faceted Ruby Appearance */
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, transparent 40%),
+        linear-gradient(to bottom, #ff0000 0%, #b30000 50%, #800000 100%);
+    background-color: #990000;
+
+    color: white;
+    border: 1px solid rgba(255, 100, 100, 0.4);
+    padding: 10px 30px;
+    /* Reduced from 16px 45px */
+    border-radius: 50px;
+    /* Capsule */
+
+    font-size: 1rem;
+    /* Reduced from 1.2rem */
+    font-weight: 900;
+    letter-spacing: 1px;
+
+    /* Deep Crystalline Depth */
+    box-shadow:
+        inset 0 4px 8px rgba(255, 255, 255, 0.4),
+        /* Top internal reflection */
+        inset 0 -6px 10px rgba(0, 0, 0, 0.6),
+        /* Bottom internal shading */
+        0 10px 20px rgba(220, 20, 60, 0.5),
+        /* Outer Ruby Glow */
+        0 4px 5px rgba(0, 0, 0, 0.4);
+    /* Drop shadow */
+
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-cerca::after {
+    /* Shine/Facet Hint */
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 45%, rgba(255, 255, 255, 0.1) 50%, transparent 55%);
+    transform: rotate(30deg);
+    pointer-events: none;
+}
+
+.btn-cerca:hover {
+    transform: scale(1.05);
+}
+
+/* CAPSULE ROW */
+.capsule-row {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.capsule-btn {
+    padding: 10px 20px;
+    /* Smaller padding */
+    border-radius: 30px;
+    font-weight: 700;
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.2s;
+    font-size: 0.9rem;
+}
+
+.capsule-btn:hover {
+    transform: translateY(-2px);
+}
+
+.cap-purple {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
+}
+
+.cap-blue {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+}
+
+.cap-green {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+}
+
+/* DUAL ACTION ROW */
+.dual-action-row {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+}
+
+/* YELLOW CATALOG BAR */
+.catalog-bar {
+    flex: 1;
+    /* Share space */
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #000;
+    font-weight: 900;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 18px;
+    border-radius: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
+    font-size: 1.1rem;
+    transition: transform 0.2s;
+}
+
+.catalog-bar:hover {
+    transform: scale(1.02);
+}
+
+/* POWER BI BAR */
+.powerbi-bar {
+    flex: 1;
+    /* Share space */
+    background: linear-gradient(135deg, #2c2c2c, #000000);
+    /* Professional Dark */
+    color: #f59e0b;
+    /* Gold accent */
+    font-weight: 900;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 18px;
+    border-radius: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    font-size: 1.1rem;
+    transition: transform 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.powerbi-bar i {
+    color: #f59e0b;
+}
+
+.powerbi-bar:hover {
+    transform: scale(1.02);
+    background: linear-gradient(135deg, #3d3d3d, #1a1a1a);
+}
+
+/* HERO CARDS (Focos / Deudas) */
+.hero-grid {
+    display: grid;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.hero-card {
+    position: relative;
+    height: 160px;
+    border-radius: 24px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hero-card:hover {
+    transform: scale(1.02);
+}
+
+.hero-bg {
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    transition: transform 0.5s ease;
+    filter: brightness(0.7) grayscale(10%);
+    /* Darken image to blend with dark theme */
+}
+
+.hero-card:hover .hero-bg {
+    transform: scale(1.05);
+    filter: brightness(0.9) grayscale(0%);
+    /* Brighten slightly on hover */
+}
+
+.hero-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.hero-title {
+    color: white;
+    font-weight: 900;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.hero-sub {
+    color: #ddd;
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+
+/* MODAL FIXES */
+.modal-image-view {
+    width: 100%;
+    border-radius: 12px;
+    cursor: zoom-in;
+    transition: transform 0.2s;
+}
+
+.modal-image-view:hover {
+    transform: scale(1.01);
+}
+
+
+
+/* Force wide modal for spreadsheets */
+@media(min-width: 768px) {
+    #debtModal .modal-content {
+        width: 95% !important;
+        max-width: 1200px !important;
+        max-height: 90vh !important;
+    }
+}
+
+/* BOTTOM NAVIGATION BAR */
+body {
+    padding-bottom: 90px;
+    /* Prevent content from being hidden */
+}
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0 25px 0;
+    /* Extra padding for iOS Home Indicator */
+    z-index: 1000;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #94a3b8;
+    gap: 5px;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+}
+
+.nav-item i {
+    font-size: 1.4rem;
+    margin-bottom: 2px;
+}
+
+.nav-item:hover,
+.nav-item:active {
+    color: #ffd700;
+    /* Gold highlight */
+    transform: translateY(-2px);
+}
+
+.nav-item span {
+    font-weight: 500;
+}
+
+/* === BENTO GRID STYLES (COMPACT ROW) === */
+.bento-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    /* Reduced gap */
+    margin-bottom: 15px;
+    /* Reduced margin */
+    padding: 5px;
+    /* Reduced padding */
+    max-width: 800px;
+    /* Constrain width to prevent lines of 6 */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Unified Glassmorphism Style */
+.bento-card {
+    position: relative;
+    /* Flex Sizing - COMPACT MODE */
+    flex: 1 1 90px;
+    /* Smaller base */
+    max-width: 110px;
+    /* Narrower max */
+
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 10px 4px;
+    /* Reduced padding */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    /* Tighter gap */
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    min-height: 70px;
+    /* Shorter card */
+    overflow: hidden;
+}
+
+/* Subtle top border on hover */
+.bento-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.bento-card:hover::before {
+    opacity: 1;
+}
+
+/* Hover Effect: Consistent with design system */
+.bento-card:hover {
+    background: rgba(239, 68, 68, 0.15);
+    /* Red Tint */
+    border-color: #ef4444;
+    /* Neon Red Border */
+    transform: translateY(-4px);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.6), inset 0 0 10px rgba(239, 68, 68, 0.2);
+    /* Intense Glow */
+}
+
+.bento-card i {
+    font-size: 1.6rem;
+    margin-bottom: 0;
+    z-index: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    transition: all 0.3s;
+}
+
+.bento-card span {
+    font-family: 'Montserrat', sans-serif;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    font-size: 0.65rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    z-index: 1;
+}
+
+/* --- SPECIFIC CAPSULE STYLES (Order: Productos, Power BI, Checklist, Negociación, Catálogo) --- */
+
+/* 1. Productos: Gray Glass, Gold Box, Yellow Glow */
+.bento-card:nth-child(1) {
+    background: linear-gradient(135deg, rgba(128, 128, 128, 0.15), rgba(80, 80, 80, 0.1));
+}
+
+.bento-card:nth-child(1) i {
+    color: #fbbf24;
+    /* Gold */
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8));
+}
+
+.bento-card:nth-child(1):hover {
+    box-shadow: 0 10px 25px rgba(251, 191, 36, 0.3), inset 0 0 20px rgba(251, 191, 36, 0.1);
+    border-color: #fbbf24;
+}
+
+/* 2. Power BI: Orange Glow */
+.bento-card:nth-child(2) i {
+    color: #f97316;
+    /* Orange */
+    filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.8));
+}
+
+.bento-card:nth-child(2):hover {
+    box-shadow: 0 10px 25px rgba(249, 115, 22, 0.3), inset 0 0 20px rgba(249, 115, 22, 0.1);
+    border-color: #f97316;
+}
+
+/* 3. Checklist: Purple List, Purple/Magenta Glow */
+.bento-card:nth-child(3) i {
+    color: #d946ef;
+    /* Magenta */
+    filter: drop-shadow(0 0 8px rgba(217, 70, 239, 0.8));
+}
+
+.bento-card:nth-child(3):hover {
+    box-shadow: 0 10px 25px rgba(217, 70, 239, 0.3), inset 0 0 20px rgba(217, 70, 239, 0.1);
+    border-color: #d946ef;
+}
+
+/* 4. Negociación (Gemini): Teal/Turquoise Glow */
+.bento-card:nth-child(4) i {
+    color: #2dd4bf;
+    /* Teal/Turquoise */
+    filter: drop-shadow(0 0 8px rgba(45, 212, 191, 0.8));
+}
+
+.bento-card:nth-child(4):hover {
+    box-shadow: 0 10px 25px rgba(45, 212, 191, 0.3), inset 0 0 20px rgba(45, 212, 191, 0.1);
+    border-color: #2dd4bf;
+}
+
+/* 5. Catálogo (Clientes): Blue Image, Light Blue Glow */
+.bento-card:nth-child(5) i {
+    color: #60a5fa;
+    /* Light Blue */
+    filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.8));
+}
+
+.bento-card:nth-child(5):hover {
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4), inset 0 0 20px rgba(59, 130, 246, 0.1);
+    border-color: #60a5fa;
+}
+
+/* 6. Compartir (QR): White/Silver Glow */
+.bento-card:nth-child(6) i {
+    color: #ffffff;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+}
+
+.bento-card:nth-child(6):hover {
+    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1);
+    border-color: #ffffff;
+}
+
+/* === PREMIUM DESIGN UPDATE === */
+
+/* 1. Deep Dark Background with Mesh Gradients */
+body,
+.app-background {
+    background-color: #121212 !important;
+    background-image:
+        radial-gradient(at 0% 0%, rgba(220, 38, 38, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(220, 38, 38, 0.1) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(245, 158, 11, 0.15) 0px, transparent 50%) !important;
+    background-attachment: fixed !important;
+    font-family: 'Montserrat', sans-serif !important;
+}
+
+/* 2. Glassmorphism Cards - Premium Effect */
+.capsule-btn.cap-purple,
+/*.capsule-btn.cap-blue, RE-ENABLED SEPARATELY */
+.capsule-btn.cap-green,
+.bento-card,
+.catalog-bar,
+.powerbi-bar,
+.hero-card {
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+    color: #e5e5e5 !important;
+}
+
+/* Blue Distribution Button - Glassmorphism (Informative, not CTA) */
+.capsule-btn.cap-blue {
+    background: rgba(59, 130, 246, 0.15) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    color: #60a5fa !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Subtle glow effect */
+.capsule-btn.cap-blue::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.5), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.capsule-btn.cap-blue:hover::before {
+    opacity: 1;
+}
+
+.capsule-btn.cap-blue:hover {
+    background: rgba(59, 130, 246, 0.25) !important;
+    border-color: rgba(59, 130, 246, 0.5) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3) !important;
+}
+
+.capsule-btn.cap-blue i {
+    color: #60a5fa !important;
+}
+
+/* 4. Floating Dock Navigation (macOS Style) */
+.bottom-nav {
+    position: fixed !important;
+    bottom: 25px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: auto !important;
+    min-width: 340px;
+    background: rgba(20, 20, 20, 0.85) !important;
+    /* Slightly more opaque for dock */
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border-radius: 24px !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+    padding: 10px 30px !important;
+    padding: 10px 30px !important;
+    justify-content: space-between !important;
+    gap: 30px !important;
+    z-index: 9000 !important;
+    /* Ensure it stays on top */
+}
+
+/* Fix for scrolling content behind dock */
+.modal-content {
+    padding-bottom: 120px !important;
+    /* Space for the dock */
+}
+
+/* Hover Effects */
+.capsule-btn:hover,
+.bento-card:hover,
+.catalog-bar:hover,
+.powerbi-bar:hover,
+.hero-card:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+    transform: translateY(-2px);
+}
+
+.hero-content-clean {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 20px;
+    text-align: center;
+}
+
+.capsule-btn.cap-purple i {
+    color: #d946ef !important;
+}
+
+/* Purple Icon */
+.capsule-btn.cap-blue i {
+    color: #3b82f6 !important;
+}
+
+/* Blue Icon */
+.capsule-btn.cap-green i {
+    color: #10b981 !important;
+}
+
+/* Green Icon */
+
+/* 3. Catalog Bar Update */
+/* From bright yellow to Dark with Yellow Text */
+.catalog-bar {
+    background: #1e1e1e !important;
+    color: #fbbf24 !important;
+    /* Amber-400 */
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+}
+
+.catalog-bar:hover {
+    background: #2a2a2a !important;
+    border-color: #fbbf24 !important;
+}
+
+.catalog-bar i {
+    color: #fbbf24 !important;
+}
+
+/* 4. Power BI Bar (Keep consistent) */
+.powerbi-bar {
+    background: #1e1e1e !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+/* 5. Nav Bar Adjustment */
+.bottom-nav {
+    background: rgba(18, 18, 18, 0.95) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Calculator Styles */
+.calculator-body {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px;
+}
+
+#calcDisplay {
+    width: 100%;
+    height: 60px;
+    background: #f3f4f6;
+    border: none;
+    border-radius: 10px;
+    font-size: 2rem;
+    text-align: right;
+    padding: 10px 15px;
+    font-family: monospace;
+    color: #1f2937;
+    margin-bottom: 10px;
+}
+
+.calc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.calc-btn {
+    height: 60px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: #e5e7eb;
+    color: #374151;
+    transition: all 0.2s;
+}
+
+.calc-btn:active {
+    filter: brightness(0.9);
+    transform: scale(0.98);
+}
+
+.calc-btn.op {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.calc-btn.equals {
+    grid-row: span 2;
+    height: 100%;
+    background: #2563eb;
+    color: white;
+}
+
+.calc-btn.zero {
+    grid-column: span 2;
+}
+
+
+/* Force wide modal for Focos */
+@media(min-width: 768px) {
+    #focusModal .modal-content {
+        width: 95% !important;
+        max-width: 1200px !important;
+        max-height: 90vh !important;
+    }
+}
+
+/* === ENTRY ANIMATIONS === */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes expand {
+    from {
+        width: 0;
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    to {
+        width: 100%;
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.main-logo {
+    animation: fadeIn 0.8s ease-out backwards;
+}
+
+.search-wrapper {
+    animation: expand 0.8s ease-out 0.3s backwards;
+}
+
+.actions-container,
+.hero-grid {
+    animation: slideUp 0.8s ease-out 0.6s backwards;
+}
+
+/* === DISTRIBUTORS TABLE === */
+.dist-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #111;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.dist-table th,
+.dist-table td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ccc;
+}
+
+.dist-table .header-row {
+    background: #1e3a8a;
+    /* Dark Blue */
+    color: white;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+.dist-table .row-amagosa {
+    background: #bfdbfe;
+    /* Light Blue */
+}
+
+.dist-table .row-escudero {
+    background: #fed7aa;
+    /* Light Orange */
+}
+
+.dist-table .row-lorenzo {
+    background: #bbf7d0;
+    /* Light Green */
+}
+
+.dist-table .row-miguel {
+    background: #fecaca;
+    /* Light Red */
+}
+
+/* === SCREEN TRANSITION OVERLAY === */
+.transition-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    pointer-events: none;
+
+    /* Frosted Glass Style */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+
+    /* Initial State: Hidden/Below */
+    opacity: 0;
+    transform: translateY(100%);
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease;
+}
+
+/* Active State: Covers Screen (Slide Up) */
+.transition-overlay.active-slide-up {
+    pointer-events: all;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Active State: Covering Screen (For Page Load) */
+.transition-overlay.active-cover {
+    pointer-events: all;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Exit State: Fade Out (Clear Up) */
+.transition-overlay.fade-out {
+    opacity: 0;
+    /* transform: translateY(0); stays in place while fading */
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+}
+
+/* === CHECKLIST PRO STYLES === */
+.checklist-container {
+    gap: 12px !important;
+}
+
+.check-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    padding: 18px 20px;
+}
+
+.check-icon {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    width: 40px;
+    display: flex;
+    justify-content: center;
+}
+
+.check-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.check-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.check-sub {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    font-weight: 400;
+}
+
+/* Highlights */
+.check-item.highlight-blue {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), transparent);
+    border-left: 4px solid #3b82f6;
+}
+
+.check-item.highlight-blue .check-icon {
+    color: #3b82f6;
+}
+
+.check-item.highlight-red {
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.15), transparent);
+    border-left: 4px solid #ef4444;
+}
+
+.check-item.highlight-red .check-icon {
+    color: #ef4444;
+}
+
+.check-item.highlight-gold {
+    background: linear-gradient(90deg, rgba(234, 179, 8, 0.1), transparent);
+    border-left: 4px solid #eab308;
+}
+
+.check-item.highlight-gold .check-icon {
+    color: #eab308;
+}
+
+.check-item.highlight-green {
+    background: linear-gradient(90deg, rgba(34, 197, 94, 0.1), transparent);
+    border-left: 4px solid #22c55e;
+}
+
+.check-item.highlight-green .check-icon {
+    color: #22c55e;
+}
+
+/* ELECTRIC HIGHLIGHT (ACTIVAR) */
+@keyframes electricPulse {
+    0% {
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(244, 0, 9, 0.4);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    100% {
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+    }
+}
+
+.check-item.highlight-electric {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.2));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+    animation: electricPulse 2s infinite;
+}
+
+.check-item.highlight-electric .check-title {
+    color: #fbbf24;
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+    font-style: italic;
+    font-weight: 900;
+}
+
+.check-item.highlight-electric .check-icon {
+    color: #fbbf24;
+    filter: drop-shadow(0 0 5px #fbbf24);
+}
+
+
+/* ============================================
+   HERO SECTION - PREMIUM ENTRANCE ANIMATIONS
+   ============================================ */
+
+/* Animated Background Gradient */
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.app-background {
+    background:
+        radial-gradient(circle at 10% 20%, rgba(244, 0, 9, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+        linear-gradient(-45deg, #050507, #0a0a0f, #0f0510, #050507);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+/* Logo Glow Effect */
+.main-logo {
+    animation: logoEntrance 1s ease-out, logoGlow 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(244, 0, 9, 0.4));
+    transition: all 0.3s ease;
+}
+
+@keyframes logoEntrance {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(-20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes logoGlow {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 20px rgba(244, 0, 9, 0.4));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 35px rgba(244, 0, 9, 0.7)) drop-shadow(0 0 50px rgba(244, 0, 9, 0.3));
+    }
+}
+
+.main-logo:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 40px rgba(244, 0, 9, 0.8)) drop-shadow(0 0 60px rgba(244, 0, 9, 0.4));
+}
+
+/* Entrance Animations for Main Elements */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Apply animations to page sections */
+.app-header {
+    animation: fadeInScale 0.6s ease-out;
+}
+
+.search-hero {
+    animation: fadeInUp 0.8s ease-out 0.2s backwards;
+}
+
+.actions-container {
+    animation: fadeInUp 0.8s ease-out 0.3s backwards;
+}
+
+.hero-grid {
+    animation: fadeInUp 0.8s ease-out 0.4s backwards;
+}
+
+/* Enhanced Search Bar with Glow */
+.search-wrapper {
+    position: relative;
+}
+
+.search-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50px;
+    background: linear-gradient(45deg,
+            rgba(244, 0, 9, 0.3),
+            rgba(59, 130, 246, 0.3),
+            rgba(139, 92, 246, 0.3),
+            rgba(244, 0, 9, 0.3));
+    background-size: 300% 300%;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s ease;
+    animation: gradientShift 4s ease infinite;
+}
+
+.search-wrapper:focus-within::before {
+    opacity: 1;
+}
+
+.search-input {
+    position: relative;
+    z-index: 1;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-input:focus {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(244, 0, 9, 0.5);
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(244, 0, 9, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Floating Animation for Hero Cards */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+.hero-card {
+    animation: float 6s ease-in-out infinite;
+}
+
+.hero-card:nth-child(2) {
+    animation-delay: 1s;
+}
+
+/* Bento Grid Enhanced */
+.bento-card {
+    animation: fadeInScale 0.5s ease-out backwards;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.bento-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.1),
+            transparent);
+    transition: left 0.5s ease;
+}
+
+.bento-card:hover::before {
+    left: 100%;
+}
+
+.bento-card:nth-child(1) {
+    animation-delay: 0.5s;
+}
+
+.bento-card:nth-child(2) {
+    animation-delay: 0.6s;
+}
+
+.bento-card:nth-child(3) {
+    animation-delay: 0.7s;
+}
+
+.bento-card:nth-child(4) {
+    animation-delay: 0.8s;
+}
+
+.bento-card:nth-child(5) {
+    animation-delay: 0.9s;
+}
+
+.bento-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Pulse effect for important buttons */
+@keyframes pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(244, 0, 9, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 10px rgba(244, 0, 9, 0);
+    }
+}
+
+.btn-cerca {
+    animation: pulse 2s ease infinite;
+}
+
+/* Shimmer effect on load */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.brand-centered {
+    animation: fadeInScale 0.8s ease-out;
+}
+
+/* ============================================
+   STATISTICS WIDGETS (DASHBOARD)
+   ============================================ */
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+    animation: fadeInUp 0.8s ease-out 0.5s backwards;
+}
+
+@media (max-width: 640px) {
+    .stats-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+}
+
+/* Stat Card */
+.stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg,
+            rgba(59, 130, 246, 0.5),
+            rgba(139, 92, 246, 0.5));
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.stat-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.stat-card:hover::before {
+    opacity: 1;
+}
+
+/* Stat Icon */
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s;
+}
+
+.stat-card:hover .stat-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.stat-icon-blue {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.stat-icon-orange {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.stat-icon-green {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+/* Stat Content */
+.stat-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-number {
+    font-size: 32px;
+    font-weight: 900;
+    color: white;
+    line-height: 1;
+    font-family: 'Montserrat', sans-serif;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.stat-label {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+@media (max-width: 640px) {
+    .stat-card {
+        padding: 16px;
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+
+    .stat-number {
+        font-size: 28px;
+    }
+
+    .stat-label {
+        font-size: 11px;
+    }
+}
+
+/* ============================================
+   SKELETON LOADERS
+   ============================================ */
+
+/* Shimmer Animation */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.05) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0.05) 100%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    border-radius: 8px;
+}
+
+/* Skeleton Card for Products */
+.skeleton-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.skeleton-header {
+    height: 120px;
+    border-radius: 12px;
+    background: linear-gradient(90deg,
+            rgba(37, 99, 235, 0.2) 0%,
+            rgba(79, 70, 229, 0.3) 50%,
+            rgba(37, 99, 235, 0.2) 100%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+}
+
+.skeleton-line {
+    height: 20px;
+    border-radius: 4px;
+}
+
+.skeleton-line.small {
+    width: 60%;
+}
+
+.skeleton-line.medium {
+    width: 80%;
+}
+
+.skeleton-line.large {
+    width: 100%;
+}
+
+.skeleton-price {
+    height: 60px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+/* Skeleton Grid */
+.skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+/* ============================================
+   TOAST NOTIFICATION SYSTEM
+   ============================================ */
+
+/* Toast Container */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+}
+
+@media (max-width: 640px) {
+    .toast-container {
+        top: auto;
+        bottom: 80px;
+        left: 20px;
+        right: 20px;
+    }
+}
+
+/* Toast Base Styles */
+.toast {
+    min-width: 320px;
+    max-width: 420px;
+    background: rgba(18, 18, 20, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    pointer-events: all;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: toastSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (max-width: 640px) {
+    .toast {
+        min-width: auto;
+        max-width: none;
+        width: 100%;
+    }
+}
+
+.toast:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 15px 50px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Toast Animations */
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(400px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes toastSlideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(400px);
+    }
+}
+
+.toast.removing {
+    animation: toastSlideOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Toast Icon */
+.toast-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* Toast Content */
+.toast-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.toast-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+}
+
+.toast-message {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+}
+
+/* Toast Close Button */
+.toast-close {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.toast-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Toast Types */
+.toast.success {
+    border-left: 4px solid #10b981;
+}
+
+.toast.success .toast-icon {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.toast.error {
+    border-left: 4px solid #ef4444;
+}
+
+.toast.error .toast-icon {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.toast.warning {
+    border-left: 4px solid #f59e0b;
+}
+
+.toast.warning .toast-icon {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.toast.info {
+    border-left: 4px solid #3b82f6;
+}
+
+.toast.info .toast-icon {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+}
+
+/* Toast Progress Bar */
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 0 0 12px 12px;
+    transform-origin: left;
+    animation: toastProgress 5s linear forwards;
+}
+
+@keyframes toastProgress {
+    from {
+        transform: scaleX(1);
+    }
+
+    to {
+        transform: scaleX(0);
+    }
+}
+
+.toast.success .toast-progress {
+    background: #10b981;
+}
+
+.toast.error .toast-progress {
+    background: #ef4444;
+}
+
+.toast.warning .toast-progress {
+    background: #f59e0b;
+}
+
+.toast.info .toast-progress {
+    background: #3b82f6;
+}
+
+/* === SHOWROOM MODE === */
+
+/* Toggle Button in Header */
+.showroom-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+.showroom-toggle:hover {
+    background: white;
+    color: black;
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Active Mode Styles */
+body.showroom-mode .sensitive-data,
+body.showroom-mode .nav-item,
+body.showroom-mode .bottom-nav,
+body.showroom-mode .search-hero,
+body.showroom-mode .btn-cerca,
+body.showroom-mode .brand-centered p {
+    display: none !important;
+}
+
+/* Enhancements for Showroom Mode */
+body.showroom-mode .bento-grid {
+    grid-template-columns: 1fr 1fr !important;
+    /* Larger cards */
+    gap: 20px;
+    margin-top: 40px;
+}
+
+body.showroom-mode .bento-card {
+    min-height: 250px;
+    /* Taller cards */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+body.showroom-mode .bento-card i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+body.showroom-mode .bento-card span {
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+}
+
+body.showroom-mode .hero-grid {
+    grid-template-columns: 1fr;
+    /* Full width hero */
+    margin-top: 40px;
+}
+
+body.showroom-mode .app-header {
+    background: linear-gradient(to right, #000, #111);
+    /* Cleaner header */
+    border-bottom: none;
+    box-shadow: none;
+}
+
+/* ============================================= */
+/* === NEW FOCOS & DEUDAS INTERACTIVE PANELS === */
+/* ============================================= */
+
+/* Main Panel Container */
+.focus-panel,
+.debt-panel {
+    background: rgba(20, 20, 25, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+}
+
+/* Panel Header */
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.panel-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.panel-title i {
+    font-size: 1.2rem;
+}
+
+.panel-title.focos i {
+    color: #fbbf24;
+    filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.5));
+}
+
+.panel-title.deudas i {
+    color: #ef4444;
+    filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5));
+}
+
+.panel-badge {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #a5a5a5;
+    font-weight: 600;
+}
+
+.panel-badge.total-deuda {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.3));
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* KPI Grid */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.kpi-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 16px 12px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.kpi-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.kpi-value {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: white;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.kpi-label {
+    font-size: 0.7rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+/* KPI Color Variants */
+.kpi-card.success .kpi-value {
+    color: #10b981;
+}
+
+.kpi-card.warning .kpi-value {
+    color: #fbbf24;
+}
+
+.kpi-card.danger .kpi-value {
+    color: #ef4444;
+}
+
+.kpi-card.info .kpi-value {
+    color: #3b82f6;
+}
+
+/* Client List Container */
+.client-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Custom Scrollbar */
+.client-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.client-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.client-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.client-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Client Card */
+.client-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    padding: 14px 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.client-card:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateX(4px);
+}
+
+/* Status Indicator */
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 10px currentColor;
+}
+
+.status-indicator.green {
+    background: #10b981;
+    color: #10b981;
+}
+
+.status-indicator.yellow {
+    background: #fbbf24;
+    color: #fbbf24;
+}
+
+.status-indicator.red {
+    background: #ef4444;
+    color: #ef4444;
+}
+
+/* Client Info */
+.client-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.client-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: white;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.client-meta {
+    font-size: 0.75rem;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.client-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Progress Section */
+.progress-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    min-width: 80px;
+}
+
+.progress-bar-container {
+    width: 80px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.progress-bar-fill.green {
+    background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.progress-bar-fill.yellow {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.progress-bar-fill.red {
+    background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.progress-text {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: white;
+}
+
+/* Amount Display (for Debts) */
+.amount-display {
+    text-align: right;
+    min-width: 90px;
+}
+
+.amount-value {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: white;
+}
+
+.amount-value.negative {
+    color: #ef4444;
+}
+
+.amount-value.positive {
+    color: #10b981;
+}
+
+.amount-days {
+    font-size: 0.7rem;
+    color: #888;
+    margin-top: 2px;
+}
+
+.amount-days.critical {
+    color: #ef4444;
+}
+
+/* Action Buttons */
+.client-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.08);
+    color: #a5a5a5;
+}
+
+.action-btn:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.action-btn.call:hover {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.action-btn.whatsapp:hover {
+    background: rgba(37, 211, 102, 0.2);
+    color: #25d366;
+}
+
+.action-btn.check:hover {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+}
+
+.action-btn.cobrar {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(34, 197, 94, 0.3));
+    color: #10b981;
+    width: auto;
+    padding: 0 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    gap: 4px;
+}
+
+.action-btn.cobrar:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(34, 197, 94, 0.5));
+    transform: scale(1.05);
+}
+
+/* View All Button */
+.view-all-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #888;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.view-all-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive KPI Grid */
+@media (max-width: 600px) {
+    .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .kpi-value {
+        font-size: 1.4rem;
+    }
+
+    .client-card {
+        flex-wrap: wrap;
+    }
+
+    .progress-section,
+    .amount-display {
+        min-width: auto;
+    }
+
+    .client-actions {
+        width: 100%;
+        justify-content: flex-end;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+}
+
+/* Empty State */
+.empty-state-panel {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.empty-state-panel i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.empty-state-panel p {
+    font-size: 0.9rem;
+}
+
+/* Animation for new items */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.client-card {
+    animation: slideInRight 0.4s ease backwards;
+}
+
+.client-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.client-card:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.client-card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.client-card:nth-child(4) {
+    animation-delay: 0.25s;
+}
+
+.client-card:nth-child(5) {
+    animation-delay: 0.3s;
+}
+
+/* ========================================= */
+/* === FASE 2: PREMIUM GLASS THEME       === */
+/* ========================================= */
+
+:root {
+    --glass-bg: rgba(18, 18, 20, 0.85);
+    /* Deep dark grey, almost black but not quite */
+    --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    --neon-green: #00ff88;
+    --text-primary: #ededed;
+    --text-secondary: #a0a0a0;
+    --btn-neutral: rgba(255, 255, 255, 0.04);
+}
+
+/* Glass Modal Override */
+#calculatorModal .modal-content {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: var(--glass-border) !important;
+    box-shadow: var(--glass-shadow) !important;
+    border-radius: 20px !important;
+}
+
+/* Neutral Buttons (Clean UI) */
+.calc-btn {
+    background: var(--btn-neutral) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    color: var(--text-primary) !important;
+    box-shadow: none !important;
+    border-radius: 12px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+.calc-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Operators slightly different but still neutral */
+.calc-btn.op {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* EQUALS = GREEN (The only pop of color) */
+.calc-btn.equals {
+    background: var(--neon-green) !important;
+    color: #000 !important;
+    /* Black text on neon green for readability */
+    font-weight: 900 !important;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4) !important;
+    border: none !important;
+}
+
+/* Inputs Clean Up */
+input#calcDisplay,
+input.qty-input {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    border-radius: 0 !important;
+}
+
+/* List Items - Glass Cards */
+.cart-item {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 12px !important;
+    transition: all 0.2s ease;
+}
+
+.cart-item:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Typography Focus */
+#bonResultPrice {
+    text-shadow: 0 0 30px rgba(0, 255, 136, 0.25);
+}
+
+/* ========================================= */
+/* === FASE 3: ANIMATIONS & POLISH       === */
+/* ========================================= */
+
+/* Watermark Branding */
+#calculatorModal .modal-content {
+    position: relative;
+    /* Ensure positioning context */
+}
+
+#calculatorModal .modal-content::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: url('logo_antonio.png') no-repeat center center;
+    background-size: contain;
+    opacity: 0.1;
+    /* More visible (was 0.03) */
+    pointer-events: none;
+    z-index: 0;
+    filter: grayscale(100%);
+}
+
+/* Logic to hide watermark in outdoor mode if needed, or keep it */
+body.outdoor-mode #calculatorModal .modal-content::before {
+    opacity: 0.05;
+    filter: none;
+}
+
+/* Liquid Animations */
+@keyframes fadeInUpLiquid {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.cart-item {
+    /* Existing styles will be merged */
+    animation: fadeInUpLiquid 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    /* Bouncy liquid effect */
+}
+
+/* Number Rolling Effect (Simulated via transition) */
+#bonResultPrice {
+    transition: color 0.3s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.price-bump {
+    transform: scale(1.1);
+    color: #fff !important;
+    /* Flash white */
+}
+
+/* Visual Feedback */
+@keyframes flashGreenScreen {
+    0% {
+        box-shadow: inset 0 0 0 0 rgba(74, 222, 128, 0);
+    }
+
+    50% {
+        box-shadow: inset 0 0 40px rgba(74, 222, 128, 0.2);
+    }
+
+    100% {
+        box-shadow: inset 0 0 0 0 rgba(74, 222, 128, 0);
+    }
+}
+
+.feedback-success {
+    animation: flashGreenScreen 0.6s ease-out;
+}
+
+/* ========================================= */
+/* === MEJORAS UI - MODO EXTERIOR & TOUCH === */
+/* ========================================= */
+
+/* 1. MODO EXTERIOR (High Contrast & Visible) */
+body.outdoor-mode {
+    background: #ffffff !important;
+    background-image: none !important;
+    --card-bg: #fff;
+}
+
+body.outdoor-mode .modal-overlay {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: none;
+}
+
+body.outdoor-mode .modal-content,
+body.outdoor-mode .calculator-body,
+body.outdoor-mode .app-container {
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: 0 0 0 1px #000 !important;
+    border: 1px solid #000 !important;
+}
+
+body.outdoor-mode .modal-header h2,
+body.outdoor-mode .close-btn,
+body.outdoor-mode .close-btn i,
+body.outdoor-mode label,
+body.outdoor-mode .calc-btn,
+body.outdoor-mode .tab-btn,
+body.outdoor-mode span,
+body.outdoor-mode p,
+body.outdoor-mode div:not(.product-color-indicator) {
+    color: #000000 !important;
+    text-shadow: none !important;
+}
+
+body.outdoor-mode .close-btn {
+    background: #e5e5e5 !important;
+    border: 2px solid #000 !important;
+}
+
+body.outdoor-mode .calc-btn {
+    background: #f3f4f6 !important;
+    border: 2px solid #000 !important;
+    font-weight: 800 !important;
+}
+
+body.outdoor-mode .calc-btn.op {
+    background: #bfdbfe !important;
+    color: #000 !important;
+}
+
+body.outdoor-mode .calc-btn.equals {
+    background: #000 !important;
+    color: #fff !important;
+}
+
+body.outdoor-mode #bonResultPrice {
+    color: #000000 !important;
+    text-shadow: none !important;
+    font-weight: 900;
+}
+
+body.outdoor-mode #bonResultTotal {
+    color: #166534 !important;
+    /* Green readable on white */
+}
+
+body.outdoor-mode input {
+    background: #fff !important;
+    color: #000 !important;
+    border: 2px solid #000 !important;
+    font-weight: bold !important;
+}
+
+/* Outdoor Mode Lists */
+body.outdoor-mode #calcListBuy>div,
+body.outdoor-mode #calcListGift>div {
+    background: #f9fafb !important;
+    border: 2px solid #000 !important;
+    color: #000 !important;
+    margin-bottom: 5px;
+}
+
+/* 2. BUTTON TOUCH TARGETS (44px) */
+.btn-touch {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    font-size: 1.5rem !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 8px;
+    touch-action: manipulation;
+    margin: 0 5px;
+    transition: transform 0.1s;
+}
+
+.btn-touch:active {
+    background-color: rgba(0, 0, 0, 0.1);
+    /* Subtle feedback instead of movement */
+}
+
+/* 3. SCROLL FIXES */
+#calculatorModal .modal-content {
+    overflow-y: auto !important;
+}
+
+#calcBodyOffer {
+    overflow-y: visible !important;
+    height: auto !important;
+    max-height: none !important;
+}
+
+/* 4. TYPOGRAPHY HIERARCHY */
+#bonResultPrice {
+    font-size: 3.5rem !important;
+    letter-spacing: -2px;
+    margin: 10px 0;
+}
+
+.price-unit-small {
+    font-size: 1rem;
+    color: #888;
+    margin-top: -10px;
+    display: block;
+}
+
+/* === EXECUTIVE DARK CALCULATOR THEME === */
+
+/* 1. Modal Container - Dark Glass */
+#calculatorModal .modal-content {
+    background: rgba(18, 18, 20, 0.95);
+    /* Deep dark background */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+}
+
+/* 2. Calculator Display */
+#calcDisplay {
+    background: rgba(0, 0, 0, 0.3);
+    color: #4ade80;
+    /* Neon Green Text */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    font-family: 'Montserrat', monospace;
+    font-weight: 600;
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+    /* Subtle glow */
+}
+
+/* 3. Calculator Buttons */
+.calc-btn {
+    background: rgba(255, 255, 255, 0.05);
+    /* Glassy button */
+    color: #e5e5e5;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(4px);
+}
+
+.calc-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.calc-btn:active {
+    transform: scale(0.95);
+}
+
+/* Operators (Blue Neon) */
+.calc-btn.op {
+    background: rgba(37, 99, 235, 0.15);
+    /* Blue tint */
+    color: #60a5fa;
+    /* Blue neon */
+    border-color: rgba(37, 99, 235, 0.3);
+}
+
+.calc-btn.op:hover {
+    background: rgba(37, 99, 235, 0.3);
+    box-shadow: 0 0 15px rgba(37, 99, 235, 0.3);
+}
+
+/* Equals (Solid Neon Gradient) */
+.calc-btn.equals {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+    border: none;
+}
+
+.calc-btn.equals:hover {
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+    transform: translateY(-2px);
+}
+
+/* 4. Product Grid - Glass Cards */
+#calcProdList div {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+#calcProdList div:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Product Icons */
+#calcProdList div div:first-child {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    /* Glow for icons */
+}
+
+/* Price Text */
+#calcProdList div div:nth-child(3) div:first-child {
+    color: #4ade80 !important;
+    /* Neon Green Price */
+    text-shadow: 0 0 8px rgba(74, 222, 128, 0.3);
+}
+
+/* Gift Button */
+.gift-btn {
+    background: rgba(251, 191, 36, 0.1) !important;
+    border: 1px solid rgba(251, 191, 36, 0.3) !important;
+    box-shadow: 0 0 5px rgba(251, 191, 36, 0.1);
+}
+
+.gift-btn:hover {
+    background: rgba(251, 191, 36, 0.3) !important;
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+}
+
+/* 5. Tabs */
+.tab-btn {
+    transition: all 0.3s;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+/* 6. Inputs in Bonification Panel */
+#calcBodyOffer input[type='number'] {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    border-radius: 6px;
+    padding: 5px;
+    text-align: center;
+}
+
+#calcBodyOffer input[type='number']:focus {
+    border-color: #60a5fa !important;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+}
+
+/* === SHOWROOM MODE LOGIC === */
+body.showroom-mode .sensitive-data {
+    display: none !important;
+}
+
+/* Force override of Outdoor Mode styles if they leak */
+body.outdoor-mode #calculatorModal .modal-content {
+    background: #ffffff !important;
+    /* Only in explicit outdoor mode */
+}
+
+
+/* Force override of Outdoor Mode styles if they leak */
+body.outdoor-mode #calculatorModal .modal-content {
+    background: #ffffff !important;
+    /* Only in explicit outdoor mode */
+}
+
+
+/* === GLASS UNFOLD ANIMATION (OPTION 3) === */
+@keyframes glassUnfold {
+    0% {
+        opacity: 0;
+        transform: scale(0.9) translateY(40px) rotateX(10deg);
+        filter: blur(12px);
+    }
+
+    60% {
+        opacity: 1;
+        filter: blur(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0) rotateX(0deg);
+        filter: blur(0);
+    }
+}
+
+#calculatorModal.open .modal-content {
+    animation: glassUnfold 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    transition: none !important;
+    /* FIX: Disable base slide-up transition */
+    will-change: transform, opacity, filter;
+    /* Reset text rendering for clarity after animation */
+}

@@ -1,0 +1,27 @@
+// Fix para caracteres especiales en WhatsApp
+// Añadir esta función en catalogoproducto.jsx alrededor de la línea 616
+
+// REEMPLAZAR la función shareViaWhatsApp con esta versión:
+
+const shareViaWhatsApp = () => {
+  if (cart.length === 0) {
+    if (window.showWarning) {
+      window.showWarning('Carrito vacío', 'Añade productos antes de enviar');
+    }
+    return;
+  }
+
+  // Usar solo caracteres ASCII seguros
+  let message = '*Propuesta Coca-Cola*\n\n';
+  cart.forEach(item => {
+    const subtotal = item.price * item.quantity;
+    message += `- ${item.name}\n`;
+    message += `  ${item.envase} x${item.quantity}\n`;
+    message += `  ${subtotal.toFixed(2)} EUR\n\n`;
+  });
+  message += `*Total: ${cartTotal.toFixed(2)} EUR*\n\n`;
+  message += 'Te interesa esta oferta?';
+
+  const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+  window.open(url, '_blank');
+};

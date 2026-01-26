@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Catálogo Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Metallic Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 28px;
+            width: 28px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #f3f4f6, #ffffff);
+            border: 1px solid #d1d5db;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            margin-top: -12px;
+            transition: transform 0.1s;
+        }
+
+        input[type=range]:active::-webkit-slider-thumb {
+            transform: scale(1.1);
+            background: #e5e7eb;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #e5e7eb;
+            border-radius: 99px;
+        }
+
+        /* Hide Scrollbar but keep functionality */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-card {
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
+            /* Start hidden */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen pb-20">
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- HEADER -->
+        <header class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+                <h1 class="text-4xl font-black text-gray-900 tracking-tight leading-none mb-2">Catálogo</h1>
+                <p class="text-gray-500 font-medium text-sm">Calculadora de Precio Paralelo</p>
+            </div>
+
+            <div class="flex gap-3">
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" id="searchInput" oninput="renderCatalog()" placeholder="Buscar..."
+                        class="pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl font-medium text-gray-900 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full md:w-64 transition-shadow">
+                </div>
+
+                <div class="relative">
+                    <select id="sortSelect" onchange="renderCatalog()"
+                        class="appearance-none pl-4 pr-10 py-3 bg-white border border-gray-200 rounded-xl font-bold text-gray-700 shadow-sm hover:shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="default">Recomendado</option>
+                        <option value="name">Nombre</option>
+                        <option value="price-asc">Precio: Menor</option>
+                        <option value="price-desc">Precio: Mayor</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- CATEGORY PILLS -->
+        <div id="categoryContainer" class="flex gap-3 overflow-x-auto hide-scrollbar mb-8 pb-2">
+            <!-- Injected JS -->
+        </div>
+
+        <!-- GRID LAYOUT -->
+        <div id="catalogGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Cards Injected Here -->
+        </div>
+
+    </div>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        // === DATA ===
+        const PRODUCTS = [
+            // 1. COCA-COLA (All)
+            { id: 1, name: 'COCA-COLA', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas' },
+            { id: 2, name: 'CC LIGHT / CC ZERO', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas' },
+            { id: 16, name: 'COCA-COLA / CC ZERO / CC LIGHT', category: 'VNR 1 LIT.', price: 18.66, envase: '12 botellas' },
+            { id: 17, name: 'COCA-COLA', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas' },
+            { id: 18, name: 'CC LIGHT / CC ZERO / CCZZ', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas' },
+            { id: 29, name: 'COCA-COLA', category: 'Lata 33cl', price: 39.36, envase: '24 latas' },
+            { id: 30, name: 'CCL / CCZ / CCZZ / CCSC / CCLSC', category: 'Lata 33cl', price: 39.36, envase: '24 latas' },
+            { id: 34, name: 'COCA-COLA VR 350', category: 'Vidrio 350ml', price: 29.28, envase: '12 botellas' },
+            { id: 39, name: 'CC REGULAR / CCZ / CCZZ / CCL / CCSC', category: 'PET 2,0 Lts', price: 28.68, envase: '6 botellas' },
+
+            // 2. FANTA (All)
+            { id: 3, name: 'FANTA NARANJA', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas' },
+            { id: 4, name: 'FANTA LIMÓN', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas' },
+            { id: 19, name: 'FANTA NARANJA', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas' },
+            { id: 20, name: 'FANTA LIMÓN', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas' },
+            { id: 31, name: 'FANTA', category: 'Lata 33cl', price: 37.68, envase: '24 latas' },
+            { id: 40, name: 'FANTA NARANJA / LIMÓN (6 ud)', category: 'PET 2,0 Lts', price: 27.06, envase: '6 botellas' },
+
+            // 3. AQUARIUS (All)
+            { id: 22, name: 'AQUARIUS', category: 'Vidrio Rellenable 30cl', price: 35.04, envase: '24 botellas' },
+            { id: 33, name: 'AQUARIUS / AQUARIUS LIBRE / VIVE', category: 'Lata 33cl', price: 41.04, envase: '24 latas' },
+            { id: 37, name: 'AQUARIUS (6 uds.)', category: 'PET 1,5L', price: 23.52, envase: '6 botellas' },
+
+            // 4. FUZE TEA (All)
+            { id: 23, name: 'FUZE TEA', category: 'Vidrio Rellenable 30cl', price: 33.12, envase: '24 botellas' },
+            { id: 32, name: 'FUZE TEA', category: 'Vidrio 30cl', price: 33.12, envase: '24 botellas' },
+            { id: 34, name: 'FUZE TEA', category: 'Lata 33cl', price: 39.60, envase: '24 latas' },
+            { id: 38, name: 'FUZE TEA (6 uds.)', category: 'PET 1,5L', price: 21.54, envase: '6 botellas' },
+
+            // 5. RESTO
+            { id: 5, name: 'SPRITE', category: 'Vidrio Rellenable 23,7cl', price: 24.96, envase: '24 botellas' },
+            { id: 21, name: 'SPRITE', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas' },
+            { id: 323, name: 'SPRITE', category: 'Lata 33cl', price: 37.68, envase: '24 latas' }, // Changed ID to avoid dupe with FuzeTea
+            { id: 41, name: 'SPRITE (6 ud) / SPRITE ZERO', category: 'PET 2,0 Lts', price: 27.06, envase: '6 botellas' },
+
+            { id: 6, name: 'ROYAL BLISS TON, CREATIV, YUZ, ZER Y BERRY', category: 'Vidrio 20cl', price: 31.92, envase: '24 botellas' },
+            { id: 7, name: 'ROYAL BLISS CÍTRICOS', category: 'Vidrio 20cl', price: 28.80, envase: '24 botellas' },
+            { id: 8, name: 'NORDIC MIST TÓNICA', category: 'Vidrio 20cl', price: 30.96, envase: '24 botellas' },
+            { id: 9, name: 'NORDIC MIST TÓNICA BLUE/ROSE', category: 'Vidrio 20cl', price: 30.96, envase: '24 botellas' },
+
+            { id: 24, name: 'MONSTER ENERGY / ULTRA', category: 'Lata 25cl', price: 44.40, envase: '24 latas' },
+            { id: 36, name: 'MONSTER ENERGY 50CL', category: 'Lata 50cl', price: 56.16, envase: '12 latas' },
+            { id: 25, name: 'BURN / BURN ZERO', category: 'Lata 25cl', price: 58.80, envase: '24 latas' },
+
+            { id: 46, name: 'AQUABONA', category: 'Aguas 500cc', price: 20.20, envase: '20 botellas' },
+            { id: 51, name: 'AQUABONA', category: 'Aguas 1,5L', price: 9.30, envase: '6 botellas' }
+        ];
+
+        // LOGIC STATE
+        let checkedCategories = new Set(['todos']);
+        let discounts = { 36: 50 };
+        let competitorPrices = {};
+
+        // === HELPERS ===
+        function getUnits(envaseStr) {
+            const match = envaseStr.match(/(\d+)/);
+            return match ? parseInt(match[1]) : 1;
+        }
+
+        function getBrandStyle(p) {
+            const name = p.name.toUpperCase();
+
+            // COCA-COLA ZERO (Black)
+            if (name.includes('ZERO') || name.includes('CCZ')) return {
+                gradient: 'from-gray-900 to-black',
+                text: 'text-gray-900',
+                abbr: 'ZERO',
+                logo: 'cocacola_zero_logo.png',
+                shadow: 'shadow-gray-900/30'
+            };
+
+            // COCA-COLA (Red)
+            if (name.includes('COCA-COLA') || name.includes('CC ') || name.includes('CCL') || name.includes('CCZ')) return {
+                gradient: 'from-red-600 to-red-900',
+                text: 'text-red-700',
+                abbr: 'CC',
+                logo: 'cocacola_logo.jpg',
+                shadow: 'shadow-red-500/30'
+            };
+
+            // FANTA (Orange)
+            if (name.includes('FANTA')) return {
+                gradient: 'from-orange-500 to-orange-700',
+                text: 'text-orange-600',
+                abbr: 'FA',
+                logo: 'fanta_logo.jpg',
+                shadow: 'shadow-orange-500/30'
+            };
+
+            // AQUARIUS (Blue)
+            if (name.includes('AQUARIUS')) return {
+                gradient: 'from-blue-600 to-blue-800',
+                text: 'text-blue-600',
+                abbr: 'AQ',
+                logo: 'aquarius_logo.png',
+                shadow: 'shadow-blue-500/30'
+            };
+
+            // FUZE TEA (Green)
+            if (name.includes('FUZE')) return {
+                gradient: 'from-green-500 to-emerald-700',
+                text: 'text-green-600',
+                abbr: 'FZ',
+                logo: 'fuzetea_logo.jpg',
+                shadow: 'shadow-green-500/30'
+            };
+
+            // SPRITE (Lemon Lime)
+            if (name.includes('SPRITE')) return {
+                gradient: 'from-lime-500 to-green-600',
+                text: 'text-green-600',
+                abbr: 'SP',
+                logo: 'sprite_logo.jpg',
+                shadow: 'shadow-green-500/30'
+            };
+
+            // ROYAL BLISS (Gold)
+            if (name.includes('ROYAL') || name.includes('BLISS') || name.includes('NORDIC')) return {
+                gradient: 'from-yellow-600 via-yellow-500 to-yellow-700',
+                text: 'text-yellow-700',
+                abbr: 'RB',
+                logo: 'royalbliss_logo.png',
+                shadow: 'shadow-yellow-500/30'
+            };
+
+            // MONSTER (Black/Green)
+            if (name.includes('MONSTER') || name.includes('BURN')) return {
+                gradient: 'from-gray-900 to-green-900',
+                text: 'text-gray-900',
+                abbr: 'M',
+                logo: 'monster_logo.jpg',
+                shadow: 'shadow-green-500/30'
+            };
+
+            // AGUA (Cyan)
+            if (name.includes('AQUA') || name.includes('AGUA') || name.includes('VILAS')) return {
+                gradient: 'from-cyan-400 to-teal-500',
+                text: 'text-teal-600',
+                abbr: 'H2O',
+                logo: 'aquabona_logo.png',
+                shadow: 'shadow-teal-500/30'
+            };
+
+            // DEFAULT
+            return {
+                gradient: 'from-gray-700 to-gray-900',
+                text: 'text-gray-600',
+                abbr: 'P',
+                logo: null,
+                shadow: 'shadow-gray-500/30'
+            };
+        }
+
+        // === RENDER ===
+        function renderCatalog() {
+            const grid = document.getElementById('catalogGrid');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const sort = document.getElementById('sortSelect').value;
+
+            // Filter
+            let filtered = PRODUCTS.filter(p => {
+                const matchSearch = p.name.toLowerCase().includes(search) || p.category.toLowerCase().includes(search);
+                let matchCat = checkedCategories.has('todos') || checkedCategories.has(p.category);
+                return matchSearch && matchCat;
+            });
+
+            // Priorities for Sort
+            if (sort === 'default') {
+                filtered.sort((a, b) => {
+                    const aVR = a.category.includes('23,7');
+                    const bVR = b.category.includes('23,7');
+                    if (aVR && !bVR) return -1;
+                    if (!aVR && bVR) return 1;
+
+                    const aCoke = a.name.includes('COCA-COLA');
+                    const bCoke = b.name.includes('COCA-COLA');
+                    if (aCoke && !bCoke) return -1;
+                    if (!aCoke && bCoke) return 1;
+
+                    return 0;
+                });
+            } else if (sort === 'name') {
+                filtered.sort((a, b) => a.name.localeCompare(b.name));
+            } else if (sort === 'price-asc') {
+                filtered.sort((a, b) => a.price - b.price);
+            } else if (sort === 'price-desc') {
+                filtered.sort((a, b) => b.price - a.price);
+            }
+
+            // HTML Generation
+            grid.innerHTML = filtered.map((p, index) => {
+                const style = getBrandStyle(p);
+                const discount = discounts[p.id] || 0;
+                const compPrice = competitorPrices[p.id] || '';
+
+                // Calc
+                const finalPrice = p.price * (1 - discount / 100);
+                const units = getUnits(p.envase);
+                const unitPrice = finalPrice / units;
+
+                // Slider settings (Max = 2x price to allow markup range)
+                const sliderMax = (p.price * 2).toFixed(2);
+                // Default slider value matches Comp Price if set, else Base Price
+                const sliderVal = compPrice ? parseFloat(compPrice) : p.price;
+
+                // Badge Logic
+                let badgeGradient = style.gradient;
+                if (discount > 40) badgeGradient = 'from-red-600 to-red-500 animate-pulse';
+                else if (discount > 20) badgeGradient = 'from-orange-500 to-yellow-500';
+                else if (discount < 0) badgeGradient = 'from-gray-400 to-gray-500'; // Costlier
+
+                // Animation Delay (staggered)
+                const delay = index * 50; // 50ms per item
+
+                return `
+                <div class="relative bg-white rounded-3xl shadow-xl overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 animate-card" style="animation-delay: ${delay}ms">
+                    <!-- HEADER -->
+                    <div class="h-32 bg-gradient-to-br ${style.gradient} flex items-center justify-center p-6 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 text-white opacity-10 text-8xl font-black rotate-12 select-none">${style.abbr}</div>
+                        
+                        ${style.logo ?
+                        `<img src="${style.logo}" class="h-24 w-24 object-cover rounded-full border-4 border-white shadow-lg relative z-10 transform group-hover:scale-110 transition-transform duration-300" alt="${p.name}">`
+                        :
+                        `<h2 class="text-white text-3xl font-black drop-shadow-md relative z-10 text-center uppercase leading-tight">${p.name.split(' ')[0]}</h2>`
+                    }
+                    </div>
+
+                    <!-- BODY -->
+                    <div class="p-5 pt-6 relative">
+                         <h3 class="text-sm font-bold text-gray-900 leading-tight mb-0.5 truncate">${p.name}</h3>
+                         <p class="text-xs font-bold ${style.text} tracking-wide uppercase mb-6 truncate">${p.category} (${p.envase})</p>
+
+                         <!-- SLIDER CONTROL -->
+                         <div class="mb-6 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <div class="flex justify-between text-xs font-bold text-gray-500 mb-2">
+                                <span>Precio Paralelo</span>
+                                <span class="text-gray-900 text-sm" id="label-comp-${p.id}">${compPrice ? compPrice + '€' : '-'}</span>
+                            </div>
+                            <!-- step 0.01 for precision -->
+                            <input type="range" min="0" max="${sliderMax}" step="0.01" value="${sliderVal}" 
+                                oninput="handleSliderChange(${p.id}, this.value)"
+                                onchange="handleSliderChange(${p.id}, this.value, true)"
+                                class="w-full">
+                         </div>
+
+                         <!-- PRICE DISPLAY -->
+                         <div class="flex items-end justify-between relative">
+                            <div>
+                                <p class="text-xs text-gray-400 font-medium mb-0.5">Precio Unidad</p>
+                                <p class="text-3xl font-black text-gray-900 tracking-tighter leading-none" id="price-unit-${p.id}">
+                                    ${unitPrice.toFixed(2)}€
+                                </p>
+                                <p class="text-xs text-gray-400 mt-1 font-medium" id="price-box-${p.id}">
+                                    Caja: ${finalPrice.toFixed(2)}€
+                                </p>
+                            </div>
+
+                            <!-- BADGE -->
+                            ${discount !== 0 ? `
+                            <div id="badge-${p.id}" class="absolute bottom-1 right-1 h-16 w-16 bg-gradient-to-br ${badgeGradient} rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform border-4 border-white">
+                                <span class="text-white font-black text-sm">${discount > 0 ? '-' : '+'}${Math.abs(discount).toFixed(0)}%</span>
+                            </div>` : `
+                            <div id="badge-${p.id}" class="hidden absolute bottom-1 right-1 h-16 w-16 bg-gradient-to-br ${style.gradient} rounded-full flex items-center justify-center shadow-lg border-4 border-white">
+                                <span class="text-white font-black text-sm"></span>
+                            </div>
+                            `}
+                         </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // === SLIDER LOGIC ===
+        function handleSliderChange(id, val, isFinal = false) {
+            const product = PRODUCTS.find(p => p.id === id);
+            if (!product) return;
+
+            const targetPrice = parseFloat(val);
+
+            // Update Label immediately for smoothness
+            const label = document.getElementById(`label-comp-${id}`);
+            if (label) label.textContent = targetPrice.toFixed(2) + '€';
+
+            // Calculate Discount implied
+            // Discount = (1 - Target/Base) * 100
+            let newDiscount = (1 - (targetPrice / product.price)) * 100;
+            discounts[id] = newDiscount;
+            competitorPrices[id] = val; // Store exact input
+
+            // Update UI (Price & Badge)
+            updateCardUI(id);
+        }
+
+        function updateCardUI(id) {
+            const product = PRODUCTS.find(p => p.id === id);
+            if (!product) return;
+            const discount = discounts[id] || 0;
+            const finalPrice = product.price * (1 - discount / 100);
+            const units = getUnits(product.envase);
+            const unitPrice = finalPrice / units;
+            const style = getBrandStyle(product);
+
+            // Update Unit Price
+            document.getElementById(`price-unit-${id}`).textContent = unitPrice.toFixed(2) + '€';
+            // Update Box Price
+            document.getElementById(`price-box-${id}`).textContent = `Caja: ${finalPrice.toFixed(2)}€`;
+
+            // Update Badge
+            // We might need to recreate the badge element if it was hidden, or just update class/text
+            // For simplicity, let's re-render the catalog? No, that kills slider focus.
+            // Let's modify the badge DOM directly.
+            let badge = document.getElementById(`badge-${id}`);
+
+            // Determine gradient
+            let gradient = style.gradient;
+            if (discount > 40) gradient = 'from-red-600 to-red-500 animate-pulse';
+            else if (discount > 20) gradient = 'from-orange-500 to-yellow-500';
+            else if (discount < 0) gradient = 'from-gray-400 to-gray-500';
+
+            const badgeContent = `<span class="text-white font-black text-sm">${discount > 0 ? '-' : '+'}${Math.abs(discount).toFixed(0)}%</span>`;
+
+            if (discount !== 0) {
+                if (!badge) {
+                    // Inject if missing (was 0%)
+                    // It's inside the price container flex item, actually absolute pos.
+                    // Ideally we have a placeholder. In HTML generation I put a placeholder hidden if 0.
+                    // Let's just find the container? 
+                    // To avoid complexity, if discount becomes 0 -> hidden. If not 0 -> show.
+                    // The simplest way without re-render is assuming the badge div always exists but has 'hidden' class if 0.
+                    // I will update HTML gen to always render badge but toggle hidden.
+                }
+                if (badge) {
+                    badge.className = `absolute bottom-1 right-1 h-16 w-16 bg-gradient-to-br ${gradient} rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform border-4 border-white`;
+                    badge.innerHTML = badgeContent;
+                    badge.classList.remove('hidden');
+                }
+            } else {
+                if (badge) badge.classList.add('hidden');
+            }
+        }
+
+        // === CATEGORIES ===
+        function initCategories() {
+            const categorySet = new Set(PRODUCTS.map(p => p.category));
+            const categories = Array.from(categorySet).sort();
+            const container = document.getElementById('categoryContainer');
+
+            let html = `
+                <button onclick="toggleCategory('todos')" class="whitespace-nowrap px-4 py-2 rounded-full font-bold text-sm transition-colors ${checkedCategories.has('todos') ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200'}">
+                    📦 Todas
+                </button>
+            `;
+
+            categories.forEach(cat => {
+                const isActive = checkedCategories.has(cat) && !checkedCategories.has('todos');
+                html += `
+                    <button onclick="toggleCategory('${cat}')" class="whitespace-nowrap px-4 py-2 rounded-full font-bold text-sm transition-colors ${isActive ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200'}">
+                        ${cat}
+                    </button>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function toggleCategory(cat) {
+            if (cat === 'todos') {
+                checkedCategories.clear();
+                checkedCategories.add('todos');
+            } else {
+                if (checkedCategories.has('todos')) checkedCategories.delete('todos');
+                if (checkedCategories.has(cat)) checkedCategories.delete(cat);
+                else checkedCategories.add(cat);
+
+                if (checkedCategories.size === 0) checkedCategories.add('todos');
+            }
+            // Re-render pills & grid
+            initCategories(); // Update active states
+            renderCatalog();
+        }
+
+        // Init
+        initCategories();
+        renderCatalog();
+
+    </script>
+</body>
+
+</html>
