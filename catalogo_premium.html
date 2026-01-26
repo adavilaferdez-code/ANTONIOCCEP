@@ -391,7 +391,7 @@
                             <!-- BADGE -->
                             ${discount !== 0 ? `
                             <div id="badge-${p.id}" class="absolute bottom-1 right-1 h-16 w-16 bg-gradient-to-br ${badgeGradient} rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform border-4 border-white">
-                                <span class="text-white font-black text-sm">${discount > 0 ? '-' : '+'}${Math.abs(discount).toFixed(0)}%</span>
+                                <span class="text-white font-black text-sm">${discount > 0 ? '' : '+'}${Math.abs(discount).toFixed(0)}%</span>
                             </div>` : `
                             <div id="badge-${p.id}" class="hidden absolute bottom-1 right-1 h-16 w-16 bg-gradient-to-br ${style.gradient} rounded-full flex items-center justify-center shadow-lg border-4 border-white">
                                 <span class="text-white font-black text-sm"></span>
@@ -451,7 +451,7 @@
             else if (discount > 20) gradient = 'from-orange-500 to-yellow-500';
             else if (discount < 0) gradient = 'from-gray-400 to-gray-500';
 
-            const badgeContent = `<span class="text-white font-black text-sm">${discount > 0 ? '-' : '+'}${Math.abs(discount).toFixed(0)}%</span>`;
+            const badgeContent = `<span class="text-white font-black text-sm">${discount > 0 ? '' : '+'}${Math.abs(discount).toFixed(0)}%</span>`;
 
             if (discount !== 0) {
                 if (!badge) {

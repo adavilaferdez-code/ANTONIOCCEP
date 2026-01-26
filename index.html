@@ -202,6 +202,8 @@
                 </div>
             </div>
 
+
+
             <!-- 4. HERO IMAGES (RESTORED) -->
             <div class="hero-grid">
                 <!-- FOCOS -->
@@ -224,6 +226,9 @@
             </div>
 
             <!-- Results List Removed from Main Flow -->
+
+            <!-- Spacer for Bottom Nav -->
+            <div style="height: 100px; width: 100%;"></div>
 
         </main>
     </div>
@@ -730,6 +735,60 @@
 
 
     <div id="transitionOverlay" class="transition-overlay"></div>
+
+    <!-- REMINDER FAB (Floating Action Button) -->
+    <button id="fabReminder" class="fab-reminder" onclick="openReminderModal()">
+        <i class="fa-solid fa-bell"></i>
+    </button>
+
+    <!-- Reminder Modal -->
+    <div id="reminderModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>🔔 Nuevo Recordatorio</h2>
+                <button class="close-btn" onclick="closeReminderModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>¿Qué hay que recordar?</label>
+                    <textarea id="reminderText" class="modal-input" rows="4"
+                        placeholder="Escribe aquí... (Ej: Llamar a Juan mañana)"></textarea>
+                </div>
+
+                <!-- Priority Selector -->
+                <div class="input-group">
+                    <label>Prioridad</label>
+                    <div class="priority-selector">
+                        <div class="p-chip" onclick="selectPriority(this, 'Alta')" style="--p-color: #ef4444;">
+                            <i class="fa-solid fa-fire"></i> Alta
+                        </div>
+                        <div class="p-chip active" onclick="selectPriority(this, 'Media')" style="--p-color: #f59e0b;">
+                            <i class="fa-regular fa-face-meh"></i> Media
+                        </div>
+                        <div class="p-chip" onclick="selectPriority(this, 'Baja')" style="--p-color: #10b981;">
+                            <i class="fa-solid fa-ice-cream"></i> Baja
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Fecha</label>
+                    <div class="quick-dates">
+                        <button onclick="setQuickDate(1)" class="date-chip">🌞 Mañana</button>
+                        <button onclick="setQuickDate(2)" class="date-chip">⏭ Pasado</button>
+                        <button onclick="setQuickDate('nextMonday')" class="date-chip">📅 El Lunes</button>
+                    </div>
+                    <input type="date" id="reminderDate" class="modal-input">
+                </div>
+                <div class="modal-actions">
+                    <button onclick="saveReminderToNotion()" id="btnSaveReminder" class="action-capsule"
+                        style="width:100%; justify-content:center; background:var(--primary-gradient); color:white;">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> GUARDAR EN NOTION
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Hidden Backup Input for Restore Functionality -->
     <input type="file" id="backupInput" style="display:none;" accept=".json" onchange="importBackup(this)">

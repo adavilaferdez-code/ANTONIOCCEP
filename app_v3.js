@@ -1581,8 +1581,18 @@ function filterCalcProducts() {
 
 // === NOTION INTEGRATION ===
 const NOTION_KEY_DEFAULT = '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'; // Transcribed from screenshot
-const NOTION_DB_ID_DEFAULT = '2eb60cbd80db80b0ae41d3eb9f774f26';
+const NOTION_DB_ID_DEFAULT = '2ee60cbd80db80b0ae41d3eb9f774f26';
 const CORS_PROXY = 'https://corsproxy.io/?';
+
+// === AUTO-FIX: CORREGIR ID ANTIGUO GUARDADO EN MEMORIA ===
+try {
+    const currentStored = localStorage.getItem('notionDb');
+    // Si tiene el ID viejo (con la b), lo forzamos al nuevo (con la e)
+    if (currentStored && currentStored.includes('2eb60cbd')) {
+        console.log("FIXING BROKEN ID IN STORAGE...");
+        localStorage.setItem('notionDb', NOTION_DB_ID_DEFAULT);
+    }
+} catch (e) { console.warn("Storage warning", e); }
 
 // === SETTINGS MODAL LOGIC ===
 const settingsModal = document.getElementById('settingsModal');
@@ -2201,4 +2211,296 @@ function openQRModal() {
 function closeQRModal() {
     qrModal.classList.remove('open');
     qrImage.src = ''; // Clear to prevent stale image
+}
+
+// === REMINDER FEATURE (NOTION SYNC) ===
+const reminderModal = document.getElementById('reminderModal');
+const reminderText = document.getElementById('reminderText');
+const reminderDate = document.getElementById('reminderDate');
+const btnSaveReminder = document.getElementById('btnSaveReminder');
+
+function openReminderModal() {
+    reminderModal.classList.add('open');
+    // Set default date to Today
+    const today = new Date().toISOString().split('T')[0];
+    if (!reminderDate.value) reminderDate.value = today;
+
+    setTimeout(() => reminderText.focus(), 100);
+}
+
+function closeReminderModal() {
+    reminderModal.classList.remove('open');
+}
+
+// Global variable for priority
+let currentPriority = "Media";
+
+function selectPriority(el, value) {
+    // Visual update
+    document.querySelectorAll('.p-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    // State update
+    currentPriority = value;
+}
+
+async function saveReminderToNotion() {
+    const text = reminderText.value.trim();
+    const date = reminderDate.value;
+
+    if (!text) {
+        showToast("¡Falta información!", "Escribe qué quieres recordar", "error");
+        return;
+    }
+
+    // Reuse settings
+    const NOTION_KEY = (localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT).trim();
+    let NOTION_DB_ID = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
+
+    // Format ID generic helper
+    const genericCleanId = NOTION_DB_ID.replace(/-/g, '');
+    const formattedId = `${genericCleanId.substr(0, 8)}-${genericCleanId.substr(8, 4)}-${genericCleanId.substr(12, 4)}-${genericCleanId.substr(16, 4)}-${genericCleanId.substr(20)}`;
+
+    // UI Loading
+    btnSaveReminder.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+    btnSaveReminder.disabled = true;
+
+    try {
+        let isDatabase = false;
+        let dbIdToQuery = formattedId;
+        let schema = null;
+
+        // 1. Check if configured ID is a Database
+        let dbResp = await fetch(`${CORS_PROXY}https://api.notion.com/v1/databases/${formattedId}`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${NOTION_KEY}`, 'Notion-Version': '2022-06-28' }
+        });
+
+        if (dbResp.ok) {
+            isDatabase = true;
+            const d = await dbResp.json();
+            schema = d.properties;
+        } else {
+            // 2. Search "Registro de tareas" if not found
+            // console.log("Searching for DB...");
+            const searchResp = await fetch(`${CORS_PROXY}https://api.notion.com/v1/search`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${NOTION_KEY}`, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    filter: { value: 'database', property: 'object' },
+                    page_size: 20
+                })
+            });
+            if (searchResp.ok) {
+                const searchData = await searchResp.json();
+                // Precise match first
+                let bestMatch = searchData.results.find(db => db.title && db.title.map(t => t.plain_text).join('').toLowerCase() === "registro de tareas");
+                // Loose match second
+                if (!bestMatch) bestMatch = searchData.results.find(db => db.title && db.title.map(t => t.plain_text).join('').toLowerCase().includes("registro de tareas"));
+
+                if (bestMatch) {
+                    dbIdToQuery = bestMatch.id;
+                    isDatabase = true;
+                    schema = bestMatch.properties;
+                }
+            }
+        }
+
+        // SAVE
+        if (isDatabase && schema) {
+            const props = {};
+
+            // Title
+            const titleProp = Object.values(schema).find(p => p.type === 'title');
+            const titleName = titleProp ? Object.keys(schema).find(key => schema[key] === titleProp) : "Name";
+            props[titleName] = { title: [{ text: { content: text } }] };
+
+            // Date
+            const dateProp = Object.values(schema).find(p => p.type === 'date');
+            if (dateProp) {
+                const dateName = Object.keys(schema).find(key => schema[key] === dateProp);
+                props[dateName] = { date: { start: date } };
+            }
+
+            // Status (Default to Pendiente)
+            const statusProp = Object.values(schema).find(p => p.type === 'status' || p.type === 'select');
+            if (statusProp) {
+                const statusName = Object.keys(schema).find(key => schema[key] === statusProp);
+                // Check if it is status or select
+                if (statusProp.type === 'status') {
+                    props[statusName] = { status: { name: "Pendiente" } };
+                } else {
+                    props[statusName] = { select: { name: "Pendiente" } };
+                }
+            }
+
+            // === PRIORIDAD (NEW) ===
+            // Try to find a column named similar to "Prioridad" or "Priority"
+            const priorityProp = Object.values(schema).find(p => {
+                const n = Object.keys(schema).find(key => schema[key] === p).toLowerCase();
+                return n.includes('prioridad') || n.includes('priority');
+            });
+
+            if (priorityProp) {
+                const pName = Object.keys(schema).find(key => schema[key] === priorityProp);
+                // We send the text value "Alta", "Media", or "Baja". Notion will match it to the option if it exists.
+                props[pName] = { select: { name: currentPriority } };
+            }
+
+            const payload = { parent: { database_id: dbIdToQuery }, properties: props };
+
+            const resp = await fetch(`${CORS_PROXY}https://api.notion.com/v1/pages`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${NOTION_KEY}`, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (resp.ok) {
+                handleSuccess("", "Registro de Tareas + Prioridad");
+                return;
+            }
+        }
+
+        // Fallback or Error
+        throw new Error("No se pudo conectar con la BD de Tareas.");
+
+    } catch (e) {
+        console.error(e);
+        showToast("Error", e.message, "error");
+    } finally {
+        btnSaveReminder.innerHTML = 'GUARDAR';
+        btnSaveReminder.disabled = false;
+    }
+
+    function handleSuccess(url, savedType) {
+        reminderText.value = '';
+        closeReminderModal();
+        showToast("¡Guardado!", `Añadido a ${savedType}`, "success");
+        triggerConfetti(); // 🎉 CELEBRATION
+
+        // Reset priority to default
+        currentPriority = "Media";
+        document.querySelectorAll('.p-chip').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.p-chip')[1].classList.add('active'); // Media is 2nd
+    }
+}
+
+// === QUICK DATE LOGIC ===
+function setQuickDate(offset) {
+    const date = new Date();
+
+    if (offset === 'nextMonday') {
+        // Calculate days until next Monday
+        const day = date.getDay();
+        const diff = (day === 0 ? 1 : 8) - day; // If Sunday(0), +1. If Mon(1), +7. etc.
+        date.setDate(date.getDate() + diff);
+    } else {
+        date.setDate(date.getDate() + offset);
+    }
+
+    // Format YYYY-MM-DD
+    const isoDate = date.toISOString().split('T')[0];
+    document.getElementById('reminderDate').value = isoDate;
+}
+
+// === PREMIUM CONFETTI EFFECT ===
+function triggerConfetti() {
+    const duration = 2000;
+    const end = Date.now() + duration;
+
+    // Create canvas if not exists
+    let canvas = document.getElementById('confetti-canvas');
+    if (!canvas) {
+        canvas = document.createElement('canvas');
+        canvas.id = 'confetti-canvas';
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.pointerEvents = 'none';
+        canvas.style.zIndex = '99999';
+        document.body.appendChild(canvas);
+    }
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+    const particles = [];
+
+    // Init particles
+    for (let i = 0; i < 150; i++) {
+        particles.push({
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            vx: (Math.random() - 0.5) * 20,
+            vy: (Math.random() - 0.5) * 20,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            size: Math.random() * 5 + 2,
+            life: Math.random() * 100 + 50
+        });
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
+
+        particles.forEach(p => {
+            if (p.life > 0) {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.5; // Gravity
+                p.life--;
+
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+                active = true;
+            }
+        });
+
+        if (active) requestAnimationFrame(animate);
+        else canvas.remove();
+    }
+
+    animate();
+}
+
+// === PREMIUM TOAST FUNCTION ===
+function showToast(title, message, type = 'info') {
+    // Ensure container exists
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    // Icons mapping
+    const icons = {
+        success: '<i class="fa-solid fa-circle-check"></i>',
+        error: '<i class="fa-solid fa-circle-xmark"></i>',
+        info: '<i class="fa-solid fa-circle-info"></i>'
+    };
+
+    // Create Toast Element
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <div class="toast-icon">${icons[type] || icons.info}</div>
+        <div class="toast-content">
+            <span class="toast-title">${title}</span>
+            <span class="toast-msg">${message}</span>
+        </div>
+    `;
+
+    container.appendChild(toast);
+
+    // Play Sound (Optional, subtle click)
+    // const audio = new Audio('path/to/sound.mp3'); audio.play().catch(()=>{});
+
+    // Remove after 3s
+    setTimeout(() => {
+        toast.style.animation = 'toastOut 0.4s forwards';
+        toast.addEventListener('animationend', () => toast.remove());
+    }, 4000);
 }
