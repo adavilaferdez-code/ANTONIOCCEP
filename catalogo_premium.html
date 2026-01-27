@@ -18,7 +18,6 @@
         /* Metallic Slider Styling */
         input[type=range] {
             -webkit-appearance: none;
-            appearance: none;
             width: 100%;
             background: transparent;
         }
@@ -87,7 +86,8 @@
         <!-- HEADER -->
         <header class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-                <h1 class="text-4xl font-black text-gray-900 tracking-tight leading-none mb-2">Catálogo</h1>
+                <h1 class="text-4xl font-black text-gray-900 tracking-tight leading-none mb-2">Catálogo v3 (Actualizado)
+                </h1>
                 <p class="text-gray-500 font-medium text-sm">Calculadora de Precio Paralelo</p>
             </div>
 
@@ -116,7 +116,7 @@
         </header>
 
         <!-- CATEGORY PILLS -->
-        <div id="categoryContainer" class="flex gap-3 overflow-x-auto hide-scrollbar mb-8 pb-2">
+        <div id="categoryContainer" class="flex flex-wrap gap-2 justify-center mb-8">
             <!-- Injected JS -->
         </div>
 
@@ -140,7 +140,7 @@
             { id: 29, name: 'COCA-COLA', category: 'Lata 33cl', price: 39.36, envase: '24 latas' },
             { id: 30, name: 'CCL / CCZ / CCZZ / CCSC / CCLSC', category: 'Lata 33cl', price: 39.36, envase: '24 latas' },
             { id: 34, name: 'COCA-COLA VR 350', category: 'Vidrio 350ml', price: 29.28, envase: '12 botellas' },
-            { id: 39, name: 'CC REGULAR / CCZ / CCZZ / CCL / CCSC', category: 'PET 2,0 Lts', price: 28.68, envase: '6 botellas' },
+            { id: 39, name: 'COCA-COLA / ZERO / LIGHT (6 ud)', category: 'PET 2,0 Lts', price: 28.68, envase: '6 botellas' },
 
             // 2. FANTA (All)
             { id: 3, name: 'FANTA NARANJA', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas' },
@@ -158,14 +158,14 @@
             // 4. FUZE TEA (All)
             { id: 23, name: 'FUZE TEA', category: 'Vidrio Rellenable 30cl', price: 33.12, envase: '24 botellas' },
             { id: 32, name: 'FUZE TEA', category: 'Vidrio 30cl', price: 33.12, envase: '24 botellas' },
-            { id: 340, name: 'FUZE TEA', category: 'Lata 33cl', price: 39.60, envase: '24 latas' },
+            { id: 34, name: 'FUZE TEA', category: 'Lata 33cl', price: 39.60, envase: '24 latas' },
             { id: 38, name: 'FUZE TEA (6 uds.)', category: 'PET 1,5L', price: 21.54, envase: '6 botellas' },
 
             // 5. RESTO
             { id: 5, name: 'SPRITE', category: 'Vidrio Rellenable 23,7cl', price: 24.96, envase: '24 botellas' },
             { id: 21, name: 'SPRITE', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas' },
             { id: 323, name: 'SPRITE', category: 'Lata 33cl', price: 37.68, envase: '24 latas' }, // Changed ID to avoid dupe with FuzeTea
-            { id: 41, name: 'SPRITE (6 ud) / SPRITE ZERO', category: 'PET 2,0 Lts', price: 27.06, envase: '6 botellas' },
+            { id: 41, name: 'SPRITE / SPRITE ZERO (6 ud)', category: 'PET 2,0 Lts', price: 27.06, envase: '6 botellas' },
 
             { id: 6, name: 'ROYAL BLISS TON, CREATIV, YUZ, ZER Y BERRY', category: 'Vidrio 20cl', price: 31.92, envase: '24 botellas' },
             { id: 7, name: 'ROYAL BLISS CÍTRICOS', category: 'Vidrio 20cl', price: 28.80, envase: '24 botellas' },
@@ -194,8 +194,18 @@
         function getBrandStyle(p) {
             const name = p.name.toUpperCase();
 
+            // SPRITE (Lemon Lime) - Checked FIRST to avoid ZERO conflict
+            if (name.includes('SPRITE')) return {
+                gradient: 'from-lime-500 to-green-600',
+                text: 'text-green-600',
+                abbr: 'SP',
+                logo: 'sprite_logo.jpg',
+                shadow: 'shadow-green-500/30'
+            };
+
             // COCA-COLA ZERO (Black)
-            if (name.includes('ZERO') || name.includes('CCZ')) return {
+            // Exclude SPRITE so it falls through to Sprite logic
+            if ((name.includes('ZERO') && !name.includes('SPRITE')) || name.includes('CCZ')) return {
                 gradient: 'from-gray-900 to-black',
                 text: 'text-gray-900',
                 abbr: 'ZERO',
@@ -236,15 +246,6 @@
                 text: 'text-green-600',
                 abbr: 'FZ',
                 logo: 'fuzetea_logo.jpg',
-                shadow: 'shadow-green-500/30'
-            };
-
-            // SPRITE (Lemon Lime)
-            if (name.includes('SPRITE')) return {
-                gradient: 'from-lime-500 to-green-600',
-                text: 'text-green-600',
-                abbr: 'SP',
-                logo: 'sprite_logo.jpg',
                 shadow: 'shadow-green-500/30'
             };
 
@@ -332,8 +333,8 @@
                 const units = getUnits(p.envase);
                 const unitPrice = finalPrice / units;
 
-                // Slider settings (Max = price to allow only discount, no markup)
-                const sliderMax = p.price.toFixed(2);
+                // Slider settings (Max = 2x price to allow markup range)
+                const sliderMax = (p.price * 2).toFixed(2);
                 // Default slider value matches Comp Price if set, else Base Price
                 const sliderVal = compPrice ? parseFloat(compPrice) : p.price;
 
@@ -347,32 +348,30 @@
                 const delay = index * 50; // 50ms per item
 
                 return `
-                <div class="relative bg-white rounded-3xl shadow-xl overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 animate-card" style="animation-delay: ${delay}ms">
+                <div class="relative bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-card" style="animation-delay: ${delay}ms">
                     <!-- HEADER -->
-                    <div class="h-32 bg-gradient-to-br ${style.gradient} flex items-center justify-center p-6 relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 text-white opacity-10 text-8xl font-black rotate-12 select-none">${style.abbr}</div>
+                    <div class="h-24 bg-gradient-to-br ${style.gradient} flex items-center justify-center p-4 relative overflow-hidden">
+                        <div class="absolute -right-3 -top-3 text-white opacity-10 text-7xl font-black rotate-12 select-none">${style.abbr}</div>
                         
                         ${style.logo ?
-                        `<img src="${style.logo}" class="h-24 w-24 object-cover rounded-full border-4 border-white shadow-lg relative z-10 transform group-hover:scale-110 transition-transform duration-300" alt="${p.name}">`
+                        `<img src="${style.logo}" class="h-16 w-16 object-cover rounded-full border-2 border-white shadow-md relative z-10 transform group-hover:scale-110 transition-transform duration-300" alt="${p.name}">`
                         :
-                        `<h2 class="text-white text-3xl font-black drop-shadow-md relative z-10 text-center uppercase leading-tight">${p.name.split(' ')[0]}</h2>`
+                        `<h2 class="text-white text-2xl font-black drop-shadow-md relative z-10 text-center uppercase leading-tight">${p.name.split(' ')[0]}</h2>`
                     }
                     </div>
 
                     <!-- BODY -->
-                    <div class="p-5 pt-6 relative">
-                         <h3 class="text-sm font-bold text-gray-900 leading-tight mb-0.5 truncate">${p.name}</h3>
-                         <p class="text-xs font-bold ${style.text} tracking-wide uppercase mb-6 truncate">${p.category} (${p.envase})</p>
+                    <div class="p-3 pt-4 relative">
+                         <h3 class="text-xs font-bold text-gray-900 leading-tight mb-0.5 truncate">${p.name}</h3>
+                         <p class="text-[10px] font-bold ${style.text} tracking-wide uppercase mb-3 truncate">${p.category} (${p.envase})</p>
 
                          <!-- SLIDER CONTROL -->
-                         <div class="mb-6 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                            <div class="flex justify-between text-xs font-bold text-gray-500 mb-2">
-                                <span>Precio Paralelo</span>
-                                <span class="text-gray-900 text-sm" id="label-comp-${p.id}">${compPrice ? compPrice + '€' : '-'}</span>
+                         <div class="mb-3 bg-gray-50 p-2 rounded-lg border border-gray-100">
+                            <div class="flex justify-between text-[10px] font-bold text-gray-500 mb-1">
+                                <span>P. Paralelo</span>
+                                <span class="text-gray-900 text-xs" id="label-comp-${p.id}">${compPrice ? compPrice + '€' : '-'}</span>
                             </div>
-                            <!-- step 0.01 for precision -->
                             <input type="range" min="0" max="${sliderMax}" step="0.01" value="${sliderVal}" 
-                                id="slider-${p.id}"
                                 oninput="handleSliderChange(${p.id}, this.value)"
                                 onchange="handleSliderChange(${p.id}, this.value, true)"
                                 class="w-full">
@@ -381,45 +380,22 @@
                          <!-- PRICE DISPLAY -->
                          <div class="flex items-end justify-between relative">
                             <div>
-                                <div class="flex items-center justify-between mb-1">
-                                    <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Precio Unidad</p>
-                                    
-                                    <!-- RIVAL PRICE INPUT (Styled) -->
-                                    <div class="flex items-center gap-2">
-                                        <!-- Trash/Reset Button -->
-                                        <button onclick="resetCard(${p.id})" 
-                                            class="h-7 w-7 flex items-center justify-center rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 transition-all"
-                                            title="Borrar / Resetear">
-                                            <i class="fa-solid fa-trash-can text-sm"></i>
-                                        </button>
-
-                                        <div class="relative group/input flex items-center">
-                                            <div class="absolute left-2 text-red-400 text-[10px] pointer-events-none">
-                                                <i class="fa-solid fa-tag"></i>
-                                            </div>
-                                            <input type="number" step="0.01" placeholder="P.UD" id="input-unit-${p.id}"
-                                                class="w-24 pl-6 pr-2 py-1 text-right text-xs font-bold bg-red-50 border border-red-300 hover:border-red-500 focus:bg-white focus:border-red-600 focus:ring-2 focus:ring-red-500/20 rounded-md transition-all outline-none text-red-700 placeholder-red-300 shadow-sm"
-                                                style="-moz-appearance: textfield;"
-                                                oninput="handleUnitInput(${p.id}, this.value)"
-                                                onclick="this.select()">
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="text-3xl font-black text-gray-900 tracking-tighter leading-none" id="price-unit-${p.id}">
+                                <p class="text-[10px] text-gray-400 font-medium mb-0.5">P. Unidad</p>
+                                <p class="text-2xl font-black text-gray-900 tracking-tighter leading-none" id="price-unit-${p.id}">
                                     ${unitPrice.toFixed(2)}€
                                 </p>
-                                <p class="text-xs text-gray-400 mt-1 font-medium" id="price-box-${p.id}">
+                                <p class="text-[10px] text-gray-400 mt-1 font-medium" id="price-box-${p.id}">
                                     Caja: ${finalPrice.toFixed(2)}€
                                 </p>
                             </div>
 
                             <!-- BADGE -->
                             ${discount !== 0 ? `
-                            <div id="badge-${p.id}" class="absolute -bottom-3 right-1 h-16 w-16 bg-gradient-to-br ${badgeGradient} rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform border-4 border-white">
-                                <span class="text-white font-black text-sm">${discount > 0 ? '' : '+'}${Math.abs(discount).toFixed(0)}%</span>
+                            <div id="badge-${p.id}" class="absolute bottom-0 right-0 h-12 w-12 bg-gradient-to-br ${badgeGradient} rounded-full flex items-center justify-center shadow-md transform group-hover:rotate-12 transition-transform border-2 border-white">
+                                <span class="text-white font-black text-xs">${discount > 0 ? '-' : '+'}${Math.abs(discount).toFixed(0)}%</span>
                             </div>` : `
-                            <div id="badge-${p.id}" class="hidden absolute -bottom-3 right-1 h-16 w-16 bg-gradient-to-br ${style.gradient} rounded-full flex items-center justify-center shadow-lg border-4 border-white">
-                                <span class="text-white font-black text-sm"></span>
+                            <div id="badge-${p.id}" class="hidden absolute bottom-0 right-0 h-12 w-12 bg-gradient-to-br ${style.gradient} rounded-full flex items-center justify-center shadow-md border-2 border-white">
+                                <span class="text-white font-black text-xs"></span>
                             </div>
                             `}
                          </div>
@@ -476,7 +452,7 @@
             else if (discount > 20) gradient = 'from-orange-500 to-yellow-500';
             else if (discount < 0) gradient = 'from-gray-400 to-gray-500';
 
-            const badgeContent = `<span class="text-white font-black text-sm">${discount > 0 ? '' : '+'}${Math.abs(discount).toFixed(0)}%</span>`;
+            const badgeContent = `<span class="text-white font-black text-sm">${discount > 0 ? '-' : '+'}${Math.abs(discount).toFixed(0)}%</span>`;
 
             if (discount !== 0) {
                 if (!badge) {
@@ -489,40 +465,12 @@
                     // I will update HTML gen to always render badge but toggle hidden.
                 }
                 if (badge) {
-                    badge.className = `absolute -bottom-3 right-1 h-16 w-16 bg-gradient-to-br ${gradient} rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform border-4 border-white`;
+                    badge.className = `absolute bottom-1 right-1 h-16 w-16 bg-gradient-to-br ${gradient} rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform border-4 border-white`;
                     badge.innerHTML = badgeContent;
                     badge.classList.remove('hidden');
                 }
             } else {
                 if (badge) badge.classList.add('hidden');
-            }
-        }
-
-        function handleUnitInput(id, unitVal) {
-            const product = PRODUCTS.find(p => p.id === id);
-            if (!product) return;
-
-            // Normalize comma to dot just in case
-            if (typeof unitVal === 'string') unitVal = unitVal.replace(',', '.');
-
-            const targetUnit = parseFloat(unitVal);
-            if (isNaN(targetUnit) || targetUnit < 0) return;
-
-            const units = getUnits(product.envase);
-            let targetBoxPrice = targetUnit * units;
-
-            // Cap at tariff price (slider max)
-            // If user enters a price higher than tariff, we clamp it to tariff (0% discount)
-            if (targetBoxPrice > product.price) {
-                targetBoxPrice = product.price;
-            }
-
-            // Update Slider Logic
-            const slider = document.getElementById(`slider-${id}`);
-            if (slider) {
-                slider.value = targetBoxPrice.toFixed(2);
-                // Trigger change logic
-                handleSliderChange(id, targetBoxPrice, true);
             }
         }
 
@@ -533,7 +481,7 @@
             const container = document.getElementById('categoryContainer');
 
             let html = `
-                <button onclick="toggleCategory('todos')" class="whitespace-nowrap px-4 py-2 rounded-full font-bold text-sm transition-colors ${checkedCategories.has('todos') ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200'}">
+                <button onclick="toggleCategory('todos')" class="whitespace-nowrap px-3 py-1.5 rounded-full font-bold text-xs transition-colors ${checkedCategories.has('todos') ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200'}">
                     📦 Todas
                 </button>
             `;
@@ -541,7 +489,7 @@
             categories.forEach(cat => {
                 const isActive = checkedCategories.has(cat) && !checkedCategories.has('todos');
                 html += `
-                    <button onclick="toggleCategory('${cat}')" class="whitespace-nowrap px-4 py-2 rounded-full font-bold text-sm transition-colors ${isActive ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200'}">
+                    <button onclick="toggleCategory('${cat}')" class="whitespace-nowrap px-3 py-1.5 rounded-full font-bold text-xs transition-colors ${isActive ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200'}">
                         ${cat}
                     </button>
                 `;
@@ -564,28 +512,6 @@
             // Re-render pills & grid
             initCategories(); // Update active states
             renderCatalog();
-        }
-
-        function resetCard(id) {
-            const product = PRODUCTS.find(p => p.id === id);
-            if (!product) return;
-
-            // 1. Reset Internal State
-            discounts[id] = 0;
-            // If using competitorPrices obj, reset it too
-            // competitorPrices[id] = null; // (Assuming we might track it, but sliderVal is source of truth mostly)
-
-            // 2. Clear Input
-            const input = document.getElementById(`input-unit-${id}`);
-            if (input) input.value = '';
-
-            // 3. Reset Slider to Max (Tariff Price)
-            const slider = document.getElementById(`slider-${id}`);
-            if (slider) {
-                slider.value = product.price.toFixed(2);
-                // Trigger updates visual
-                handleSliderChange(id, product.price, true);
-            }
         }
 
         // Init
