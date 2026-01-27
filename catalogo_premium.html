@@ -18,6 +18,7 @@
         /* Metallic Slider Styling */
         input[type=range] {
             -webkit-appearance: none;
+            appearance: none;
             width: 100%;
             background: transparent;
         }
@@ -157,7 +158,7 @@
             // 4. FUZE TEA (All)
             { id: 23, name: 'FUZE TEA', category: 'Vidrio Rellenable 30cl', price: 33.12, envase: '24 botellas' },
             { id: 32, name: 'FUZE TEA', category: 'Vidrio 30cl', price: 33.12, envase: '24 botellas' },
-            { id: 34, name: 'FUZE TEA', category: 'Lata 33cl', price: 39.60, envase: '24 latas' },
+            { id: 340, name: 'FUZE TEA', category: 'Lata 33cl', price: 39.60, envase: '24 latas' },
             { id: 38, name: 'FUZE TEA (6 uds.)', category: 'PET 1,5L', price: 21.54, envase: '6 botellas' },
 
             // 5. RESTO
@@ -331,8 +332,8 @@
                 const units = getUnits(p.envase);
                 const unitPrice = finalPrice / units;
 
-                // Slider settings (Max = 2x price to allow markup range)
-                const sliderMax = (p.price * 2).toFixed(2);
+                // Slider settings (Max = price to allow only discount, no markup)
+                const sliderMax = p.price.toFixed(2);
                 // Default slider value matches Comp Price if set, else Base Price
                 const sliderVal = compPrice ? parseFloat(compPrice) : p.price;
 
@@ -371,6 +372,7 @@
                             </div>
                             <!-- step 0.01 for precision -->
                             <input type="range" min="0" max="${sliderMax}" step="0.01" value="${sliderVal}" 
+                                id="slider-${p.id}"
                                 oninput="handleSliderChange(${p.id}, this.value)"
                                 onchange="handleSliderChange(${p.id}, this.value, true)"
                                 class="w-full">
@@ -379,7 +381,30 @@
                          <!-- PRICE DISPLAY -->
                          <div class="flex items-end justify-between relative">
                             <div>
-                                <p class="text-xs text-gray-400 font-medium mb-0.5">Precio Unidad</p>
+                                <div class="flex items-center justify-between mb-1">
+                                    <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Precio Unidad</p>
+                                    
+                                    <!-- RIVAL PRICE INPUT (Styled) -->
+                                    <div class="flex items-center gap-2">
+                                        <!-- Trash/Reset Button -->
+                                        <button onclick="resetCard(${p.id})" 
+                                            class="h-7 w-7 flex items-center justify-center rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 transition-all"
+                                            title="Borrar / Resetear">
+                                            <i class="fa-solid fa-trash-can text-sm"></i>
+                                        </button>
+
+                                        <div class="relative group/input flex items-center">
+                                            <div class="absolute left-2 text-red-400 text-[10px] pointer-events-none">
+                                                <i class="fa-solid fa-tag"></i>
+                                            </div>
+                                            <input type="number" step="0.01" placeholder="P.UD" id="input-unit-${p.id}"
+                                                class="w-24 pl-6 pr-2 py-1 text-right text-xs font-bold bg-red-50 border border-red-300 hover:border-red-500 focus:bg-white focus:border-red-600 focus:ring-2 focus:ring-red-500/20 rounded-md transition-all outline-none text-red-700 placeholder-red-300 shadow-sm"
+                                                style="-moz-appearance: textfield;"
+                                                oninput="handleUnitInput(${p.id}, this.value)"
+                                                onclick="this.select()">
+                                        </div>
+                                    </div>
+                                </div>
                                 <p class="text-3xl font-black text-gray-900 tracking-tighter leading-none" id="price-unit-${p.id}">
                                     ${unitPrice.toFixed(2)}€
                                 </p>
@@ -390,10 +415,10 @@
 
                             <!-- BADGE -->
                             ${discount !== 0 ? `
-                            <div id="badge-${p.id}" class="absolute bottom-1 right-1 h-16 w-16 bg-gradient-to-br ${badgeGradient} rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform border-4 border-white">
+                            <div id="badge-${p.id}" class="absolute -bottom-3 right-1 h-16 w-16 bg-gradient-to-br ${badgeGradient} rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform border-4 border-white">
                                 <span class="text-white font-black text-sm">${discount > 0 ? '' : '+'}${Math.abs(discount).toFixed(0)}%</span>
                             </div>` : `
-                            <div id="badge-${p.id}" class="hidden absolute bottom-1 right-1 h-16 w-16 bg-gradient-to-br ${style.gradient} rounded-full flex items-center justify-center shadow-lg border-4 border-white">
+                            <div id="badge-${p.id}" class="hidden absolute -bottom-3 right-1 h-16 w-16 bg-gradient-to-br ${style.gradient} rounded-full flex items-center justify-center shadow-lg border-4 border-white">
                                 <span class="text-white font-black text-sm"></span>
                             </div>
                             `}
@@ -464,12 +489,40 @@
                     // I will update HTML gen to always render badge but toggle hidden.
                 }
                 if (badge) {
-                    badge.className = `absolute bottom-1 right-1 h-16 w-16 bg-gradient-to-br ${gradient} rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform border-4 border-white`;
+                    badge.className = `absolute -bottom-3 right-1 h-16 w-16 bg-gradient-to-br ${gradient} rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform border-4 border-white`;
                     badge.innerHTML = badgeContent;
                     badge.classList.remove('hidden');
                 }
             } else {
                 if (badge) badge.classList.add('hidden');
+            }
+        }
+
+        function handleUnitInput(id, unitVal) {
+            const product = PRODUCTS.find(p => p.id === id);
+            if (!product) return;
+
+            // Normalize comma to dot just in case
+            if (typeof unitVal === 'string') unitVal = unitVal.replace(',', '.');
+
+            const targetUnit = parseFloat(unitVal);
+            if (isNaN(targetUnit) || targetUnit < 0) return;
+
+            const units = getUnits(product.envase);
+            let targetBoxPrice = targetUnit * units;
+
+            // Cap at tariff price (slider max)
+            // If user enters a price higher than tariff, we clamp it to tariff (0% discount)
+            if (targetBoxPrice > product.price) {
+                targetBoxPrice = product.price;
+            }
+
+            // Update Slider Logic
+            const slider = document.getElementById(`slider-${id}`);
+            if (slider) {
+                slider.value = targetBoxPrice.toFixed(2);
+                // Trigger change logic
+                handleSliderChange(id, targetBoxPrice, true);
             }
         }
 
@@ -511,6 +564,28 @@
             // Re-render pills & grid
             initCategories(); // Update active states
             renderCatalog();
+        }
+
+        function resetCard(id) {
+            const product = PRODUCTS.find(p => p.id === id);
+            if (!product) return;
+
+            // 1. Reset Internal State
+            discounts[id] = 0;
+            // If using competitorPrices obj, reset it too
+            // competitorPrices[id] = null; // (Assuming we might track it, but sliderVal is source of truth mostly)
+
+            // 2. Clear Input
+            const input = document.getElementById(`input-unit-${id}`);
+            if (input) input.value = '';
+
+            // 3. Reset Slider to Max (Tariff Price)
+            const slider = document.getElementById(`slider-${id}`);
+            if (slider) {
+                slider.value = product.price.toFixed(2);
+                // Trigger updates visual
+                handleSliderChange(id, product.price, true);
+            }
         }
 
         // Init

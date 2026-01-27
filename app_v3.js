@@ -1478,14 +1478,16 @@ const productCatalog = [
     { name: 'Coca-Cola Zero Zero 2L (Caja)', price: 28.68, image: 'cocacola_zero_logo.png', defaultDiscount: 71 },
     { name: 'Fanta Naranja 2L (Caja)', price: 27.06, image: 'fanta_logo.jpg', defaultDiscount: 71 },
     { name: 'Fanta Limón 2L (Caja)', price: 27.06, image: 'fanta_logo.jpg', defaultDiscount: 71 },
-    { name: 'Coca-Cola Lata 33cl (Caja)', price: 39.36, image: 'cocacola_logo.jpg', defaultDiscount: 62 },
-    { name: 'Coca-Cola Zero Lata 33cl (Caja)', price: 39.36, image: 'cocacola_zero_logo.png', defaultDiscount: 62 },
-    { name: 'Coca-Cola Zero Zero Lata 33cl (Caja)', price: 39.36, image: 'cocacola_zero_logo.png', defaultDiscount: 62 },
-    { name: 'Fanta Naranja Lata 33cl (Caja)', price: 37.68, image: 'fanta_logo.jpg', defaultDiscount: 62 },
-    { name: 'Fanta Limón Lata 33cl (Caja)', price: 37.68, image: 'fanta_logo.jpg', defaultDiscount: 62 },
-    { name: 'Aquarius Limón Lata 33cl (Caja)', price: 41.04, image: 'aquarius_logo.png', defaultDiscount: 60 },
-    { name: 'Aquarius Naranja Lata 33cl (Caja)', price: 41.04, image: 'aquarius_logo.png', defaultDiscount: 60 },
-    { name: 'Fuze Tea Lata 33cl (Caja)', price: 39.60, image: 'fuzetea_logo.jpg', defaultDiscount: 60 },
+    { name: 'Coca-Cola Lata 33cl (Caja 24)', price: 39.36, image: 'cocacola_logo.jpg', defaultDiscount: 62 },
+    { name: 'Coca-Cola Zero Lata 33cl (Caja 24)', price: 39.36, image: 'cocacola_zero_logo.png', defaultDiscount: 62 },
+    { name: 'Coca-Cola Zero Zero Lata 33cl (Caja 24)', price: 39.36, image: 'cocacola_zero_logo.png', defaultDiscount: 62 },
+    { name: 'Fanta Naranja Lata 33cl (Caja 24)', price: 37.68, image: 'fanta_logo.jpg', defaultDiscount: 62 },
+    { name: 'Fanta Limón Lata 33cl (Caja 24)', price: 37.68, image: 'fanta_logo.jpg', defaultDiscount: 62 },
+    { name: 'Aquarius Limón Lata 33cl (Caja 24)', price: 41.04, image: 'aquarius_logo.png', defaultDiscount: 60 },
+    { name: 'Aquarius Naranja Lata 33cl (Caja 24)', price: 41.04, image: 'aquarius_logo.png', defaultDiscount: 60 },
+    { name: 'Fuze Tea Lata 33cl (Caja 24)', price: 39.60, image: 'fuzetea_logo.jpg', defaultDiscount: 60 },
+    { name: 'Sprite 2L (Caja)', price: 27.06, image: 'sprite_logo.jpg', defaultDiscount: 60 },
+    { name: 'Aquabona 1.5L (Caja 6)', price: 9.30, image: 'aquabona_logo.png', defaultDiscount: 60 },
     { name: 'Royal Bliss Vidrio 20cl (Caja24)', price: 31.92, image: 'royalbliss_logo.png', defaultDiscount: 0 },
     { name: 'Monster Lata 50cl (Caja 24)', price: 56.16, image: 'monster_logo.jpg', defaultDiscount: 50 },
 ];
@@ -1796,6 +1798,12 @@ async function syncFolderToNotion() {
     syncBtn.innerHTML = originalText;
     syncBtn.disabled = false;
 
+    // FIX: Auth Error Interception (Evita que salga el error genérico si es Auth)
+    if (errorCount > 0 && (lastErrorMsg.includes("401") || lastErrorMsg.includes("AUTENTICACIÓN") || lastErrorMsg.includes("iPad"))) {
+        alert(`❌ NO SE PUEDO SINCRONIZAR (iPad/Móvil)\n\nEl dispositivo NO tiene la Clave de Notion guardada.\n\nSOLUCIÓN:\n1. Ve a Configuración (⚙️).\n2. Pega tu clave "ntn_...".\n3. Guarda.`);
+        return;
+    }
+
     if (errorCount > 0) {
         alert(`⚠️ Problema en la sincronización:\n\n✅ Enviados: ${successCount}\nâŒ Fallos: ${errorCount}\n\n🔍 ERROR DETECTADO:\n"${lastErrorMsg}"\n\n(Revisa que las columnas en Notion se llamen exactamente "Carpeta" y "Estado")`);
     } else {
@@ -1889,6 +1897,10 @@ async function sendNoteToNotion(client, folderName) {
     });
 
     if (!response.ok) {
+        // DETECCIÓN ESPECÍFICA DE ERROR DE CLAVE (iPad/Móvil)
+        if (response.status === 401) {
+            throw new Error("⛔ ERROR DE AUTENTICACIÓN (iPad/Móvil): Tu clave API no está guardada en este dispositivo. Ve a Configuración (⚙️) y pégala de nuevo.");
+        }
         const err = await response.json();
         throw new Error(err.message || 'Notion API Error');
     }
@@ -2279,6 +2291,8 @@ async function saveReminderToNotion() {
             isDatabase = true;
             const d = await dbResp.json();
             schema = d.properties;
+        } else if (dbResp.status === 401) {
+            throw new Error("⛔ ERROR DE AUTENTICACIÓN (iPad): Falta la Clave API en este dispositivo.");
         } else {
             // 2. Search "Registro de tareas" if not found
             // console.log("Searching for DB...");
