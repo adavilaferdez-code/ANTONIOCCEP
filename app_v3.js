@@ -2260,7 +2260,7 @@ async function saveReminderToNotion() {
     const date = reminderDate.value;
 
     if (!text) {
-        showToast("¡Falta información!", "Escribe qué quieres recordar", "error");
+        alert("⚠️ Por favor, escribe qué quieres recordar.");
         return;
     }
 
@@ -2268,15 +2268,15 @@ async function saveReminderToNotion() {
     const NOTION_KEY = (localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT).trim();
     let NOTION_DB_ID = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
 
-    // Format ID generic helper
-    const genericCleanId = NOTION_DB_ID.replace(/-/g, '');
-    const formattedId = `${genericCleanId.substr(0, 8)}-${genericCleanId.substr(8, 4)}-${genericCleanId.substr(12, 4)}-${genericCleanId.substr(16, 4)}-${genericCleanId.substr(20)}`;
-
     // UI Loading
     btnSaveReminder.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
     btnSaveReminder.disabled = true;
 
     try {
+        // Format ID generic helper
+        const genericCleanId = NOTION_DB_ID.replace(/-/g, '');
+        const formattedId = `${genericCleanId.substr(0, 8)}-${genericCleanId.substr(8, 4)}-${genericCleanId.substr(12, 4)}-${genericCleanId.substr(16, 4)}-${genericCleanId.substr(20)}`;
+
         let isDatabase = false;
         let dbIdToQuery = formattedId;
         let schema = null;
@@ -2291,26 +2291,21 @@ async function saveReminderToNotion() {
             isDatabase = true;
             const d = await dbResp.json();
             schema = d.properties;
-        } else if (dbResp.status === 401) {
-            throw new Error("⛔ ERROR DE AUTENTICACIÓN (iPad): Falta la Clave API en este dispositivo.");
         } else {
-            // 2. Search "Registro de tareas" if not found
-            // console.log("Searching for DB...");
+            // If direct ID fails, try Search or just Fallback immediately to avoid long waits
+            console.warn("Direct DB access failed, trying search...");
             const searchResp = await fetch(`${CORS_PROXY}https://api.notion.com/v1/search`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${NOTION_KEY}`, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     filter: { value: 'database', property: 'object' },
-                    page_size: 20
+                    page_size: 5
                 })
             });
+
             if (searchResp.ok) {
                 const searchData = await searchResp.json();
-                // Precise match first
-                let bestMatch = searchData.results.find(db => db.title && db.title.map(t => t.plain_text).join('').toLowerCase() === "registro de tareas");
-                // Loose match second
-                if (!bestMatch) bestMatch = searchData.results.find(db => db.title && db.title.map(t => t.plain_text).join('').toLowerCase().includes("registro de tareas"));
-
+                const bestMatch = searchData.results[0]; // Just take the first one found
                 if (bestMatch) {
                     dbIdToQuery = bestMatch.id;
                     isDatabase = true;
@@ -2339,7 +2334,6 @@ async function saveReminderToNotion() {
             const statusProp = Object.values(schema).find(p => p.type === 'status' || p.type === 'select');
             if (statusProp) {
                 const statusName = Object.keys(schema).find(key => schema[key] === statusProp);
-                // Check if it is status or select
                 if (statusProp.type === 'status') {
                     props[statusName] = { status: { name: "Pendiente" } };
                 } else {
@@ -2347,8 +2341,7 @@ async function saveReminderToNotion() {
                 }
             }
 
-            // === PRIORIDAD (NEW) ===
-            // Try to find a column named similar to "Prioridad" or "Priority"
+            // Priority
             const priorityProp = Object.values(schema).find(p => {
                 const n = Object.keys(schema).find(key => schema[key] === p).toLowerCase();
                 return n.includes('prioridad') || n.includes('priority');
@@ -2356,7 +2349,6 @@ async function saveReminderToNotion() {
 
             if (priorityProp) {
                 const pName = Object.keys(schema).find(key => schema[key] === priorityProp);
-                // We send the text value "Alta", "Media", or "Baja". Notion will match it to the option if it exists.
                 props[pName] = { select: { name: currentPriority } };
             }
 
@@ -2369,32 +2361,54 @@ async function saveReminderToNotion() {
             });
 
             if (resp.ok) {
-                handleSuccess("", "Registro de Tareas + Prioridad");
+                handleSuccess("", "Notion (Nube)");
                 return;
             }
         }
 
-        // Fallback or Error
-        throw new Error("No se pudo conectar con la BD de Tareas.");
+        throw new Error("No se pudo conectar con Notion.");
 
     } catch (e) {
-        console.error(e);
-        showToast("Error", e.message, "error");
+        console.error("Notion Error:", e);
+        // FALLBACK: SAVE LOCALLY
+        saveLocally(text, date, currentPriority);
     } finally {
         btnSaveReminder.innerHTML = 'GUARDAR';
         btnSaveReminder.disabled = false;
     }
 
+    function saveLocally(text, date, priority) {
+        const localReminders = JSON.parse(localStorage.getItem('offlineReminders') || '[]');
+        localReminders.push({
+            id: Date.now(),
+            text: text,
+            date: date,
+            priority: priority,
+            status: 'pending',
+            synced: false
+        });
+        localStorage.setItem('offlineReminders', JSON.stringify(localReminders));
+
+        // Use Alert because Toasts are disabled
+        alert(`⚠️ NOTION NO RESPONDE\n\nPero tranquilo/a, he guardado la nota en la MEMORIA DEL IPAD.\n\nSe guardó como: "${text}"`);
+
+        reminderText.value = '';
+        closeReminderModal();
+    }
+
     function handleSuccess(url, savedType) {
         reminderText.value = '';
         closeReminderModal();
-        showToast("¡Guardado!", `Añadido a ${savedType}`, "success");
-        triggerConfetti(); // 🎉 CELEBRATION
+
+        // Use Alert because Toasts are disabled
+        alert(`✅ ¡GUARDADO!\n\nTu recordatorio se ha subido correctamente a ${savedType}.`);
+
+        triggerConfetti();
 
         // Reset priority to default
         currentPriority = "Media";
         document.querySelectorAll('.p-chip').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.p-chip')[1].classList.add('active'); // Media is 2nd
+        document.querySelectorAll('.p-chip')[1].classList.add('active');
     }
 }
 
