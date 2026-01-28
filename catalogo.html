@@ -7,6 +7,10 @@
     <title>Catálogo de Productos - HostelHub</title>
     <link rel="stylesheet" href="style.css?v=99">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="logo_antonio.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         /* Catalog Specific Overrides - LIGHT THEME */
         :root {
@@ -1275,6 +1279,60 @@
                 toggleOutdoorMode();
             }
         } catch (e) { console.error(e); }
+        <!-- Service Worker & Gestures -->
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js');
+                });
+        }
+
+            // SWIPE GESTURES
+            let touchStartX = 0;
+            let touchEndX = 0;
+            const grid = document.getElementById('catalogGrid');
+
+            if (grid) {
+                grid.addEventListener('touchstart', e => {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+
+            grid.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+            handleSwipe(e.target);
+            }, {passive: true});
+        }
+
+            function handleSwipe(target) {
+            const card = target.closest('.product-card');
+            if (!card) return;
+
+            // Swipe RIGHT (Add)
+            if (touchEndX > touchStartX + 80) { // Threshold 80px
+                const onClickAttr = card.getAttribute('onclick');
+            if (onClickAttr) {
+                    const match = onClickAttr.match(/toggleSelect\((\d+)\)/);
+            if (match && match[1]) {
+                        const id = parseInt(match[1]);
+
+            // Visual Feedback
+            const originalTransform = card.style.transform;
+            card.style.transition = 'transform 0.2s, background 0.2s';
+            card.style.transform = 'translateX(30px)';
+            card.style.background = '#d1fae5'; // Light Green
+
+            // Trigger Add
+            addToActiveNote(id);
+
+                        // Reset
+                        setTimeout(() => {
+                card.style.transform = originalTransform;
+            card.style.background = 'white';
+                        }, 300);
+                    }
+                }
+            }
+        }
     </script>
 </body>
 
