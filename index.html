@@ -500,9 +500,14 @@
 
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
+        <!-- New Config Button in Main Menu -->
+        <a href="#" class="nav-item" onclick="configureSettings(); return false;">
+            <i class="fa-solid fa-gear"></i>
+            <span>Ajustes</span>
+        </a>
         <a href="#" class="nav-item" onclick="openCalculator(); return false;">
             <i class="fa-solid fa-calculator"></i>
-            <span>Calculadora</span>
+            <span>Calc</span>
         </a>
         <a href="#" class="nav-item sensitive-data" onclick="openNotionApp(); return false;">
             <i class="fa-solid fa-pen-to-square"></i>
@@ -511,10 +516,6 @@
         <a href="http://excel.cloud.microsoft" target="_blank" class="nav-item sensitive-data">
             <i class="fa-solid fa-table-cells"></i>
             <span>EXCEL</span>
-        </a>
-        <a href="https://outlook.office.com/mail/" target="_blank" class="nav-item">
-            <i class="fa-solid fa-envelope"></i>
-            <span>Correo</span>
         </a>
     </nav>
 
