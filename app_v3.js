@@ -2244,6 +2244,17 @@ function closeReminderModal() {
     reminderModal.classList.remove('open');
 }
 
+// === PRIORITY LOGIC ===
+let currentPriority = "Media";
+
+function selectPriority(el, value) {
+    // Visual update
+    document.querySelectorAll('.p-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    // State update
+    currentPriority = value;
+}
+
 // === RADAR FEATURE ===
 // Lazy selectors to avoid loading issues
 
