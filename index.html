@@ -168,6 +168,11 @@
                     <i class="fa-solid fa-magnifying-glass search-icon"></i>
                     <input type="text" id="searchInput" class="search-input"
                         placeholder="Buscar bar, restaurante, ciudad...">
+                    <!-- Settings Button -->
+                    <button onclick="configureSettings()" class="settings-btn" title="Ajustes Notion"
+                        style="right: 70px;">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
                     <!-- Reminder Button -->
                     <button onclick="openReminderModal()" class="reminder-bell-btn" title="Nuevo Recordatorio">
                         <i class="fa-solid fa-bell"></i>
@@ -831,113 +836,8 @@
 
     <div id="transitionOverlay" class="transition-overlay"></div>
 
-    <!-- REMINDER FAB (Floating Action Button) -->
-    <button id="fabReminder" class="fab-reminder" onclick="openReminderModal()">
-        <i class="fa-solid fa-bell"></i>
-    </button>
-
-    <!-- Reminder Modal -->
-    <div id="reminderModal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 400px;">
-            <div class="modal-header">
-                <h2>🔔 Nuevo Recordatorio</h2>
-                <button class="close-btn" onclick="closeReminderModal()"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="modal-body">
-                <div class="input-group">
-                    <label>¿Qué hay que recordar?</label>
-                    <textarea id="reminderText" class="modal-input" rows="4"
-                        placeholder="Escribe aquí... (Ej: Llamar a Juan mañana)"
-                        oninput="autoSaveReminder()"></textarea>
-                </div>
-
-                <!-- Priority Selector -->
-                <div class="input-group">
-                    <label>Prioridad</label>
-                    <div class="priority-selector">
-                        <div class="p-chip" onclick="selectPriority(this, 'Alta')" style="--p-color: #ef4444;">
-                            <i class="fa-solid fa-fire"></i> Alta
-                        </div>
-                        <div class="p-chip active" onclick="selectPriority(this, 'Media')" style="--p-color: #f59e0b;">
-                            <i class="fa-regular fa-face-meh"></i> Media
-                        </div>
-                        <div class="p-chip" onclick="selectPriority(this, 'Baja')" style="--p-color: #10b981;">
-                            <i class="fa-solid fa-ice-cream"></i> Baja
-                        </div>
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label>Fecha</label>
-                    <div class="quick-dates">
-                        <button onclick="setQuickDate(1)" class="date-chip">🌞 Mañana</button>
-                        <button onclick="setQuickDate(2)" class="date-chip">⏭ Pasado</button>
-                        <button onclick="setQuickDate('nextMonday')" class="date-chip">📅 El Lunes</button>
-                    </div>
-                    <input type="date" id="reminderDate" class="modal-input">
-                </div>
-                <div class="modal-actions">
-                    <button onclick="saveReminderToNotion()" id="btnSaveReminder" class="action-capsule"
-                        style="width:100%; justify-content:center; background:var(--primary-gradient); color:white; position:relative; display:flex; align-items:center;">
-                        <span id="notionStatusIndicator"
-                            style="width:8px; height:8px; border-radius:50%; background:#fbbf24; display:inline-block; margin-right:8px; transition: background 0.3s;"></span>
-                        <i class="fa-solid fa-cloud-arrow-up"></i> GUARDAR EN NOTION
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Hidden Backup Input for Restore Functionality -->
     <input type="file" id="backupInput" style="display:none;" accept=".json" onchange="importBackup(this)">
-
-    <!-- Settings Modal (New) -->
-    <div id="settingsModal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h2>⚙️ Configuración Notion</h2>
-                <button class="close-btn" onclick="closeSettingsModal()"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="modal-body" style="padding: 20px;">
-                <div style="margin-bottom: 20px;">
-                    <label style="display:block; margin-bottom:8px; font-weight:bold; color:var(--text-color);">🔑
-                        Internal Integration Secret</label>
-                    <input type="password" id="settingNotionKey" placeholder="secret_..."
-                        style="width:100%; padding:10px; border-radius:8px; border:1px solid #444; background:#222; color:white;">
-                    <p style="font-size:12px; color:#aaa; margin-top:5px;">Empieza por "secret_". Consíguelo en <a
-                            href="https://www.notion.so/my-integrations" target="_blank"
-                            style="color:#3b82f6;">notion.so/my-integrations</a></p>
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <label style="display:block; margin-bottom:8px; font-weight:bold; color:var(--text-color);">🗄️
-                        Database ID</label>
-                    <input type="text" id="settingNotionDb" placeholder="32 caracteres hex..."
-                        style="width:100%; padding:10px; border-radius:8px; border:1px solid #444; background:#222; color:white;">
-                    <p style="font-size:12px; color:#aaa; margin-top:5px;">El ID de la base de datos (normalmente en
-                        la
-                        URL).</p>
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <label style="display:block; margin-bottom:8px; font-weight:bold; color:var(--text-color);">📱
-                        Deep
-                        Link (App Notion)</label>
-                    <input type="text" id="settingNotionAppUrl" placeholder="notion://..."
-                        style="width:100%; padding:10px; border-radius:8px; border:1px solid #444; background:#222; color:white;">
-                    <p style="font-size:12px; color:#aaa; margin-top:5px;">Pega el enlace de tu página y cambia
-                        <b>https</b> por <b>notion</b>.
-                    </p>
-                </div>
-
-                <div style="text-align: right;">
-                    <button onclick="saveSettings()"
-                        style="background:var(--primary-gradient); border:none; padding:10px 20px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">💾
-                        Guardar y Probar</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- QR Modal -->
     <div id="qrModal" class="modal-overlay">

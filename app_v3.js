@@ -1,4 +1,4 @@
-﻿// HostelHub Premium - App V3
+// HostelHub Premium - App V3
 
 let searchResults = [];
 let currentEditingId = null;
@@ -27,14 +27,14 @@ if (navigator.geolocation) {
                 lat: position.coords.latitude,
                 lon: position.coords.longitude
             };
-            console.log("ðŸ“ Location acquired:", userLocation);
+            console.log("📍 Location acquired:", userLocation);
         },
         (error) => {
-            console.warn("⚠️ Location access denied or error:", error.message);
+            console.warn("??� Location access denied or error:", error.message);
         }
     );
 } else {
-    console.warn("⚠️ Geolocation not supported by this browser.");
+    console.warn("??� Geolocation not supported by this browser.");
 }
 
 */
@@ -54,7 +54,7 @@ function searchNearMe() {
     const term = searchInput.value.trim();
 
     // Visual feedback
-    venueList.innerHTML = '<div class="empty-state"><p>ðŸš€ Abriendo Google Maps...</p></div>';
+    venueList.innerHTML = '<div class="empty-state"><p>🚀 Abriendo Google Maps...</p></div>';
 
     const query = term.length > 0 ? term : 'restaurantes y bares';
     const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
@@ -498,7 +498,7 @@ function deleteRow(rowId) {
 }
 
 function clearDebtPad() {
-    if (confirm('Â¿Borrar todas las notas de deuda?')) {
+    if (confirm('¿Borrar todas las notas de deuda?')) {
         debtPad.innerHTML = '';
         addDebtRow();
         saveDebt();
@@ -586,7 +586,7 @@ function saveToDebts() {
     const item = searchResults.find(i => i.id === currentEditingId);
     if (!item) return;
 
-    const phoneStr = item.phone ? ` - ðŸ“ž ${item.phone}` : '';
+    const phoneStr = item.phone ? ` - 📞 ${item.phone}` : '';
     const noteText = `New: ${item.name}${phoneStr}`;
 
     // Add to debt list interactively
@@ -650,8 +650,8 @@ function closePlanes() {
 // RENDER FOLDERS (LEVEL 1)
 function renderFolders() {
     const planes = getPlanesData();
-    planesTitle.innerText = '📂 Mis Notas (Carpetas)';
-    planesTitle.innerText = '📂 Mis Notas (Carpetas)';
+    planesTitle.innerText = '?? Mis Notas (Carpetas)';
+    planesTitle.innerText = '?? Mis Notas (Carpetas)';
     // Controls for Root
     planesControls.innerHTML = `
         <button onclick="createNewFolder()" class="add-btn" style="background:var(--primary-gradient);"><i class="fa-solid fa-folder-plus"></i> Nueva Carpeta</button>
@@ -704,7 +704,7 @@ function openFolder(folderId) {
     const folder = planes.find(f => f.id === folderId);
     if (!folder) return;
 
-    planesTitle.innerText = `📂 ${folder.name}`;
+    planesTitle.innerText = `?? ${folder.name}`;
 
     // Controls for Folder
     planesControls.innerHTML = `
@@ -730,7 +730,7 @@ function renderClientList(folder) {
     planesContent.innerHTML = '';
 
     if (folder.clients.length === 0) {
-        planesContent.innerHTML = '<div class="empty-state" style="color:#aaa;">Carpeta vacía. Añade notas.</div>';
+        planesContent.innerHTML = '<div class="empty-state" style="color:#aaa;">Carpeta vac�a. A�ade notas.</div>';
         return;
     }
 
@@ -858,7 +858,7 @@ function editFolder(id) {
 
 // === AI MAGIC REWRITE ===
 function deleteFolder(id) {
-    if (!confirm("Â¿Seguro que quieres borrar esta carpeta y todo su contenido?")) return;
+    if (!confirm("¿Seguro que quieres borrar esta carpeta y todo su contenido?")) return;
     let planes = getPlanesData();
     planes = planes.filter(f => f.id !== id);
     savePlanesData(planes);
@@ -916,7 +916,7 @@ function saveClientEdit(rowId) {
 // === AI MAGIC REWRITE ===
 function deleteClientRow(rowId) {
     if (!currentFolderId) return;
-    if (!confirm("Â¿Borrar nota?")) return;
+    if (!confirm("¿Borrar nota?")) return;
 
     const planes = getPlanesData();
     const folder = planes.find(f => f.id === currentFolderId);
@@ -956,7 +956,7 @@ function exportBackup() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    alert('Copia de seguridad descargada. GuÃ¡rdala en lugar seguro.');
+    alert('Copia de seguridad descargada. Guárdala en lugar seguro.');
 }
 
 function copyBackup() {
@@ -968,10 +968,10 @@ function copyBackup() {
     const text = JSON.stringify(data, null, 2);
 
     navigator.clipboard.writeText(text).then(() => {
-        alert('Â¡Copia copiada al portapapeles! ðŸ“‹\n\nAhora puedes pegarla en las Notas de tu iPad o enviÃ¡rtela por correo.');
+        alert('¡Copia copiada al portapapeles! 📋\n\nAhora puedes pegarla en las Notas de tu iPad o enviártela por correo.');
     }).catch(err => {
         console.error('Error al copiar: ', err);
-        alert('No se pudo copiar automÃ¡ticamente. Intenta usar el botón de Descarga.');
+        alert('No se pudo copiar automáticamente. Intenta usar el bot�n de Descarga.');
     });
 }
 
@@ -979,7 +979,7 @@ function importBackup(input) {
     const file = input.files[0];
     if (!file) return;
 
-    if (!confirm('ATENCIÃ“N: Esto sobrescribirÃ¡ tus datos actuales con los del archivo. Â¿Seguro?')) {
+    if (!confirm('ATENCIÓN: Esto sobrescribirá tus datos actuales con los del archivo. ¿Seguro?')) {
         input.value = ''; // Reset
         return;
     }
@@ -996,12 +996,12 @@ function importBackup(input) {
                 localStorage.setItem('debtNotesContent', data.debts);
             }
 
-            alert('Â¡Datos restaurados con Ã©xito!');
+            alert('¡Datos restaurados con éxito!');
             renderFolders(); // Refresh view
 
         } catch (err) {
             console.error(err);
-            alert('Error al leer el archivo. AsegÃºrate de que es una copia vÃ¡lida.');
+            alert('Error al leer el archivo. Asegúrate de que es una copia válida.');
         }
         input.value = ''; // Reset
     };
@@ -1245,7 +1245,7 @@ function renderBonificationLists() {
     // RENDER BUY LIST
     buyContainer.innerHTML = '';
     if (calcCart.buy.length === 0) {
-        buyContainer.innerHTML = '<div style="color:#666; font-size:0.8rem; text-align:center; padding:10px; border:1px dashed #444; border-radius:4px;">Selecciona productos del catálogo para COMPRAR</div>';
+        buyContainer.innerHTML = '<div style="color:#666; font-size:0.8rem; text-align:center; padding:10px; border:1px dashed #444; border-radius:4px;">Selecciona productos del cat�logo para COMPRAR</div>';
     } else {
         calcCart.buy.forEach((item, index) => {
             const row = document.createElement('div');
@@ -1253,7 +1253,7 @@ function renderBonificationLists() {
             row.innerHTML = `
                 <div style="flex:1; overflow:hidden;">
                     <div style="font-size:0.75rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
-                    <div style="font-size:0.7rem; color:#4ade80;">${item.price.toFixed(2)}€</div>
+                    <div style="font-size:0.7rem; color:#4ade80;">${item.price.toFixed(2)}�</div>
                 </div>
                 <div style="display:flex; flex-direction:column; width:80px; align-items:center;">
                     <label style="font-size:0.65rem; color:#aaa;">Cant.</label>
@@ -1280,7 +1280,7 @@ function renderBonificationLists() {
     // RENDER GIFT LIST
     giftContainer.innerHTML = '';
     if (calcCart.gift.length === 0) {
-        giftContainer.innerHTML = '<div style="color:#666; font-size:0.8rem; text-align:center; padding:5px;">(Opcional) Usa 🎁 para añadir regalos</div>';
+        giftContainer.innerHTML = '<div style="color:#666; font-size:0.8rem; text-align:center; padding:5px;">(Opcional) Usa ?? para a�adir regalos</div>';
     } else {
         calcCart.gift.forEach((item, index) => {
             const row = document.createElement('div');
@@ -1288,7 +1288,7 @@ function renderBonificationLists() {
             row.innerHTML = `
                 <div style="flex:1; overflow:hidden;">
                     <div style="font-size:0.75rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
-                    <div style="font-size:0.7rem; color:#fbbf24;">(Valor: ${(item.price * (1 - item.discount / 100)).toFixed(2)}€)</div>
+                    <div style="font-size:0.7rem; color:#fbbf24;">(Valor: ${(item.price * (1 - item.discount / 100)).toFixed(2)}�)</div>
                 </div>
                 <div style="display:flex; flex-direction:column; width:75px; align-items:center;">
                     <label style="font-size:0.65rem; color:#aaa;">Cant.</label>
@@ -1478,13 +1478,13 @@ const productCatalog = [
     { name: 'Coca-Cola Zero 2L (Caja)', price: 28.68, image: 'cocacola_zero_logo.png', defaultDiscount: 71 },
     { name: 'Coca-Cola Zero Zero 2L (Caja)', price: 28.68, image: 'cocacola_zero_logo.png', defaultDiscount: 71 },
     { name: 'Fanta Naranja 2L (Caja)', price: 27.06, image: 'fanta_logo.jpg', defaultDiscount: 71 },
-    { name: 'Fanta Limón 2L (Caja)', price: 27.06, image: 'fanta_logo.jpg', defaultDiscount: 71 },
+    { name: 'Fanta Lim�n 2L (Caja)', price: 27.06, image: 'fanta_logo.jpg', defaultDiscount: 71 },
     { name: 'Coca-Cola Lata 33cl (Caja 24)', price: 39.36, image: 'cocacola_logo.jpg', defaultDiscount: 62 },
     { name: 'Coca-Cola Zero Lata 33cl (Caja 24)', price: 39.36, image: 'cocacola_zero_logo.png', defaultDiscount: 62 },
     { name: 'Coca-Cola Zero Zero Lata 33cl (Caja 24)', price: 39.36, image: 'cocacola_zero_logo.png', defaultDiscount: 62 },
     { name: 'Fanta Naranja Lata 33cl (Caja 24)', price: 37.68, image: 'fanta_logo.jpg', defaultDiscount: 62 },
-    { name: 'Fanta Limón Lata 33cl (Caja 24)', price: 37.68, image: 'fanta_logo.jpg', defaultDiscount: 62 },
-    { name: 'Aquarius Limón Lata 33cl (Caja 24)', price: 41.04, image: 'aquarius_logo.png', defaultDiscount: 60 },
+    { name: 'Fanta Lim�n Lata 33cl (Caja 24)', price: 37.68, image: 'fanta_logo.jpg', defaultDiscount: 62 },
+    { name: 'Aquarius Lim�n Lata 33cl (Caja 24)', price: 41.04, image: 'aquarius_logo.png', defaultDiscount: 60 },
     { name: 'Aquarius Naranja Lata 33cl (Caja 24)', price: 41.04, image: 'aquarius_logo.png', defaultDiscount: 60 },
     { name: 'Fuze Tea Lata 33cl (Caja 24)', price: 39.60, image: 'fuzetea_logo.jpg', defaultDiscount: 60 },
     { name: 'Sprite 2L (Caja)', price: 27.06, image: 'sprite_logo.jpg', defaultDiscount: 60 },
@@ -1547,7 +1547,7 @@ function renderCalcProducts(filter = '') {
         // Price
         const price = document.createElement('div');
         price.style.cssText = 'font-size:0.95rem; color:#4ade80; font-weight:800; font-family:monospace;';
-        price.innerText = p.price.toFixed(2) + '€';
+        price.innerText = p.price.toFixed(2) + '�';
 
         // Gift Button (Small icon)
         const giftBtn = document.createElement('button');
@@ -1587,7 +1587,7 @@ function saveSpyReport() {
     const statusDiv = document.getElementById('spyStatus');
 
     if (notes.length === 0) {
-        alert("⚠️ Por favor escribe algún detalle del informe.");
+        alert("?? Por favor escribe alg�n detalle del informe.");
         return;
     }
 
@@ -1616,7 +1616,7 @@ function saveSpyReport() {
     }, 2000);
 
     // Optional: Alert for immediate feedback since toast might be hidden
-    alert(`🕵️ INFORME GUARDADO\n\nMarca: ${brand}\nAcción: ${type}\n\n¡Buen trabajo, agente!`);
+    alert(`??? INFORME GUARDADO\n\nMarca: ${brand}\nAcci�n: ${type}\n\n�Buen trabajo, agente!`);
 }
 
 
@@ -1662,7 +1662,7 @@ function openNotionApp() {
         window.location.href = finalUrl;
     } else {
         // If not configured, try to show alert or open settings
-        if (confirm("⚠️ Aún no has configurado el enlace directo a la App de Notion.\n\n¿Quieres configurarlo ahora?")) {
+        if (confirm("?? A�n no has configurado el enlace directo a la App de Notion.\n\n�Quieres configurarlo ahora?")) {
             configureSettings();
         }
     }
@@ -1692,13 +1692,13 @@ function saveSettings() {
 
     // Validation removed as user has 'ntn_' key format
     if (newKey.length < 10) {
-        alert("⚠️ La clave parece demasiado corta. Asegúrate de copiarla entera.");
+        alert("?? La clave parece demasiado corta. Aseg�rate de copiarla entera.");
         return;
     }
 
     // Prevent pasting Key into DB ID
     if (newDb.startsWith('ntn_') || newDb.startsWith('secret_')) {
-        alert("⚠️ ERROR: Has pegado la Clave en el hueco del ID.\n\nEl 'Database ID' es diferente (búscalo en la URL de tu Notion).");
+        alert("?? ERROR: Has pegado la Clave en el hueco del ID.\n\nEl 'Database ID' es diferente (b�scalo en la URL de tu Notion).");
         return;
     }
 
@@ -1762,8 +1762,8 @@ async function testNotionConnection() {
     // We can't update a JS alert. We'll verify and then alert.
 
     try {
-        // DEBUG: Mostrar la clave que se estÃ¡ usando realmente
-        alert(`🐛 DIAGNÓSTICO:\n\nUsando clave: ${NOTION_KEY.substring(0, 15)}...${NOTION_KEY.substring(NOTION_KEY.length - 5)}\n\n(Comprueba si coincide con tu clave ntn_)`);
+        // DEBUG: Mostrar la clave que se está usando realmente
+        alert(`?? DIAGN�STICO:\n\nUsando clave: ${NOTION_KEY.substring(0, 15)}...${NOTION_KEY.substring(NOTION_KEY.length - 5)}\n\n(Comprueba si coincide con tu clave ntn_)`);
 
         const response = await fetch(url, {
             method: 'GET',
@@ -1775,14 +1775,14 @@ async function testNotionConnection() {
 
         if (!response.ok) {
             const err = await response.json();
-            throw new Error(err.message || 'Error de conexiÃ³n');
+            throw new Error(err.message || 'Error de conexión');
         }
 
         const data = await response.json();
-        alert(`🎉 ¡CONEXIÓN EXITOSA!\n\n🤖 Bot detectado: ${data.bot ? data.bot.owner.type : 'Usuario'}\n✅ Tu API Key funciona perfectamente.\n\nSi la sincronización falla, el problema es que NO has dado permiso al bot en la base de datos (Menú Copas > Conexiones).`);
+        alert(`?? �CONEXI�N EXITOSA!\n\n?? Bot detectado: ${data.bot ? data.bot.owner.type : 'Usuario'}\n? Tu API Key funciona perfectamente.\n\nSi la sincronizaci�n falla, el problema es que NO has dado permiso al bot en la base de datos (Men� Copas > Conexiones).`);
 
     } catch (e) {
-        alert(`âŒ ERROR DE CONEXIÃ“N:\n"${e.message}"\n\nEsto significa que la Clave INTERNAL INTEGRATION SECRET (Notion) está MAL copiada/pegada (No confundir con Gemini).`);
+        alert(`❌ ERROR DE CONEXIÓN:\n"${e.message}"\n\nEsto significa que la Clave INTERNAL INTEGRATION SECRET (Notion) est� MAL copiada/pegada (No confundir con Gemini).`);
     }
 }
 
@@ -1805,11 +1805,11 @@ async function syncFolderToNotion() {
     const planes = getPlanesData();
     const folder = planes.find(f => f.id === currentFolderId);
     if (!folder || folder.clients.length === 0) {
-        alert("La carpeta está vacía.");
+        alert("La carpeta est� vac�a.");
         return;
     }
 
-    if (!confirm(`¿Enviar ${folder.clients.length} notas a Notion?\nEsto creará o actualizará las entradas en tu base de datos.`)) return;
+    if (!confirm(`�Enviar ${folder.clients.length} notas a Notion?\nEsto crear� o actualizar� las entradas en tu base de datos.`)) return;
 
     // Show loading state
     const syncBtn = planesControls.querySelector('button:last-child');
@@ -1838,16 +1838,16 @@ async function syncFolderToNotion() {
     syncBtn.innerHTML = originalText;
     syncBtn.disabled = false;
 
-    // FIX: Auth Error Interception (Evita que salga el error genérico si es Auth)
-    if (errorCount > 0 && (lastErrorMsg.includes("401") || lastErrorMsg.includes("AUTENTICACIÓN") || lastErrorMsg.includes("iPad"))) {
-        alert(`❌ NO SE PUEDO SINCRONIZAR (iPad/Móvil)\n\nEl dispositivo NO tiene la Clave de Notion guardada.\n\nSOLUCIÓN:\n1. Ve a Configuración (⚙️).\n2. Pega tu clave "ntn_...".\n3. Guarda.`);
+    // FIX: Auth Error Interception (Evita que salga el error gen�rico si es Auth)
+    if (errorCount > 0 && (lastErrorMsg.includes("401") || lastErrorMsg.includes("AUTENTICACI�N") || lastErrorMsg.includes("iPad"))) {
+        alert(`? NO SE PUEDO SINCRONIZAR (iPad/M�vil)\n\nEl dispositivo NO tiene la Clave de Notion guardada.\n\nSOLUCI�N:\n1. Ve a Configuraci�n (??).\n2. Pega tu clave "ntn_...".\n3. Guarda.`);
         return;
     }
 
     if (errorCount > 0) {
-        alert(`⚠️ Problema en la sincronización:\n\n✅ Enviados: ${successCount}\nâŒ Fallos: ${errorCount}\n\n🔍 ERROR DETECTADO:\n"${lastErrorMsg}"\n\n(Revisa que las columnas en Notion se llamen exactamente "Carpeta" y "Estado")`);
+        alert(`??� Problema en la sincronizaci�n:\n\n? Enviados: ${successCount}\n❌ Fallos: ${errorCount}\n\n??� ERROR DETECTADO:\n"${lastErrorMsg}"\n\n(Revisa que las columnas en Notion se llamen exactamente "Carpeta" y "Estado")`);
     } else {
-        alert(`¡Sincronización Perfecta! 🚀\n\n✅ Se han enviado ${successCount} notas a Notion.`);
+        alert(`�Sincronizaci�n Perfecta! ??\n\n? Se han enviado ${successCount} notas a Notion.`);
     }
 }
 
@@ -1890,7 +1890,7 @@ async function sendNoteToNotion(client, folderName) {
     plainText = plainText.replace(/^[\.\s\-\:]+/, '').trim();
 
     // If cleanup left it empty (user didn't type anything), put a default
-    if (!plainText) plainText = "Nota sin tÃ­tulo";
+    if (!plainText) plainText = "Nota sin título";
 
     // Determine Status
     const statusName = client.status === 'paid' ? 'Hecho' : (client.status === 'pending' ? 'Pendiente' : 'Sin Estado');
@@ -1937,9 +1937,9 @@ async function sendNoteToNotion(client, folderName) {
     });
 
     if (!response.ok) {
-        // DETECCIÓN ESPECÍFICA DE ERROR DE CLAVE (iPad/Móvil)
+        // DETECCI�N ESPEC�FICA DE ERROR DE CLAVE (iPad/M�vil)
         if (response.status === 401) {
-            throw new Error("⛔ ERROR DE AUTENTICACIÓN (iPad/Móvil): Tu clave API no está guardada en este dispositivo. Ve a Configuración (⚙️) y pégala de nuevo.");
+            throw new Error("? ERROR DE AUTENTICACI�N (iPad/M�vil): Tu clave API no est� guardada en este dispositivo. Ve a Configuraci�n (??) y p�gala de nuevo.");
         }
         const err = await response.json();
         throw new Error(err.message || 'Notion API Error');
@@ -1959,7 +1959,7 @@ async function sendNoteToNotion(client, folderName) {
 // === AI MAGIC REWRITE ===
 // === SYNC FUNCTION FINAL ===
 async function syncNotion_FINAL() {
-    console.log("🚀 syncNotion_FINAL Triggered"); // Debug Log
+    console.log("?? syncNotion_FINAL Triggered"); // Debug Log
 
     // 1. Get Credentials
     const NOTION_KEY = (localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT).trim();
@@ -1974,7 +1974,7 @@ async function syncNotion_FINAL() {
     };
     NOTION_DB_ID = formatUUID(NOTION_DB_ID);
 
-    if (!confirm("⚠️  ¿Quieres IMPORTAR y RESTAURAR tus notas desde Notion PRO?\n\nEsto buscará todas las notas en tu base de datos y las recreará en esta aplicación. Útil si has perdido datos o cambiado de dispositivo.")) return;
+    if (!confirm("??  �Quieres IMPORTAR y RESTAURAR tus notas desde Notion PRO?\n\nEsto buscar� todas las notas en tu base de datos y las recrear� en esta aplicaci�n. �til si has perdido datos o cambiado de dispositivo.")) return;
 
     // Show loading
     const syncBtn = planesControls.querySelector('button[title="Bajar datos de Notion"]');
@@ -1986,7 +1986,7 @@ async function syncNotion_FINAL() {
     }
 
     // FEEDBACK
-    // alert("⏳ Conectando con Notion...\n(Dale a Aceptar y espera unos segundos)"); // Commented out to reduce clicks
+    // alert("? Conectando con Notion...\n(Dale a Aceptar y espera unos segundos)"); // Commented out to reduce clicks
 
     try {
         let hasMore = true;
@@ -2021,14 +2021,14 @@ async function syncNotion_FINAL() {
 
                 // HANDLE INVALID TOKEN (Most common on iPad)
                 if (response.status === 401 || err.code === 'unauthorized') {
-                    alert(`❌ ERROR DE AUTENTICACIÓN (iPad/Móvil)\n\nTu "API Key" no está guardada en este dispositivo.\n\nSOLUCIÓN:\n1. Toca el botón de engranaje (⚙️) aquí abajo.\n2. Pega tu clave que empieza por "ntn_...".\n3. Guarda y prueba de nuevo.`);
-                    throw new Error("Clave inválida o no configurada en este dispositivo.");
+                    alert(`? ERROR DE AUTENTICACI�N (iPad/M�vil)\n\nTu "API Key" no est� guardada en este dispositivo.\n\nSOLUCI�N:\n1. Toca el bot�n de engranaje (??) aqu� abajo.\n2. Pega tu clave que empieza por "ntn_...".\n3. Guarda y prueba de nuevo.`);
+                    throw new Error("Clave inv�lida o no configurada en este dispositivo.");
                 }
 
                 // If we get ANY error (400, 404, 401), it means the ID is wrong OR we don't have access.
                 // Let's try to SEARCH for what databases we DO have access to.
                 if (response.status === 400 || response.status === 404 || err.code === 'object_not_found' || err.code === 'validation_error') {
-                    console.log("🕵️‍♂️ ID failed. Searching for ANY accessible database...");
+                    console.log("?????? ID failed. Searching for ANY accessible database...");
 
                     const searchUrl = `${CORS_PROXY}https://api.notion.com/v1/search`;
                     const searchResp = await fetch(searchUrl, {
@@ -2054,10 +2054,10 @@ async function syncNotion_FINAL() {
                         if (foundDbs.length > 0) {
                             // We found databases! Use the first one.
                             const bestDb = foundDbs[0];
-                            console.log("🎉 FOUND DATABASE VIA SEARCH:", bestDb.id);
+                            console.log("?? FOUND DATABASE VIA SEARCH:", bestDb.id);
                             const dbName = bestDb.title && bestDb.title.length > 0 ? bestDb.title[0].plain_text : "Sin nombre";
 
-                            alert(`✅ ¡Lo encontré! El ID que pusiste no funcionaba, pero he buscado y he encontrado tu base de datos: "${dbName}".\n\nVoy a usar esta automáticamente.`);
+                            alert(`? �Lo encontr�! El ID que pusiste no funcionaba, pero he buscado y he encontrado tu base de datos: "${dbName}".\n\nVoy a usar esta autom�ticamente.`);
 
                             // Update ID and Persist
                             NOTION_DB_ID = bestDb.id.replace(/-/g, '');
@@ -2081,7 +2081,7 @@ async function syncNotion_FINAL() {
                             }
 
                         } else {
-                            throw new Error("❌ Tu ID era incorrecto, y he buscado pero NO veo ninguna base de datos compartida.\n\nPOR FAVOR: Ve a la tabla en Notion -> 3 puntos -> Conexiones -> Añadir 'MI AUTOMATIZACION'.");
+                            throw new Error("? Tu ID era incorrecto, y he buscado pero NO veo ninguna base de datos compartida.\n\nPOR FAVOR: Ve a la tabla en Notion -> 3 puntos -> Conexiones -> A�adir 'MI AUTOMATIZACION'.");
                         }
                     }
                 }
@@ -2108,7 +2108,7 @@ async function syncNotion_FINAL() {
                 // Date is usually optional but good to have
 
                 if (missing.length > 0) {
-                    alert(`⚠️ AVISO DE CONFIGURACIÓN:\n\nTu base de datos de Notion parece tener nombres de columnas diferentes.\n\nFaltan (o se llaman diferente): \n- ${missing.join('\n- ')}\n\nColumnas encontradas: \n[ ${propNames.join(', ')} ]\n\nEl sistema intentará importar lo que pueda.`);
+                    alert(`?? AVISO DE CONFIGURACI�N:\n\nTu base de datos de Notion parece tener nombres de columnas diferentes.\n\nFaltan (o se llaman diferente): \n- ${missing.join('\n- ')}\n\nColumnas encontradas: \n[ ${propNames.join(', ')} ]\n\nEl sistema intentar� importar lo que pueda.`);
                 }
             }
             // ---------------------------------------------------
@@ -2217,11 +2217,11 @@ async function syncNotion_FINAL() {
 
         savePlanesData(planes);
         renderFolders(); // Refresh View
-        alert(`✅ Proceso finalizado.\n\n📥 Descargados: ${allPages.length}\n✨ Nuevos: ${restoredCount}\n🔄 Actualizados: ${updatedCount}`);
+        alert(`? Proceso finalizado.\n\n?? Descargados: ${allPages.length}\n? Nuevos: ${restoredCount}\n?? Actualizados: ${updatedCount}`);
 
     } catch (e) {
         console.error(e);
-        alert("❌ Error al importar: " + e.message + "\n\n(Abre la consola (F12) para más detalles)");
+        alert("? Error al importar: " + e.message + "\n\n(Abre la consola (F12) para m�s detalles)");
     } finally {
         if (syncBtn) {
             syncBtn.innerHTML = originalText || 'Importar Notion (NEW)';
@@ -2236,7 +2236,7 @@ async function syncNotion_FINAL() {
 // CHECK INTEGRITY
 // CHECK INTEGRITY
 // console.log("APP V3 LOADED OK");
-// alert("✅ SISTEMA OK (V3)");
+// alert("? SISTEMA OK (V3)");
 
 
 
@@ -2374,23 +2374,23 @@ async function activateRadar() {
 
     // CHECK GPS
     if (!navigator.geolocation) {
-        runDemoMode("⚠️ Tu iPad no tiene GPS. Iniciando MODO DEMO...");
+        runDemoMode("?? Tu iPad no tiene GPS. Iniciando MODO DEMO...");
         return;
     }
 
-    radarStatus.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin"></i> Escaneando satélites...';
+    radarStatus.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin"></i> Escaneando sat�lites...';
 
     navigator.geolocation.getCurrentPosition(
         (pos) => {
             const lat = pos.coords.latitude;
             const lon = pos.coords.longitude;
-            radarStatus.innerHTML = "📍 Posición fijada. Buscando clientes...";
+            radarStatus.innerHTML = "?? Posici�n fijada. Buscando clientes...";
             searchNearbyPlaces(lat, lon);
         },
         (err) => {
             console.error(err);
             // FAILOVER TO DEMO MODE
-            runDemoMode("⚠️ GPS Bloqueado. Iniciando MODO SIMULACIÓN...");
+            runDemoMode("?? GPS Bloqueado. Iniciando MODO SIMULACI�N...");
         },
         { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 } // Low accuracy is faster
     );
@@ -2403,10 +2403,10 @@ async function activateRadar() {
             // Mock Results
             const mockData = [
                 { name: "Bar La Plaza", dist: 0.05, address: { road: "Plaza Mayor, 1" }, lat: demoLat + 0.0005, lon: demoLon + 0.0005 },
-                { name: "Cafetería Central", dist: 0.12, address: { road: "Calle Real, 14" }, lat: demoLat + 0.001, lon: demoLon + 0.001 },
-                { name: "Restaurante El Puente", dist: 0.35, address: { road: "Av. del Río" }, lat: demoLat + 0.003, lon: demoLon + 0.003 },
+                { name: "Cafeter�a Central", dist: 0.12, address: { road: "Calle Real, 14" }, lat: demoLat + 0.001, lon: demoLon + 0.001 },
+                { name: "Restaurante El Puente", dist: 0.35, address: { road: "Av. del R�o" }, lat: demoLat + 0.003, lon: demoLon + 0.003 },
                 { name: "Pub The Corner", dist: 0.45, address: { road: "Esquina Verde" }, lat: demoLat + 0.004, lon: demoLon + 0.004 },
-                { name: "Hotel Avenida", dist: 0.8, address: { road: "Av. Constitución" }, lat: demoLat + 0.007, lon: demoLon + 0.007 }
+                { name: "Hotel Avenida", dist: 0.8, address: { road: "Av. Constituci�n" }, lat: demoLat + 0.007, lon: demoLon + 0.007 }
             ];
             renderRadarResults(mockData);
         }, 1500);
@@ -2438,8 +2438,8 @@ async function searchNearbyPlaces(lat, lon) {
 
         if (!results || results.length === 0) {
             // Fallback to Demo if API returns nothing (common in remote areas)
-            radarStatus.innerText = "Sin señal de datos. Mostrando SIMULACIÓN:";
-            runDemoMode("Modo Sin Conexión");
+            radarStatus.innerText = "Sin se�al de datos. Mostrando SIMULACI�N:";
+            runDemoMode("Modo Sin Conexi�n");
             return;
         }
 
@@ -2451,7 +2451,7 @@ async function searchNearbyPlaces(lat, lon) {
             .filter(item => item.dist <= radiusKm) // Only show within selected radius
             .sort((a, b) => a.dist - b.dist);
 
-        radarStatus.innerText = `🎯 ${processed.length} Negocios encontrados`;
+        radarStatus.innerText = `?? ${processed.length} Negocios encontrados`;
         renderRadarResults(processed);
 
     } catch (e) {
@@ -2497,9 +2497,9 @@ function renderRadarResults(items) {
         // Open/Closed badge
         let openBadge = '';
         if (openStatus === true) {
-            openBadge = '<span style="font-size:0.7rem; background:#10b981; color:white; padding:2px 6px; border-radius:4px; margin-left:6px;">🟢 ABIERTO</span>';
+            openBadge = '<span style="font-size:0.7rem; background:#10b981; color:white; padding:2px 6px; border-radius:4px; margin-left:6px;">?? ABIERTO</span>';
         } else if (openStatus === false) {
-            openBadge = '<span style="font-size:0.7rem; background:#ef4444; color:white; padding:2px 6px; border-radius:4px; margin-left:6px;">🔴 CERRADO</span>';
+            openBadge = '<span style="font-size:0.7rem; background:#ef4444; color:white; padding:2px 6px; border-radius:4px; margin-left:6px;">?? CERRADO</span>';
         }
 
         const div = document.createElement('div');
@@ -2511,7 +2511,7 @@ function renderRadarResults(items) {
         div.innerHTML = `
             <div style="flex:1;">
                 <div class="radar-name">${name}${openBadge}</div>
-                <div class="radar-address">${(item.address && item.address.road) ? item.address.road : (item.address ? item.address : 'Ubicación aproximada')}</div>
+                <div class="radar-address">${(item.address && item.address.road) ? item.address.road : (item.address ? item.address : 'Ubicaci�n aproximada')}</div>
                 <div style="font-size:0.7rem; color:${statusColor}; font-weight:bold; margin-top:4px;">${statusLabel}</div>
             </div>
             <div class="radar-dist">
@@ -2526,7 +2526,7 @@ function renderRadarResults(items) {
     if (displayedCount === 0) {
         radarList.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">No hay negocios abiertos en este momento cerca de ti. Desactiva el filtro "Solo ABIERTOS" para ver todos.</div>';
     } else {
-        radarStatus.innerText = `🎯 ${displayedCount} ${filterOpen ? 'Abiertos' : 'Negocios'} detectados`;
+        radarStatus.innerText = `?? ${displayedCount} ${filterOpen ? 'Abiertos' : 'Negocios'} detectados`;
     }
 }
 
@@ -2535,7 +2535,7 @@ async function saveReminderToNotion() {
     const date = reminderDate.value;
 
     if (!text) {
-        alert("⚠️ Por favor, escribe qué quieres recordar.");
+        alert("?? Por favor, escribe qu� quieres recordar.");
         return;
     }
 
@@ -2665,7 +2665,7 @@ async function saveReminderToNotion() {
         localStorage.setItem('offlineReminders', JSON.stringify(localReminders));
 
         // Use Alert because Toasts are disabled
-        alert(`⚠️ NOTION NO RESPONDE\n\nPero tranquilo/a, he guardado la nota en la MEMORIA DEL IPAD.\n\nSe guardó como: "${text}"`);
+        alert(`?? NOTION NO RESPONDE\n\nPero tranquilo/a, he guardado la nota en la MEMORIA DEL IPAD.\n\nSe guard� como: "${text}"`);
 
         reminderText.value = '';
         closeReminderModal();
@@ -2676,7 +2676,7 @@ async function saveReminderToNotion() {
         closeReminderModal();
 
         // Use Alert because Toasts are disabled
-        alert(`✅ ¡GUARDADO!\n\nTu recordatorio se ha subido correctamente a ${savedType}.`);
+        alert(`? �GUARDADO!\n\nTu recordatorio se ha subido correctamente a ${savedType}.`);
 
         triggerConfetti();
 
@@ -2824,12 +2824,12 @@ function activateRadar() {
 
     // Check if geolocation is available
     if (!navigator.geolocation) {
-        statusEl.innerHTML = '❌ Tu navegador no soporta geolocalización';
-        listEl.innerHTML = '<div style="color:#ff4444; text-align:center; padding:20px;">Geolocalización no disponible en este dispositivo</div>';
+        statusEl.innerHTML = '? Tu navegador no soporta geolocalizaci�n';
+        listEl.innerHTML = '<div style="color:#ff4444; text-align:center; padding:20px;">Geolocalizaci�n no disponible en este dispositivo</div>';
         return;
     }
 
-    statusEl.innerHTML = '📍 Solicitando permisos de ubicación...';
+    statusEl.innerHTML = '?? Solicitando permisos de ubicaci�n...';
     listEl.innerHTML = '';
 
     // Request location with high accuracy
@@ -2839,8 +2839,8 @@ function activateRadar() {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
 
-            console.log('📍 Location acquired:', lat, lon);
-            statusEl.innerHTML = '🔍 Escaneando negocios cercanos...';
+            console.log('?? Location acquired:', lat, lon);
+            statusEl.innerHTML = '?? Escaneando negocios cercanos...';
 
             // Get selected radius
             const radiusSelect = document.getElementById('radarRadius');
@@ -2862,33 +2862,33 @@ function activateRadar() {
                 case error.PERMISSION_DENIED:
                     errorMsg = `
                         <div style="color:#ff4444; padding:20px; text-align:center;">
-                            <h3 style="margin:0 0 15px 0;">🚫 GPS BLOQUEADO</h3>
+                            <h3 style="margin:0 0 15px 0;">?? GPS BLOQUEADO</h3>
                             <p style="margin:0 0 10px 0; font-size:0.9rem; line-height:1.5;">
-                                Has denegado el permiso de ubicación.
+                                Has denegado el permiso de ubicaci�n.
                             </p>
                             <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:8px; margin-top:15px; text-align:left;">
-                                <p style="margin:0 0 10px 0; font-weight:bold;">📱 Para activar en iPad/iPhone:</p>
+                                <p style="margin:0 0 10px 0; font-weight:bold;">?? Para activar en iPad/iPhone:</p>
                                 <ol style="margin:0; padding-left:20px; font-size:0.85rem; line-height:1.6;">
-                                    <li>Ve a <strong>Ajustes</strong> → <strong>Safari</strong></li>
-                                    <li>Busca <strong>Ubicación</strong></li>
+                                    <li>Ve a <strong>Ajustes</strong> ? <strong>Safari</strong></li>
+                                    <li>Busca <strong>Ubicaci�n</strong></li>
                                     <li>Selecciona <strong>"Preguntar" o "Permitir"</strong></li>
-                                    <li>Recarga esta página</li>
+                                    <li>Recarga esta p�gina</li>
                                 </ol>
                             </div>
                             <p style="margin-top:15px; font-size:0.8rem; color:#aaa;">
-                                💡 También puedes usar la búsqueda manual escribiendo el nombre de la ciudad
+                                ?? Tambi�n puedes usar la b�squeda manual escribiendo el nombre de la ciudad
                             </p>
                         </div>
                     `;
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">❌ Ubicación no disponible. Verifica tu conexión GPS.</div>';
+                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">? Ubicaci�n no disponible. Verifica tu conexi�n GPS.</div>';
                     break;
                 case error.TIMEOUT:
-                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">⏱️ Tiempo agotado. Intenta de nuevo.</div>';
+                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">?? Tiempo agotado. Intenta de nuevo.</div>';
                     break;
                 default:
-                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">❌ Error desconocido al obtener ubicación.</div>';
+                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">? Error desconocido al obtener ubicaci�n.</div>';
             }
 
             statusEl.innerHTML = '';
@@ -2981,15 +2981,15 @@ async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
 
         // Display results
         if (businesses.length === 0) {
-            statusEl.innerHTML = '😔 No se encontraron negocios';
+            statusEl.innerHTML = '?? No se encontraron negocios';
             listEl.innerHTML = `
                 <div style="color:#aaa; text-align:center; padding:20px;">
                     <p>No hay bares o restaurantes en un radio de ${radiusKm}km</p>
-                    <p style="font-size:0.8rem; margin-top:10px;">Prueba aumentando el radio de búsqueda</p>
+                    <p style="font-size:0.8rem; margin-top:10px;">Prueba aumentando el radio de b�squeda</p>
                 </div>
             `;
         } else {
-            statusEl.innerHTML = `✅ ${businesses.length} negocio${businesses.length > 1 ? 's' : ''} encontrado${businesses.length > 1 ? 's' : ''}`;
+            statusEl.innerHTML = `? ${businesses.length} negocio${businesses.length > 1 ? 's' : ''} encontrado${businesses.length > 1 ? 's' : ''}`;
 
             listEl.innerHTML = '';
             businesses.forEach(biz => {
@@ -3001,18 +3001,18 @@ async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
                     : `${biz.distance.toFixed(2)}km`;
 
                 const typeIcon = {
-                    'bar': '🍺',
-                    'restaurant': '🍽️',
-                    'cafe': '☕',
-                    'pub': '🍻'
-                }[biz.type] || '🏪';
+                    'bar': '??',
+                    'restaurant': '???',
+                    'cafe': '?',
+                    'pub': '??'
+                }[biz.type] || '??';
 
                 card.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:5px;">
                         <div style="flex:1;">
                             <div style="font-weight:bold; color:white; font-size:0.95rem;">${typeIcon} ${biz.name}</div>
                             ${biz.address ? `<div style="font-size:0.75rem; color:#aaa; margin-top:3px;">${biz.address}</div>` : ''}
-                            ${biz.phone ? `<div style="font-size:0.75rem; color:#4ade80; margin-top:3px;">📞 ${biz.phone}</div>` : ''}
+                            ${biz.phone ? `<div style="font-size:0.75rem; color:#4ade80; margin-top:3px;">?? ${biz.phone}</div>` : ''}
                         </div>
                         <div style="background:rgba(0,255,136,0.2); color:#00ff88; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:bold; white-space:nowrap; margin-left:10px;">
                             ${distText}
@@ -3021,12 +3021,12 @@ async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
                     <div style="display:flex; gap:8px; margin-top:10px;">
                         <a href="https://www.google.com/maps/search/?api=1&query=${biz.lat},${biz.lon}" target="_blank" 
                            style="flex:1; background:#3b82f6; color:white; padding:6px; border-radius:6px; text-align:center; text-decoration:none; font-size:0.8rem;">
-                            📍 Ver Mapa
+                            ?? Ver Mapa
                         </a>
                         ${biz.phone ? `
                         <a href="tel:${biz.phone}" 
                            style="flex:1; background:#10b981; color:white; padding:6px; border-radius:6px; text-align:center; text-decoration:none; font-size:0.8rem;">
-                            📞 Llamar
+                            ?? Llamar
                         </a>
                         ` : ''}
                     </div>
@@ -3038,7 +3038,7 @@ async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
 
     } catch (error) {
         console.error('Error scanning businesses:', error);
-        statusEl.innerHTML = '❌ Error al escanear';
+        statusEl.innerHTML = '? Error al escanear';
         listEl.innerHTML = `
             <div style="color:#ff4444; text-align:center; padding:20px;">
                 <p>Error al buscar negocios cercanos</p>
@@ -3048,445 +3048,3 @@ async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
             ;
     }
 }
-
-
-// === REMINDER & NOTION INTEGRATION MODULE ===
-
-// Global variables for reminder functionality
-let reminderAutoSaveTimeout = null;
-// Note: currentPriority is already declared in PRIORITY LOGIC section (line 2288)
-
-// Check Notion connection status on page load
-document.addEventListener('DOMContentLoaded', () => {
-    checkNotionConnection();
-});
-
-// Check if Notion credentials are configured
-function checkNotionConnection() {
-    const notionKey = localStorage.getItem('notionApiKey');
-    const notionDb = localStorage.getItem('notionDatabaseId');
-
-    const indicator = document.getElementById('notionStatusIndicator');
-    if (!indicator) return;
-
-    if (notionKey && notionDb) {
-        // Has credentials - show green
-        indicator.style.background = '#10b981';
-        indicator.title = 'Conectado a Notion';
-    } else {
-        // No credentials - show yellow
-        indicator.style.background = '#fbbf24';
-        indicator.title = 'Configuración pendiente - Haz clic en Ajustes';
-    }
-}
-
-// Update status indicator with specific status
-function updateNotionStatusIndicator(status) {
-    const indicator = document.getElementById('notionStatusIndicator');
-    if (!indicator) return;
-
-    const statusColors = {
-        'connected': { color: '#10b981', title: 'Conectado a Notion' },
-        'pending': { color: '#fbbf24', title: 'Configuración pendiente' },
-        'error': { color: '#ef4444', title: 'Error de conexión' },
-        'saving': { color: '#3b82f6', title: 'Guardando...' }
-    };
-
-    const config = statusColors[status] || statusColors['pending'];
-    indicator.style.background = config.color;
-    indicator.title = config.title;
-}
-
-// Auto-save reminder draft to localStorage (debounced)
-function autoSaveReminder() {
-    clearTimeout(reminderAutoSaveTimeout);
-
-    reminderAutoSaveTimeout = setTimeout(() => {
-        const text = document.getElementById('reminderText')?.value || '';
-        const date = document.getElementById('reminderDate')?.value || '';
-
-        if (text.trim().length > 0) {
-            const draft = {
-                text: text,
-                priority: currentPriority,
-                date: date,
-                timestamp: Date.now()
-            };
-            localStorage.setItem('reminderDraft', JSON.stringify(draft));
-        }
-    }, 2000); // Save after 2 seconds of inactivity
-}
-
-// Open reminder modal
-function openReminderModal() {
-    const modal = document.getElementById('reminderModal');
-    if (!modal) return;
-
-    modal.classList.add('open');
-
-    // Check Notion connection status
-    checkNotionConnection();
-
-    // Restore draft if exists
-    const draftJson = localStorage.getItem('reminderDraft');
-    if (draftJson) {
-        try {
-            const draft = JSON.parse(draftJson);
-
-            // Check if draft is recent (less than 24 hours old)
-            const hoursSinceDraft = (Date.now() - draft.timestamp) / (1000 * 60 * 60);
-
-            if (hoursSinceDraft < 24) {
-                document.getElementById('reminderText').value = draft.text || '';
-                document.getElementById('reminderDate').value = draft.date || '';
-
-                if (draft.priority) {
-                    currentPriority = draft.priority;
-                    // Update UI to reflect priority
-                    document.querySelectorAll('.p-chip').forEach(chip => {
-                        chip.classList.remove('active');
-                    });
-                    const activeChip = Array.from(document.querySelectorAll('.p-chip')).find(
-                        chip => chip.textContent.includes(draft.priority)
-                    );
-                    if (activeChip) activeChip.classList.add('active');
-                }
-            }
-        } catch (e) {
-            console.error('Error loading draft:', e);
-        }
-    }
-}
-
-// Close reminder modal
-function closeReminderModal() {
-    const modal = document.getElementById('reminderModal');
-    if (!modal) return;
-
-    modal.classList.remove('open');
-
-    // Ask if user wants to keep draft
-    const text = document.getElementById('reminderText')?.value || '';
-    if (text.trim().length > 0) {
-        // Keep draft automatically - it will expire in 24h
-    } else {
-        // Clear draft if empty
-        localStorage.removeItem('reminderDraft');
-    }
-}
-
-// Open reminder modal
-function openReminderModal() {
-    const modal = document.getElementById('reminderModal');
-    if (!modal) return;
-
-    modal.classList.add('open');
-
-    // Check Notion connection status
-    checkNotionConnection();
-
-    // Restore draft if exists
-    const draftJson = localStorage.getItem('reminderDraft');
-    if (draftJson) {
-        try {
-            const draft = JSON.parse(draftJson);
-
-            // Check if draft is recent (less than 24 hours old)
-            const hoursSinceDraft = (Date.now() - draft.timestamp) / (1000 * 60 * 60);
-
-            if (hoursSinceDraft < 24) {
-                document.getElementById('reminderText').value = draft.text || '';
-                document.getElementById('reminderDate').value = draft.date || '';
-
-                if (draft.priority) {
-                    currentPriority = draft.priority;
-                    // Update UI to reflect priority
-                    document.querySelectorAll('.p-chip').forEach(chip => {
-                        chip.classList.remove('active');
-                    });
-                    const activeChip = Array.from(document.querySelectorAll('.p-chip')).find(
-                        chip => chip.textContent.includes(draft.priority)
-                    );
-                    if (activeChip) activeChip.classList.add('active');
-                }
-            }
-        } catch (e) {
-            console.error('Error loading draft:', e);
-        }
-    }
-}
-
-// Close reminder modal
-function closeReminderModal() {
-    const modal = document.getElementById('reminderModal');
-    if (!modal) return;
-
-    modal.classList.remove('open');
-
-    // Ask if user wants to keep draft
-    const text = document.getElementById('reminderText')?.value || '';
-    if (text.trim().length > 0) {
-        // Keep draft automatically - it will expire in 24h
-    } else {
-        // Clear draft if empty
-        localStorage.removeItem('reminderDraft');
-    }
-}
-
-// Set quick date
-function setQuickDate(daysOffset) {
-    const dateInput = document.getElementById('reminderDate');
-    if (!dateInput) return;
-
-    const today = new Date();
-    let targetDate;
-
-    if (daysOffset === 'nextMonday') {
-        // Get next Monday
-        const dayOfWeek = today.getDay();
-        const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek);
-        targetDate = new Date(today.getTime() + daysUntilMonday * 24 * 60 * 60 * 1000);
-    } else {
-        // Add days
-        targetDate = new Date(today.getTime() + daysOffset * 24 * 60 * 60 * 1000);
-    }
-
-    // Format as YYYY-MM-DD
-    const year = targetDate.getFullYear();
-    const month = String(targetDate.getMonth() + 1).padStart(2, '0');
-    const day = String(targetDate.getDate()).padStart(2, '0');
-
-    dateInput.value = `${year}-${month}-${day}`;
-    autoSaveReminder();
-}
-
-// Save reminder to Notion
-async function saveReminderToNotion() {
-    const text = document.getElementById('reminderText')?.value || '';
-    const date = document.getElementById('reminderDate')?.value || '';
-    const btn = document.getElementById('btnSaveReminder');
-
-    // Validation
-    if (!text.trim()) {
-        showToast('Campo vacío', 'Por favor escribe algo para recordar', 'error');
-        return;
-    }
-
-    // Get Notion credentials
-    const notionKey = localStorage.getItem('notionApiKey');
-    const notionDb = localStorage.getItem('notionDatabaseId');
-
-    if (!notionKey || !notionDb) {
-        showToast('Configuración necesaria', 'Configura tu API de Notion en Ajustes primero', 'error');
-        updateNotionStatusIndicator('pending');
-        return;
-    }
-
-    // Update UI - disable button
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
-    }
-    updateNotionStatusIndicator('saving');
-
-    try {
-        // Prepare Notion API request
-        const notionData = {
-            parent: { database_id: notionDb },
-            properties: {
-                'Name': {
-                    title: [
-                        {
-                            text: {
-                                content: text.substring(0, 100) // Limit to 100 chars for title
-                            }
-                        }
-                    ]
-                },
-                'Priority': {
-                    select: {
-                        name: currentPriority
-                    }
-                },
-                'Date': date ? {
-                    date: {
-                        start: date
-                    }
-                } : null
-            }
-        };
-
-        // Remove null properties
-        if (!date) delete notionData.properties.Date;
-
-        // Make API call
-        const response = await fetch('https://api.notion.com/v1/pages', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${notionKey}`,
-                'Content-Type': 'application/json',
-                'Notion-Version': '2022-06-28'
-            },
-            body: JSON.stringify(notionData)
-        });
-
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            console.error('Notion API Error:', errorData);
-            throw new Error(`Error ${response.status}: ${errorData.message || response.statusText}`);
-        }
-
-        const result = await response.json();
-
-        // Success!
-        updateNotionStatusIndicator('connected');
-
-        // Clear draft
-        localStorage.removeItem('reminderDraft');
-
-        // Generate Notion page URL
-        const pageId = result.id.replace(/-/g, '');
-        const notionAppUrl = localStorage.getItem('notionAppDeepLink') || '';
-        const pageUrl = notionAppUrl ?
-            notionAppUrl.replace(/\/[^\/]*$/, `/${pageId}`) :
-            `https://notion.so/${pageId}`;
-
-        // Show success toast with link
-        showToastWithLink('¡Guardado en Notion!', 'Toca para abrir', pageUrl);
-
-        // Clear form
-        document.getElementById('reminderText').value = '';
-        document.getElementById('reminderDate').value = '';
-
-        // Close modal after short delay
-        setTimeout(() => {
-            closeReminderModal();
-        }, 1500);
-
-    } catch (error) {
-        console.error('Error saving to Notion:', error);
-        updateNotionStatusIndicator('error');
-        showToast('Error al guardar', error.message || 'Verifica tu conexión y configuración', 'error');
-    } finally {
-        // Re-enable button
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<span id="notionStatusIndicator" style="width:8px; height:8px; border-radius:50%; background:#fbbf24; display:inline-block; margin-right:8px; transition: background 0.3s;"></span><i class="fa-solid fa-cloud-arrow-up"></i> GUARDAR EN NOTION';
-        }
-        checkNotionConnection();
-    }
-}
-
-// Enhanced toast with clickable link
-function showToastWithLink(title, message, url) {
-    // Create toast element
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-        position: fixed;
-        top: 80px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: linear-gradient(135deg, #10b981, #059669);
-        color: white;
-        padding: 15px 20px;
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
-        z-index: 10000;
-        cursor: pointer;
-        transition: all 0.3s;
-        max-width: 90%;
-        text-align: center;
-    `;
-
-    toast.innerHTML = `
-        <div style="font-weight: bold; margin-bottom: 5px;">${title}</div>
-        <div style="font-size: 0.9rem; opacity: 0.9;">${message}</div>
-        <div style="font-size: 0.75rem; margin-top: 5px; opacity: 0.7;">🔗 ${url.substring(0, 40)}...</div>
-    `;
-
-    toast.onclick = () => {
-        window.open(url, '_blank');
-        toast.remove();
-    };
-
-    toast.onmouseenter = () => {
-        toast.style.transform = 'translateX(-50%) scale(1.05)';
-    };
-
-    toast.onmouseleave = () => {
-        toast.style.transform = 'translateX(-50%) scale(1)';
-    };
-
-    document.body.appendChild(toast);
-
-    // Auto-remove after 5 seconds
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(-50%) translateY(-20px)';
-        setTimeout(() => toast.remove(), 300);
-    }, 5000);
-}
-
-// Configure Notion settings
-function configureSettings() {
-    const modal = document.getElementById('settingsModal');
-    if (!modal) return;
-
-    modal.classList.add('open');
-
-    // Load existing settings
-    document.getElementById('settingNotionKey').value = localStorage.getItem('notionApiKey') || '';
-    document.getElementById('settingNotionDb').value = localStorage.getItem('notionDatabaseId') || '';
-    document.getElementById('settingNotionAppUrl').value = localStorage.getItem('notionAppDeepLink') || '';
-}
-
-function closeSettingsModal() {
-    const modal = document.getElementById('settingsModal');
-    if (modal) modal.classList.remove('open');
-}
-
-// Save Notion settings
-function saveSettings() {
-    const key = document.getElementById('settingNotionKey')?.value || '';
-    const db = document.getElementById('settingNotionDb')?.value || '';
-    const appUrl = document.getElementById('settingNotionAppUrl')?.value || '';
-
-    // Basic validation - just check not empty
-    if (!key || key.trim().length === 0) {
-        showToast('API Key vacía', 'Por favor introduce tu API Key de Notion', 'error');
-        return;
-    }
-
-    if (!db || db.trim().length === 0) {
-        showToast('Database ID vacío', 'Por favor introduce el Database ID', 'error');
-        return;
-    }
-
-    // Save to localStorage
-    localStorage.setItem('notionApiKey', key.trim());
-    localStorage.setItem('notionDatabaseId', db.trim());
-    localStorage.setItem('notionAppDeepLink', appUrl.trim());
-
-    // Update status
-    checkNotionConnection();
-
-    showToast('Configuración guardada', 'Notion está listo para usar', 'success');
-
-    setTimeout(() => {
-        closeSettingsModal();
-    }, 1000);
-}
-
-// Open Notion app directly
-function openNotionApp() {
-    const appUrl = localStorage.getItem('notionAppDeepLink');
-
-    if (appUrl) {
-        window.open(appUrl, '_blank');
-    } else {
-        showToast('Configura Notion', 'Añade el Deep Link en Ajustes primero', 'error');
-        configureSettings();
-    }
-}
-
