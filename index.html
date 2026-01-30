@@ -16,6 +16,38 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
+        /* Reminder Bell Button */
+        .reminder-bell-btn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+            z-index: 10;
+        }
+
+        .reminder-bell-btn:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+        }
+
+        .reminder-bell-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
         /* OUTDOOR MODE STYLES - GLOBAL & AGGRESSIVE */
         body.outdoor-mode,
         body.outdoor-mode .app-container,
@@ -136,6 +168,10 @@
                     <i class="fa-solid fa-magnifying-glass search-icon"></i>
                     <input type="text" id="searchInput" class="search-input"
                         placeholder="Buscar bar, restaurante, ciudad...">
+                    <!-- Reminder Button -->
+                    <button onclick="openReminderModal()" class="reminder-bell-btn" title="Nuevo Recordatorio">
+                        <i class="fa-solid fa-bell"></i>
+                    </button>
                 </div>
             </section>
 
