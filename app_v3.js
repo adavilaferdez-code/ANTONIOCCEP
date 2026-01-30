@@ -3175,8 +3175,63 @@ function closeReminderModal() {
     }
 }
 
-// Note: selectPriority function already exists (line 2290)
-// We enhance it by modifying the existing function to call autoSaveReminder
+// Open reminder modal
+function openReminderModal() {
+    const modal = document.getElementById('reminderModal');
+    if (!modal) return;
+
+    modal.classList.add('open');
+
+    // Check Notion connection status
+    checkNotionConnection();
+
+    // Restore draft if exists
+    const draftJson = localStorage.getItem('reminderDraft');
+    if (draftJson) {
+        try {
+            const draft = JSON.parse(draftJson);
+
+            // Check if draft is recent (less than 24 hours old)
+            const hoursSinceDraft = (Date.now() - draft.timestamp) / (1000 * 60 * 60);
+
+            if (hoursSinceDraft < 24) {
+                document.getElementById('reminderText').value = draft.text || '';
+                document.getElementById('reminderDate').value = draft.date || '';
+
+                if (draft.priority) {
+                    currentPriority = draft.priority;
+                    // Update UI to reflect priority
+                    document.querySelectorAll('.p-chip').forEach(chip => {
+                        chip.classList.remove('active');
+                    });
+                    const activeChip = Array.from(document.querySelectorAll('.p-chip')).find(
+                        chip => chip.textContent.includes(draft.priority)
+                    );
+                    if (activeChip) activeChip.classList.add('active');
+                }
+            }
+        } catch (e) {
+            console.error('Error loading draft:', e);
+        }
+    }
+}
+
+// Close reminder modal
+function closeReminderModal() {
+    const modal = document.getElementById('reminderModal');
+    if (!modal) return;
+
+    modal.classList.remove('open');
+
+    // Ask if user wants to keep draft
+    const text = document.getElementById('reminderText')?.value || '';
+    if (text.trim().length > 0) {
+        // Keep draft automatically - it will expire in 24h
+    } else {
+        // Clear draft if empty
+        localStorage.removeItem('reminderDraft');
+    }
+}
 
 // Set quick date
 function setQuickDate(daysOffset) {
@@ -3397,21 +3452,21 @@ function saveSettings() {
     const db = document.getElementById('settingNotionDb')?.value || '';
     const appUrl = document.getElementById('settingNotionAppUrl')?.value || '';
 
-    // Basic validation
-    if (key && !key.startsWith('secret_') && !key.startsWith('ntn_')) {
-        showToast('API Key inválida', 'Debe empezar con "secret_" o "ntn_"', 'error');
+    // Basic validation - just check not empty
+    if (!key || key.trim().length === 0) {
+        showToast('API Key vacía', 'Por favor introduce tu API Key de Notion', 'error');
         return;
     }
 
-    if (db && db.length !== 32) {
-        showToast('Database ID inválido', 'Debe tener exactamente 32 caracteres', 'error');
+    if (!db || db.trim().length === 0) {
+        showToast('Database ID vacío', 'Por favor introduce el Database ID', 'error');
         return;
     }
 
     // Save to localStorage
-    localStorage.setItem('notionApiKey', key);
-    localStorage.setItem('notionDatabaseId', db);
-    localStorage.setItem('notionAppDeepLink', appUrl);
+    localStorage.setItem('notionApiKey', key.trim());
+    localStorage.setItem('notionDatabaseId', db.trim());
+    localStorage.setItem('notionAppDeepLink', appUrl.trim());
 
     // Update status
     checkNotionConnection();
