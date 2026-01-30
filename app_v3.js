@@ -1,4 +1,6 @@
-﻿let searchResults = [];
+﻿// HostelHub Premium - App V3
+
+let searchResults = [];
 let currentEditingId = null;
 let userLocation = null;
 
@@ -1136,35 +1138,32 @@ function switchCalcTab(mode) {
     const bodyBasic = document.getElementById('calcBodyBasic');
     const bodyOffer = document.getElementById('calcBodyOffer');
 
+    // Reset all first
+    tabBasic.style.borderBottom = '2px solid transparent';
+    tabBasic.style.color = '#aaa';
+    tabBasic.style.fontWeight = 'normal';
+
+    tabOffer.style.borderBottom = '2px solid transparent';
+    tabOffer.style.color = '#aaa';
+    tabOffer.style.fontWeight = 'normal';
+
+    bodyBasic.style.display = 'none';
+    bodyOffer.style.display = 'none';
+
     if (mode === 'basic') {
         // Activate Basic
         tabBasic.style.borderBottom = '2px solid var(--primary-color)';
         tabBasic.style.color = 'white';
         tabBasic.style.fontWeight = 'bold';
-
-        tabOffer.style.borderBottom = '2px solid transparent';
-        tabOffer.style.color = '#aaa';
-        tabOffer.style.fontWeight = 'normal';
-
         bodyBasic.style.display = 'block';
-        bodyOffer.style.display = 'none';
-
-        // Focus calc
         setTimeout(() => document.getElementById('calcDisplay').focus(), 100);
-    } else {
+
+    } else if (mode === 'offer') {
         // Activate Offer
         tabOffer.style.borderBottom = '2px solid var(--primary-color)';
         tabOffer.style.color = 'white';
         tabOffer.style.fontWeight = 'bold';
-
-        tabBasic.style.borderBottom = '2px solid transparent';
-        tabBasic.style.color = '#aaa';
-        tabBasic.style.fontWeight = 'normal';
-
         bodyOffer.style.display = 'block';
-        bodyBasic.style.display = 'none';
-
-        // Focus inputs
         setTimeout(() => document.getElementById('bonPrice').focus(), 100);
     }
 }
@@ -1408,6 +1407,8 @@ function calculateBonification() {
 
 
 
+
+
 function openCalculator() {
     document.getElementById('calculatorModal').classList.add('open');
     switchCalcTab('basic'); // Reset to basic on open
@@ -1579,6 +1580,45 @@ function filterCalcProducts() {
 }
 
 // Direct selection functions (called from product row buttons)
+function saveSpyReport() {
+    const brand = document.getElementById('spyBrand').value;
+    const type = document.getElementById('spyType').value;
+    const notes = document.getElementById('spyNotes').value.trim();
+    const statusDiv = document.getElementById('spyStatus');
+
+    if (notes.length === 0) {
+        alert("⚠️ Por favor escribe algún detalle del informe.");
+        return;
+    }
+
+    const report = {
+        id: Date.now(),
+        brand: brand,
+        type: type,
+        notes: notes,
+        date: new Date().toISOString()
+    };
+
+    // Save properly to local storage (append to list)
+    const reports = JSON.parse(localStorage.getItem('spyReports') || '[]');
+    reports.push(report);
+    localStorage.setItem('spyReports', JSON.stringify(reports));
+
+    // UI Feedback
+    statusDiv.innerHTML = '<i class="fa-solid fa-check"></i> Enviado correctamente';
+
+    // Clear form
+    document.getElementById('spyNotes').value = '';
+
+    // Clear success msg after 2s
+    setTimeout(() => {
+        statusDiv.innerHTML = '';
+    }, 2000);
+
+    // Optional: Alert for immediate feedback since toast might be hidden
+    alert(`🕵️ INFORME GUARDADO\n\nMarca: ${brand}\nAcción: ${type}\n\n¡Buen trabajo, agente!`);
+}
+
 
 
 // === NOTION INTEGRATION ===
@@ -2253,10 +2293,67 @@ function selectPriority(el, value) {
     el.classList.add('active');
     // State update
     currentPriority = value;
+    // Auto-save reminder if function exists
+    if (typeof autoSaveReminder === 'function') {
+        autoSaveReminder();
+    }
 }
+
 
 // === RADAR FEATURE ===
 // Lazy selectors to avoid loading issues
+
+// Function to parse OpenStreetMap opening_hours and check if open now
+function isOpenNow(opening_hours) {
+    if (!opening_hours || opening_hours === '24/7') return true;
+
+    const now = new Date();
+    const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+    const currentDay = dayNames[now.getDay()];
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+
+    try {
+        const parts = opening_hours.split(';');
+
+        for (let part of parts) {
+            part = part.trim();
+            const match = part.match(/([\w,\-]+)\s+(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})/);
+            if (!match) continue;
+
+            const [_, days, startH, startM, endH, endM] = match;
+            const startTime = parseInt(startH) * 60 + parseInt(startM);
+            const endTime = parseInt(endH) * 60 + parseInt(endM);
+
+            let dayMatch = false;
+
+            if (days.includes('-')) {
+                const [startDay, endDay] = days.split('-');
+                const startIdx = dayNames.indexOf(startDay);
+                const endIdx = dayNames.indexOf(endDay);
+                const currentIdx = now.getDay();
+
+                if (startIdx <= endIdx) {
+                    dayMatch = currentIdx >= startIdx && currentIdx <= endIdx;
+                } else {
+                    dayMatch = currentIdx >= startIdx || currentIdx <= endIdx;
+                }
+            } else if (days.includes(',')) {
+                dayMatch = days.split(',').some(d => d.trim() === currentDay);
+            } else {
+                dayMatch = days === currentDay;
+            }
+
+            if (dayMatch && currentTime >= startTime && currentTime <= endTime) {
+                return true;
+            }
+        }
+
+        return false;
+    } catch (e) {
+        console.warn('Error parsing opening_hours:', opening_hours, e);
+        return null;
+    }
+}
 
 async function activateRadar() {
     const radarModal = document.getElementById('radarModal');
@@ -2324,20 +2421,17 @@ function closeRadarModal() {
 async function searchNearbyPlaces(lat, lon) {
     const radarStatus = document.getElementById('radarStatus');
     try {
-        // Query OpenStreetMap
-        // We use a broader query to ensure results
-        const query = "bar";
+        // Get user preferences
+        const filterOpen = document.getElementById('radarFilterOpen')?.checked ?? true;
+        const radiusKm = parseFloat(document.getElementById('radarRadius')?.value ?? 1);
+        const radiusDeg = radiusKm / 111; // Approximate conversion km to degrees
 
+        // Query OpenStreetMap with extratags for opening_hours
         let results = [];
         try {
-            // Try Nominatim
-            results = await runNominatimSearch(`bares cerca de [${lat},${lon}]`);
-
-            // If empty, try Viewbox
-            if (!results || results.length === 0) {
-                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=restaurant&limit=20&viewbox=${lon - 0.02},${lat + 0.02},${lon + 0.02},${lat - 0.02}&bounded=1`);
-                if (response.ok) results = await response.json();
-            }
+            // Try Nominatim with extratags
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=bar+restaurant+cafe&limit=50&viewbox=${lon - radiusDeg},${lat + radiusDeg},${lon + radiusDeg},${lat - radiusDeg}&bounded=1&extratags=1`);
+            if (response.ok) results = await response.json();
         } catch (e) {
             console.warn("API Error, using internal mock for demo");
         }
@@ -2349,14 +2443,15 @@ async function searchNearbyPlaces(lat, lon) {
             return;
         }
 
-        radarStatus.innerText = `🎯 ${results.length} Clientes detectados`;
-
-        // Calculate distances
+        // Calculate distances and filter by selected radius
         const processed = results.map(item => {
             const dist = getDistanceFromLatLonInKm(lat, lon, item.lat, item.lon);
             return { ...item, dist: dist };
-        }).sort((a, b) => a.dist - b.dist);
+        })
+            .filter(item => item.dist <= radiusKm) // Only show within selected radius
+            .sort((a, b) => a.dist - b.dist);
 
+        radarStatus.innerText = `🎯 ${processed.length} Negocios encontrados`;
         renderRadarResults(processed);
 
     } catch (e) {
@@ -2367,9 +2462,20 @@ async function searchNearbyPlaces(lat, lon) {
 
 function renderRadarResults(items) {
     const radarList = document.getElementById('radarList');
+    const radarStatus = document.getElementById('radarStatus');
+    const filterOpen = document.getElementById('radarFilterOpen')?.checked ?? true;
+
     radarList.innerHTML = '';
+    let displayedCount = 0;
 
     items.forEach(item => {
+        // Check opening hours
+        const opening_hours = item.extratags?.opening_hours || null;
+        const openStatus = isOpenNow(opening_hours);
+
+        // Apply filter: skip if user wants only open and this is closed
+        if (filterOpen && openStatus === false) return;
+
         // Logic for Client vs Prospect
         const planes = getPlanesData();
         let isClient = false;
@@ -2388,6 +2494,14 @@ function renderRadarResults(items) {
         const statusLabel = isClient ? 'CLIENTE' : 'PROSPECTO';
         const statusBg = isClient ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)';
 
+        // Open/Closed badge
+        let openBadge = '';
+        if (openStatus === true) {
+            openBadge = '<span style="font-size:0.7rem; background:#10b981; color:white; padding:2px 6px; border-radius:4px; margin-left:6px;">🟢 ABIERTO</span>';
+        } else if (openStatus === false) {
+            openBadge = '<span style="font-size:0.7rem; background:#ef4444; color:white; padding:2px 6px; border-radius:4px; margin-left:6px;">🔴 CERRADO</span>';
+        }
+
         const div = document.createElement('div');
         div.className = 'radar-item';
         div.style.borderLeft = `4px solid ${statusColor}`;
@@ -2396,7 +2510,7 @@ function renderRadarResults(items) {
 
         div.innerHTML = `
             <div style="flex:1;">
-                <div class="radar-name">${name}</div>
+                <div class="radar-name">${name}${openBadge}</div>
                 <div class="radar-address">${(item.address && item.address.road) ? item.address.road : (item.address ? item.address : 'Ubicación aproximada')}</div>
                 <div style="font-size:0.7rem; color:${statusColor}; font-weight:bold; margin-top:4px;">${statusLabel}</div>
             </div>
@@ -2405,7 +2519,15 @@ function renderRadarResults(items) {
             </div>
         `;
         radarList.appendChild(div);
+        displayedCount++;
     });
+
+    // Update status message
+    if (displayedCount === 0) {
+        radarList.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">No hay negocios abiertos en este momento cerca de ti. Desactiva el filtro "Solo ABIERTOS" para ver todos.</div>';
+    } else {
+        radarStatus.innerText = `🎯 ${displayedCount} ${filterOpen ? 'Abiertos' : 'Negocios'} detectados`;
+    }
 }
 
 async function saveReminderToNotion() {
@@ -2682,6 +2804,634 @@ function showToast(title, message, type = 'info') {
     // Remove after 3s
     setTimeout(() => {
         toast.style.animation = 'toastOut 0.4s forwards';
-        toast.addEventListener('animationend', () => toast.remove());
+        toast.remove();
     }, 4000);
 }
+
+// === RADAR FUNCTIONALITY ===
+function activateRadar() {
+    const modal = document.getElementById('radarModal');
+    const statusEl = document.getElementById('radarStatus');
+    const listEl = document.getElementById('radarList');
+
+    if (!modal) {
+        alert('Error: Modal del RADAR no encontrado');
+        return;
+    }
+
+    // Open modal
+    modal.classList.add('open');
+
+    // Check if geolocation is available
+    if (!navigator.geolocation) {
+        statusEl.innerHTML = '❌ Tu navegador no soporta geolocalización';
+        listEl.innerHTML = '<div style="color:#ff4444; text-align:center; padding:20px;">Geolocalización no disponible en este dispositivo</div>';
+        return;
+    }
+
+    statusEl.innerHTML = '📍 Solicitando permisos de ubicación...';
+    listEl.innerHTML = '';
+
+    // Request location with high accuracy
+    navigator.geolocation.getCurrentPosition(
+        // Success callback
+        (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            console.log('📍 Location acquired:', lat, lon);
+            statusEl.innerHTML = '🔍 Escaneando negocios cercanos...';
+
+            // Get selected radius
+            const radiusSelect = document.getElementById('radarRadius');
+            const radiusKm = radiusSelect ? parseFloat(radiusSelect.value) : 0.5;
+
+            // Get filter preference
+            const filterOpen = document.getElementById('radarFilterOpen');
+            const onlyOpen = filterOpen ? filterOpen.checked : true;
+
+            // Scan for businesses
+            scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen);
+        },
+        // Error callback
+        (error) => {
+            console.error('Geolocation error:', error);
+
+            let errorMsg = '';
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMsg = `
+                        <div style="color:#ff4444; padding:20px; text-align:center;">
+                            <h3 style="margin:0 0 15px 0;">🚫 GPS BLOQUEADO</h3>
+                            <p style="margin:0 0 10px 0; font-size:0.9rem; line-height:1.5;">
+                                Has denegado el permiso de ubicación.
+                            </p>
+                            <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:8px; margin-top:15px; text-align:left;">
+                                <p style="margin:0 0 10px 0; font-weight:bold;">📱 Para activar en iPad/iPhone:</p>
+                                <ol style="margin:0; padding-left:20px; font-size:0.85rem; line-height:1.6;">
+                                    <li>Ve a <strong>Ajustes</strong> → <strong>Safari</strong></li>
+                                    <li>Busca <strong>Ubicación</strong></li>
+                                    <li>Selecciona <strong>"Preguntar" o "Permitir"</strong></li>
+                                    <li>Recarga esta página</li>
+                                </ol>
+                            </div>
+                            <p style="margin-top:15px; font-size:0.8rem; color:#aaa;">
+                                💡 También puedes usar la búsqueda manual escribiendo el nombre de la ciudad
+                            </p>
+                        </div>
+                    `;
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">❌ Ubicación no disponible. Verifica tu conexión GPS.</div>';
+                    break;
+                case error.TIMEOUT:
+                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">⏱️ Tiempo agotado. Intenta de nuevo.</div>';
+                    break;
+                default:
+                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">❌ Error desconocido al obtener ubicación.</div>';
+            }
+
+            statusEl.innerHTML = '';
+            listEl.innerHTML = errorMsg;
+        },
+        // Options
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+
+function closeRadarModal() {
+    const modal = document.getElementById('radarModal');
+    if (modal) {
+        modal.classList.remove('open');
+    }
+}
+
+// Scan nearby businesses using Overpass API (OpenStreetMap)
+async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
+    const statusEl = document.getElementById('radarStatus');
+    const listEl = document.getElementById('radarList');
+
+    try {
+        // Convert radius to meters
+        const radiusM = radiusKm * 1000;
+
+        // Overpass query for bars, restaurants, cafes
+        const query = `
+            [out:json][timeout:25];
+            (
+                node["amenity"~"bar|restaurant|cafe|pub"](around:${radiusM},${lat},${lon});
+                way["amenity"~"bar|restaurant|cafe|pub"](around:${radiusM},${lat},${lon});
+            );
+            out body;
+            >;
+            out skel qt;
+        `;
+
+        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Error en la API de Overpass');
+
+        const data = await response.json();
+        const elements = data.elements || [];
+
+        // Filter and process results
+        let businesses = elements
+            .filter(el => el.tags && el.tags.name)
+            .map(el => {
+                const elLat = el.lat || (el.center ? el.center.lat : null);
+                const elLon = el.lon || (el.center ? el.center.lon : null);
+
+                if (!elLat || !elLon) return null;
+
+                const distance = getDistanceFromLatLonInKm(lat, lon, elLat, elLon);
+
+                return {
+                    name: el.tags.name,
+                    type: el.tags.amenity,
+                    address: el.tags['addr:street'] || '',
+                    phone: el.tags.phone || el.tags['contact:phone'] || '',
+                    opening_hours: el.tags.opening_hours || '',
+                    distance: distance,
+                    lat: elLat,
+                    lon: elLon
+                };
+            })
+            .filter(b => b !== null);
+
+        // Sort by distance
+        businesses.sort((a, b) => a.distance - b.distance);
+
+        // Filter by radius (double check)
+        businesses = businesses.filter(b => b.distance <= radiusKm);
+
+        // Check if open now (if filter is active)
+        if (onlyOpen) {
+            const now = new Date();
+            businesses = businesses.filter(b => {
+                if (!b.opening_hours) return true; // Include if no hours specified
+                // Simple check - this could be improved with a proper library
+                return !b.opening_hours.toLowerCase().includes('closed');
+            });
+        }
+
+        // Display results
+        if (businesses.length === 0) {
+            statusEl.innerHTML = '😔 No se encontraron negocios';
+            listEl.innerHTML = `
+                <div style="color:#aaa; text-align:center; padding:20px;">
+                    <p>No hay bares o restaurantes en un radio de ${radiusKm}km</p>
+                    <p style="font-size:0.8rem; margin-top:10px;">Prueba aumentando el radio de búsqueda</p>
+                </div>
+            `;
+        } else {
+            statusEl.innerHTML = `✅ ${businesses.length} negocio${businesses.length > 1 ? 's' : ''} encontrado${businesses.length > 1 ? 's' : ''}`;
+
+            listEl.innerHTML = '';
+            businesses.forEach(biz => {
+                const card = document.createElement('div');
+                card.style.cssText = 'background:rgba(255,255,255,0.05); border-radius:8px; padding:12px; border-left:3px solid #00ff88;';
+
+                const distText = biz.distance < 1
+                    ? `${(biz.distance * 1000).toFixed(0)}m`
+                    : `${biz.distance.toFixed(2)}km`;
+
+                const typeIcon = {
+                    'bar': '🍺',
+                    'restaurant': '🍽️',
+                    'cafe': '☕',
+                    'pub': '🍻'
+                }[biz.type] || '🏪';
+
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:5px;">
+                        <div style="flex:1;">
+                            <div style="font-weight:bold; color:white; font-size:0.95rem;">${typeIcon} ${biz.name}</div>
+                            ${biz.address ? `<div style="font-size:0.75rem; color:#aaa; margin-top:3px;">${biz.address}</div>` : ''}
+                            ${biz.phone ? `<div style="font-size:0.75rem; color:#4ade80; margin-top:3px;">📞 ${biz.phone}</div>` : ''}
+                        </div>
+                        <div style="background:rgba(0,255,136,0.2); color:#00ff88; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:bold; white-space:nowrap; margin-left:10px;">
+                            ${distText}
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <a href="https://www.google.com/maps/search/?api=1&query=${biz.lat},${biz.lon}" target="_blank" 
+                           style="flex:1; background:#3b82f6; color:white; padding:6px; border-radius:6px; text-align:center; text-decoration:none; font-size:0.8rem;">
+                            📍 Ver Mapa
+                        </a>
+                        ${biz.phone ? `
+                        <a href="tel:${biz.phone}" 
+                           style="flex:1; background:#10b981; color:white; padding:6px; border-radius:6px; text-align:center; text-decoration:none; font-size:0.8rem;">
+                            📞 Llamar
+                        </a>
+                        ` : ''}
+                    </div>
+                `;
+
+                listEl.appendChild(card);
+            });
+        }
+
+    } catch (error) {
+        console.error('Error scanning businesses:', error);
+        statusEl.innerHTML = '❌ Error al escanear';
+        listEl.innerHTML = `
+            <div style="color:#ff4444; text-align:center; padding:20px;">
+                <p>Error al buscar negocios cercanos</p>
+                <p style="font-size:0.8rem; margin-top:10px;">${error.message}</p>
+            </div>
+        `
+            ;
+    }
+}
+
+
+// === REMINDER & NOTION INTEGRATION MODULE ===
+
+// Global variables for reminder functionality
+let reminderAutoSaveTimeout = null;
+// Note: currentPriority is already declared in PRIORITY LOGIC section (line 2288)
+
+// Check Notion connection status on page load
+document.addEventListener('DOMContentLoaded', () => {
+    checkNotionConnection();
+});
+
+// Check if Notion credentials are configured
+function checkNotionConnection() {
+    const notionKey = localStorage.getItem('notionApiKey');
+    const notionDb = localStorage.getItem('notionDatabaseId');
+
+    const indicator = document.getElementById('notionStatusIndicator');
+    if (!indicator) return;
+
+    if (notionKey && notionDb) {
+        // Has credentials - show green
+        indicator.style.background = '#10b981';
+        indicator.title = 'Conectado a Notion';
+    } else {
+        // No credentials - show yellow
+        indicator.style.background = '#fbbf24';
+        indicator.title = 'Configuración pendiente - Haz clic en Ajustes';
+    }
+}
+
+// Update status indicator with specific status
+function updateNotionStatusIndicator(status) {
+    const indicator = document.getElementById('notionStatusIndicator');
+    if (!indicator) return;
+
+    const statusColors = {
+        'connected': { color: '#10b981', title: 'Conectado a Notion' },
+        'pending': { color: '#fbbf24', title: 'Configuración pendiente' },
+        'error': { color: '#ef4444', title: 'Error de conexión' },
+        'saving': { color: '#3b82f6', title: 'Guardando...' }
+    };
+
+    const config = statusColors[status] || statusColors['pending'];
+    indicator.style.background = config.color;
+    indicator.title = config.title;
+}
+
+// Auto-save reminder draft to localStorage (debounced)
+function autoSaveReminder() {
+    clearTimeout(reminderAutoSaveTimeout);
+
+    reminderAutoSaveTimeout = setTimeout(() => {
+        const text = document.getElementById('reminderText')?.value || '';
+        const date = document.getElementById('reminderDate')?.value || '';
+
+        if (text.trim().length > 0) {
+            const draft = {
+                text: text,
+                priority: currentPriority,
+                date: date,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('reminderDraft', JSON.stringify(draft));
+        }
+    }, 2000); // Save after 2 seconds of inactivity
+}
+
+// Open reminder modal
+function openReminderModal() {
+    const modal = document.getElementById('reminderModal');
+    if (!modal) return;
+
+    modal.classList.add('open');
+
+    // Check Notion connection status
+    checkNotionConnection();
+
+    // Restore draft if exists
+    const draftJson = localStorage.getItem('reminderDraft');
+    if (draftJson) {
+        try {
+            const draft = JSON.parse(draftJson);
+
+            // Check if draft is recent (less than 24 hours old)
+            const hoursSinceDraft = (Date.now() - draft.timestamp) / (1000 * 60 * 60);
+
+            if (hoursSinceDraft < 24) {
+                document.getElementById('reminderText').value = draft.text || '';
+                document.getElementById('reminderDate').value = draft.date || '';
+
+                if (draft.priority) {
+                    currentPriority = draft.priority;
+                    // Update UI to reflect priority
+                    document.querySelectorAll('.p-chip').forEach(chip => {
+                        chip.classList.remove('active');
+                    });
+                    const activeChip = Array.from(document.querySelectorAll('.p-chip')).find(
+                        chip => chip.textContent.includes(draft.priority)
+                    );
+                    if (activeChip) activeChip.classList.add('active');
+                }
+            }
+        } catch (e) {
+            console.error('Error loading draft:', e);
+        }
+    }
+}
+
+// Close reminder modal
+function closeReminderModal() {
+    const modal = document.getElementById('reminderModal');
+    if (!modal) return;
+
+    modal.classList.remove('open');
+
+    // Ask if user wants to keep draft
+    const text = document.getElementById('reminderText')?.value || '';
+    if (text.trim().length > 0) {
+        // Keep draft automatically - it will expire in 24h
+    } else {
+        // Clear draft if empty
+        localStorage.removeItem('reminderDraft');
+    }
+}
+
+// Note: selectPriority function already exists (line 2290)
+// We enhance it by modifying the existing function to call autoSaveReminder
+
+// Set quick date
+function setQuickDate(daysOffset) {
+    const dateInput = document.getElementById('reminderDate');
+    if (!dateInput) return;
+
+    const today = new Date();
+    let targetDate;
+
+    if (daysOffset === 'nextMonday') {
+        // Get next Monday
+        const dayOfWeek = today.getDay();
+        const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek);
+        targetDate = new Date(today.getTime() + daysUntilMonday * 24 * 60 * 60 * 1000);
+    } else {
+        // Add days
+        targetDate = new Date(today.getTime() + daysOffset * 24 * 60 * 60 * 1000);
+    }
+
+    // Format as YYYY-MM-DD
+    const year = targetDate.getFullYear();
+    const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+    const day = String(targetDate.getDate()).padStart(2, '0');
+
+    dateInput.value = `${year}-${month}-${day}`;
+    autoSaveReminder();
+}
+
+// Save reminder to Notion
+async function saveReminderToNotion() {
+    const text = document.getElementById('reminderText')?.value || '';
+    const date = document.getElementById('reminderDate')?.value || '';
+    const btn = document.getElementById('btnSaveReminder');
+
+    // Validation
+    if (!text.trim()) {
+        showToast('Campo vacío', 'Por favor escribe algo para recordar', 'error');
+        return;
+    }
+
+    // Get Notion credentials
+    const notionKey = localStorage.getItem('notionApiKey');
+    const notionDb = localStorage.getItem('notionDatabaseId');
+
+    if (!notionKey || !notionDb) {
+        showToast('Configuración necesaria', 'Configura tu API de Notion en Ajustes primero', 'error');
+        updateNotionStatusIndicator('pending');
+        return;
+    }
+
+    // Update UI - disable button
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+    }
+    updateNotionStatusIndicator('saving');
+
+    try {
+        // Prepare Notion API request
+        const notionData = {
+            parent: { database_id: notionDb },
+            properties: {
+                'Name': {
+                    title: [
+                        {
+                            text: {
+                                content: text.substring(0, 100) // Limit to 100 chars for title
+                            }
+                        }
+                    ]
+                },
+                'Priority': {
+                    select: {
+                        name: currentPriority
+                    }
+                },
+                'Date': date ? {
+                    date: {
+                        start: date
+                    }
+                } : null
+            }
+        };
+
+        // Remove null properties
+        if (!date) delete notionData.properties.Date;
+
+        // Make API call
+        const response = await fetch('https://api.notion.com/v1/pages', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${notionKey}`,
+                'Content-Type': 'application/json',
+                'Notion-Version': '2022-06-28'
+            },
+            body: JSON.stringify(notionData)
+        });
+
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('Notion API Error:', errorData);
+            throw new Error(`Error ${response.status}: ${errorData.message || response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        // Success!
+        updateNotionStatusIndicator('connected');
+
+        // Clear draft
+        localStorage.removeItem('reminderDraft');
+
+        // Generate Notion page URL
+        const pageId = result.id.replace(/-/g, '');
+        const notionAppUrl = localStorage.getItem('notionAppDeepLink') || '';
+        const pageUrl = notionAppUrl ?
+            notionAppUrl.replace(/\/[^\/]*$/, `/${pageId}`) :
+            `https://notion.so/${pageId}`;
+
+        // Show success toast with link
+        showToastWithLink('¡Guardado en Notion!', 'Toca para abrir', pageUrl);
+
+        // Clear form
+        document.getElementById('reminderText').value = '';
+        document.getElementById('reminderDate').value = '';
+
+        // Close modal after short delay
+        setTimeout(() => {
+            closeReminderModal();
+        }, 1500);
+
+    } catch (error) {
+        console.error('Error saving to Notion:', error);
+        updateNotionStatusIndicator('error');
+        showToast('Error al guardar', error.message || 'Verifica tu conexión y configuración', 'error');
+    } finally {
+        // Re-enable button
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<span id="notionStatusIndicator" style="width:8px; height:8px; border-radius:50%; background:#fbbf24; display:inline-block; margin-right:8px; transition: background 0.3s;"></span><i class="fa-solid fa-cloud-arrow-up"></i> GUARDAR EN NOTION';
+        }
+        checkNotionConnection();
+    }
+}
+
+// Enhanced toast with clickable link
+function showToastWithLink(title, message, url) {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+        z-index: 10000;
+        cursor: pointer;
+        transition: all 0.3s;
+        max-width: 90%;
+        text-align: center;
+    `;
+
+    toast.innerHTML = `
+        <div style="font-weight: bold; margin-bottom: 5px;">${title}</div>
+        <div style="font-size: 0.9rem; opacity: 0.9;">${message}</div>
+        <div style="font-size: 0.75rem; margin-top: 5px; opacity: 0.7;">🔗 ${url.substring(0, 40)}...</div>
+    `;
+
+    toast.onclick = () => {
+        window.open(url, '_blank');
+        toast.remove();
+    };
+
+    toast.onmouseenter = () => {
+        toast.style.transform = 'translateX(-50%) scale(1.05)';
+    };
+
+    toast.onmouseleave = () => {
+        toast.style.transform = 'translateX(-50%) scale(1)';
+    };
+
+    document.body.appendChild(toast);
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(-20px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
+
+// Configure Notion settings
+function configureSettings() {
+    const modal = document.getElementById('settingsModal');
+    if (!modal) return;
+
+    modal.classList.add('open');
+
+    // Load existing settings
+    document.getElementById('settingNotionKey').value = localStorage.getItem('notionApiKey') || '';
+    document.getElementById('settingNotionDb').value = localStorage.getItem('notionDatabaseId') || '';
+    document.getElementById('settingNotionAppUrl').value = localStorage.getItem('notionAppDeepLink') || '';
+}
+
+function closeSettingsModal() {
+    const modal = document.getElementById('settingsModal');
+    if (modal) modal.classList.remove('open');
+}
+
+// Save Notion settings
+function saveSettings() {
+    const key = document.getElementById('settingNotionKey')?.value || '';
+    const db = document.getElementById('settingNotionDb')?.value || '';
+    const appUrl = document.getElementById('settingNotionAppUrl')?.value || '';
+
+    // Basic validation
+    if (key && !key.startsWith('secret_') && !key.startsWith('ntn_')) {
+        showToast('API Key inválida', 'Debe empezar con "secret_" o "ntn_"', 'error');
+        return;
+    }
+
+    if (db && db.length !== 32) {
+        showToast('Database ID inválido', 'Debe tener exactamente 32 caracteres', 'error');
+        return;
+    }
+
+    // Save to localStorage
+    localStorage.setItem('notionApiKey', key);
+    localStorage.setItem('notionDatabaseId', db);
+    localStorage.setItem('notionAppDeepLink', appUrl);
+
+    // Update status
+    checkNotionConnection();
+
+    showToast('Configuración guardada', 'Notion está listo para usar', 'success');
+
+    setTimeout(() => {
+        closeSettingsModal();
+    }, 1000);
+}
+
+// Open Notion app directly
+function openNotionApp() {
+    const appUrl = localStorage.getItem('notionAppDeepLink');
+
+    if (appUrl) {
+        window.open(appUrl, '_blank');
+    } else {
+        showToast('Configura Notion', 'Añade el Deep Link en Ajustes primero', 'error');
+        configureSettings();
+    }
+}
+

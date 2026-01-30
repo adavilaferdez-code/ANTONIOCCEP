@@ -186,12 +186,8 @@
                             <span>Catálogo</span>
                         </div>
 
-                        <!-- 6. COMPARTIR QR -->
-                        <div class="bento-card sensitive-data" onclick="openQRModal()"
-                            style="cursor:pointer; border: 1px dashed #aaa;">
-                            <i class="fa-solid fa-qrcode" style="color: #ffffff;"></i>
-                            <span>Compartir</span>
-                        </div>
+
+
                     </div>
 
                     <!-- 3. Distribuidores -->
@@ -512,14 +508,14 @@
 
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
-        <!-- New Config Button in Main Menu -->
-        <a href="#" class="nav-item" onclick="configureSettings(); return false;">
-            <i class="fa-solid fa-gear"></i>
-            <span>Ajustes</span>
+        <!-- CORREO - Primera posición -->
+        <a href="https://outlook.office.com/mail/" target="_blank" class="nav-item">
+            <i class="fa-solid fa-envelope"></i>
+            <span>CORREO</span>
         </a>
         <a href="#" class="nav-item" onclick="openCalculator(); return false;">
             <i class="fa-solid fa-calculator"></i>
-            <span>Calc</span>
+            <span>CALC</span>
         </a>
         <a href="#" class="nav-item sensitive-data" onclick="openNotionApp(); return false;">
             <i class="fa-solid fa-pen-to-square"></i>
@@ -529,9 +525,10 @@
             <i class="fa-solid fa-table-cells"></i>
             <span>EXCEL</span>
         </a>
-        <a href="https://outlook.office.com/mail/" target="_blank" class="nav-item">
-            <i class="fa-solid fa-envelope"></i>
-            <span>Correo</span>
+        <!-- Ajustes - Última posición -->
+        <a href="#" class="nav-item" onclick="configureSettings(); return false;">
+            <i class="fa-solid fa-gear"></i>
+            <span>Ajustes</span>
         </a>
     </nav>
 
@@ -571,6 +568,31 @@
                 <h2>📡 Radar de Clientes</h2>
                 <button class="close-btn" onclick="closeRadarModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
+
+            <!-- Controles de Filtrado -->
+            <div style="padding:10px 15px; background:rgba(255,255,255,0.03); border-radius:8px; margin-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:15px; flex-wrap:wrap;">
+                    <!-- Toggle Solo Abiertos -->
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;">
+                        <input type="checkbox" id="radarFilterOpen" checked
+                            style="width:18px; height:18px; cursor:pointer;">
+                        <span style="font-size:0.9rem; color:#fff;">🟢 Solo ABIERTOS ahora</span>
+                    </label>
+
+                    <!-- Selector de Radio -->
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:0.85rem; color:#aaa;">Radio:</span>
+                        <select id="radarRadius"
+                            style="padding:6px 10px; border-radius:6px; background:#222; color:white; border:1px solid #444; cursor:pointer;">
+                            <option value="0.5" selected>500m</option>
+                            <option value="1">1 km</option>
+                            <option value="2">2 km</option>
+                            <option value="5">5 km</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div style="padding:15px; text-align:center;">
                 <div id="radarStatus" style="color:#aaa; margin-bottom:15px;">Escaneando zona...</div>
                 <div id="radarList" class="radar-list" style="display:flex; flex-direction:column; gap:10px;">
@@ -608,6 +630,7 @@
                             style="flex:1; background:none; border:none; color:white; padding:8px; border-bottom:2px solid var(--primary-color); font-weight:bold; cursor:pointer;">Básica</button>
                         <button class="tab-btn" onclick="switchCalcTab('offer')" id="tabOffer"
                             style="flex:1; background:none; border:none; color:#aaa; padding:8px; border-bottom:2px solid transparent; cursor:pointer;">Bonif.</button>
+
                     </div>
 
                     <!-- VIEW 1: BASIC CALCULATOR -->
@@ -640,8 +663,8 @@
                         </div>
                     </div>
 
-                    <!-- VIEW 2: BONIFICATION CALCULATOR -->
-                    <!-- VIEW 2: BONIFICATION CALCULATOR -->
+
+                    <!-- VIEW 3: BONIFICATION CALCULATOR -->
                     <div id="calcBodyOffer" class="calculator-body" style="display:none; padding:0; height: 100%;">
 
                         <!-- FLEX CONTAINER WRAPPER -->
@@ -765,6 +788,8 @@
     </div>
     <!-- END CALCULATOR MODAL -->
 
+
+
     <!-- Debug Console Overlay -->
 
 
@@ -786,7 +811,8 @@
                 <div class="input-group">
                     <label>¿Qué hay que recordar?</label>
                     <textarea id="reminderText" class="modal-input" rows="4"
-                        placeholder="Escribe aquí... (Ej: Llamar a Juan mañana)"></textarea>
+                        placeholder="Escribe aquí... (Ej: Llamar a Juan mañana)"
+                        oninput="autoSaveReminder()"></textarea>
                 </div>
 
                 <!-- Priority Selector -->
@@ -816,7 +842,9 @@
                 </div>
                 <div class="modal-actions">
                     <button onclick="saveReminderToNotion()" id="btnSaveReminder" class="action-capsule"
-                        style="width:100%; justify-content:center; background:var(--primary-gradient); color:white;">
+                        style="width:100%; justify-content:center; background:var(--primary-gradient); color:white; position:relative; display:flex; align-items:center;">
+                        <span id="notionStatusIndicator"
+                            style="width:8px; height:8px; border-radius:50%; background:#fbbf24; display:inline-block; margin-right:8px; transition: background 0.3s;"></span>
                         <i class="fa-solid fa-cloud-arrow-up"></i> GUARDAR EN NOTION
                     </button>
                 </div>
