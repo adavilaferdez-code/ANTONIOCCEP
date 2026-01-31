@@ -1,4 +1,4 @@
-const CACHE_NAME = 'catalogo-v2';
+const CACHE_NAME = 'catalogo-v3-no-notion';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',

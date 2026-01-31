@@ -927,12 +927,45 @@ async function fetchNearbyPlaces(lat, lon, radiusKm, onlyOpen = false) {
         out skel qt;
     `;
 
-    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+    // List of Overpass instances to try in order
+    const endpoints = [
+        'https://overpass-api.de/api/interpreter',
+        'https://overpass.kumi.systems/api/interpreter',
+        'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
+    ];
 
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Error en la API de Overpass');
+    let lastError = null;
+    let data = null;
 
-    const data = await response.json();
+    // Retry loop
+    for (const endpoint of endpoints) {
+        try {
+            console.log(`Trying Overpass server: ${endpoint}`);
+            const url = `${endpoint}?data=${encodeURIComponent(query)}`;
+
+            // Allow 10s timeout per server
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+            const response = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (!response.ok) throw new Error(`Status ${response.status}`);
+
+            data = await response.json();
+            if (data) break; // Success!
+
+        } catch (err) {
+            console.warn(`Failed to fetch from ${endpoint}:`, err);
+            lastError = err;
+            // Continue to next endpoint
+        }
+    }
+
+    if (!data) {
+        throw new Error('Todos los servidores de mapas están ocupados. Inténtalo más tarde.');
+    }
+
     const elements = data.elements || [];
 
     // Filter and process results
