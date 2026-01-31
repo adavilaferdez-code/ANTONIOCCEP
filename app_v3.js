@@ -645,50 +645,12 @@ async function saveReminder() {
     btnSaveReminder.innerHTML = '⏳ Guardando...';
     btnSaveReminder.disabled = true;
 
-    try {
-        // Try to save to Notion (if credentials exist)
-        const notionToken = localStorage.getItem('notionToken');
-        const notionDbId = localStorage.getItem('notionDbId');
+    // DIRECTLY SAVE LOCALLY (Notion Removed)
+    saveLocally(text, date, currentPriority);
 
-        if (notionToken && notionDbId) {
-            const payload = {
-                parent: { database_id: notionDbId },
-                properties: {
-                    "Nombre": {
-                        title: [{ text: { content: text } }]
-                    },
-                    "Fecha": {
-                        date: { start: date }
-                    },
-                    "Prioridad": {
-                        select: { name: currentPriority }
-                    }
-                }
-            };
-
-            const resp = await fetch('https://api.notion.com/v1/pages', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${notionToken}`,
-                    'Notion-Version': '2022-06-28',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
-
-            if (resp.ok) {
-                return;
-            }
-        }
-
-
-    } catch (e) {
-        // FALLBACK: SAVE LOCALLY
-        saveLocally(text, date, currentPriority);
-    } finally {
-        btnSaveReminder.innerHTML = 'GUARDAR';
-        btnSaveReminder.disabled = false;
-    }
+    // Reset button state
+    btnSaveReminder.innerHTML = 'GUARDAR';
+    btnSaveReminder.disabled = false;
 
     function saveLocally(text, date, priority) {
         const localReminders = JSON.parse(localStorage.getItem('offlineReminders') || '[]');
@@ -708,12 +670,12 @@ async function saveReminder() {
         closeReminderModal();
     }
 
-    function handleSuccess(url, savedType) {
+    function handleSuccess() {
         reminderText.value = '';
         closeReminderModal();
 
         // Use Alert because Toasts are disabled
-        alert(`✅ GUARDADO!\n\nTu recordatorio se ha subido correctamente a ${savedType}.`);
+        alert(`✅ GUARDADO!\n\nTu recordatorio se ha guardado correctamente.`);
 
         triggerConfetti();
 
