@@ -2816,10 +2816,11 @@ body.outdoor-mode .fab-reminder {
     border-color: #fbbf24;
     outline: none;
 }
+
 /* RADAR STYLES */
 .radar-item {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     padding: 15px;
     display: flex;
@@ -2827,10 +2828,12 @@ body.outdoor-mode .fab-reminder {
     justify-content: space-between;
     transition: 0.2s;
 }
+
 .radar-item:active {
     transform: scale(0.98);
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
 }
+
 .radar-dist {
     background: var(--primary-color);
     color: white;
@@ -2839,15 +2842,92 @@ body.outdoor-mode .fab-reminder {
     font-size: 0.8rem;
     font-weight: bold;
 }
+
 .radar-name {
     font-weight: bold;
     font-size: 1.1rem;
     color: white;
     text-align: left;
 }
+
 .radar-address {
     font-size: 0.8rem;
     color: #aaa;
     text-align: left;
 }
 
+
+/* PREMIUM GOLD BUTTON FOR SAP */
+.btn-gold-sap {
+    /* Make it span full width inside a bento grid or flex container if needed, 
+       but for bento card size, we might want to keep it square-ish or rectangular.
+       However, the user asked for a BUTTON. Let's make it fit the bento card style 
+       but with GOLD background. */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+
+    /* OVERRIDE BENTO CARD DEFAULTS FOR GOLD LOOK */
+    background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%) !important;
+    border: 2px solid #FFFACD !important;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+    color: #3E2723 !important;
+
+    border-radius: 14px;
+    padding: 10px 4px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+    min-height: 70px;
+}
+
+.btn-gold-sap::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    0% {
+        left: -100%;
+    }
+
+    20% {
+        left: 100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+.btn-gold-sap i {
+    font-size: 1.6rem;
+    margin-bottom: 5px;
+    color: #3E2723 !important;
+    z-index: 2;
+}
+
+.btn-gold-sap span {
+    font-weight: 800;
+    font-size: 0.75rem;
+    /* Match bento card size */
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #3E2723 !important;
+    z-index: 2;
+}
+
+.btn-gold-sap:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2) !important;
+}
