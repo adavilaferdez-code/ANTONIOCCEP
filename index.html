@@ -168,15 +168,7 @@
                     <i class="fa-solid fa-magnifying-glass search-icon"></i>
                     <input type="text" id="searchInput" class="search-input"
                         placeholder="Buscar bar, restaurante, ciudad...">
-                    <!-- Settings Button -->
-                    <button onclick="configureSettings()" class="settings-btn" title="Ajustes Notion"
-                        style="right: 70px;">
-                        <i class="fa-solid fa-gear"></i>
-                    </button>
-                    <!-- Reminder Button -->
-                    <button onclick="openReminderModal()" class="reminder-bell-btn" title="Nuevo Recordatorio">
-                        <i class="fa-solid fa-bell"></i>
-                    </button>
+
                 </div>
             </section>
 
@@ -558,18 +550,9 @@
             <i class="fa-solid fa-calculator"></i>
             <span>CALC</span>
         </a>
-        <a href="#" class="nav-item sensitive-data" onclick="openNotionApp(); return false;">
-            <i class="fa-solid fa-pen-to-square"></i>
-            <span>NOTION</span>
-        </a>
         <a href="http://excel.cloud.microsoft" target="_blank" class="nav-item sensitive-data">
             <i class="fa-solid fa-table-cells"></i>
             <span>EXCEL</span>
-        </a>
-        <!-- Ajustes - Última posición -->
-        <a href="#" class="nav-item" onclick="configureSettings(); return false;">
-            <i class="fa-solid fa-gear"></i>
-            <span>Ajustes</span>
         </a>
     </nav>
 
@@ -777,7 +760,7 @@
                                     </div>
                                     <div
                                         style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                                        <span style="color:#aaa; font-size:0.75rem;">🎁 Total Regalo:</span>
+                                        <span style="color:#aaa; font-size:0.75rem;">🎁 Total Bonif.:</span>
                                         <span id="bonFreeQty" style="color:#fbbf24; font-weight:bold;">0</span>
                                     </div>
                                     <hr style="border:0; border-top:1px solid #333; margin:5px 0;">
@@ -814,7 +797,7 @@
 
                     <!-- Scrollable Grid -->
                     <div id="calcProdList"
-                        style="flex:1; overflow-y:auto; display:grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap:10px; align-content:start;">
+                        style="flex:1; overflow-y:auto; display:grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap:8px; align-content:start;">
                         <!-- Products will be injected here via JS -->
                         <div style="color:#aaa; text-align:center; grid-column:1/-1;">Cargando tarifas...</div>
                     </div>
@@ -856,7 +839,7 @@
         </div>
     </div>
 
-    <script src="app_v3.js?v=new1"></script>
+    <script src="app_v3.js?v=20260131_1625"></script>
     <script src="toast.js"></script>
     <script>
         // Simple Date Script
@@ -890,6 +873,20 @@
                     }
                 });
             });
+
+            // Re-attach calculator listener firmly
+            const calcBtn = document.querySelector('a[onclick*="openCalculator"]');
+            if (calcBtn) {
+                calcBtn.onclick = function (e) {
+                    e.preventDefault();
+                    if (window.openCalculator) {
+                        window.openCalculator();
+                    } else {
+                        console.error("openCalculator not found on window");
+                        alert("Cargando calculadora... Intenta de nuevo en unos segundos.");
+                    }
+                };
+            }
         });
 
         function openCatalogWithNote() {

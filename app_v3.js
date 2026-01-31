@@ -1,2650 +1,688 @@
-// HostelHub Premium - App V3
-
-let searchResults = [];
-let currentEditingId = null;
-let userLocation = null;
-
-function requestLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                userLocation = {
-                    lat: position.coords.latitude,
-                    lon: position.coords.longitude
-                };
-                console.log("Loc ok");
-            },
-            (err) => console.warn("Loc err")
-        );
-    }
-}
-
-/* // Initialize Geolocation immediately
-if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            userLocation = {
-                lat: position.coords.latitude,
-                lon: position.coords.longitude
-            };
-            console.log("üìç Location acquired:", userLocation);
-        },
-        (error) => {
-            console.warn("??è Location access denied or error:", error.message);
-        }
-    );
-} else {
-    console.warn("??è Geolocation not supported by this browser.");
-}
-
-*/
-// Search Modal Control
-const searchResultsModal = document.getElementById('searchResultsModal');
-
-function openSearchResultsModal() {
-    searchResultsModal.classList.add('open');
-}
-
-function closeSearchResultsModal() {
-    searchResultsModal.classList.remove('open');
-}
-
-// Search Logic - Google Maps Direct
-function searchNearMe() {
-    const term = searchInput.value.trim();
-
-    // Visual feedback
-    venueList.innerHTML = '<div class="empty-state"><p>üöÄ Abriendo Google Maps...</p></div>';
-
-    const query = term.length > 0 ? term : 'restaurantes y bares';
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
-
-    // Open in new tab
-    window.open(url, '_blank');
-}
-
-// Legacy search functions removed for stability
-
-
-// DOM Elements
-const searchInput = document.getElementById('searchInput');
-const venueList = document.getElementById('venueList');
-const modal = document.getElementById('detailModal');
-
-// Inputs
-const inputName = document.getElementById('inputName');
-const inputAddress = document.getElementById('inputAddress');
-const inputPhone = document.getElementById('inputPhone');
-const inputEmail = document.getElementById('inputEmail');
-const inputNotes = document.getElementById('inputNotes');
-const btnCall = document.getElementById('btnCall');
-const btnEmail = document.getElementById('btnEmail');
-
-
-// === SEARCH LOGIC ===
-let debounceTimer;
-searchInput.addEventListener('input', (e) => {
-    // Ask for location when typing starts
-    if (!userLocation) requestLocation();
-
-    clearTimeout(debounceTimer);
-    const query = e.target.value.trim();
-
-    if (query.length < 3) return;
-
-    debounceTimer = setTimeout(() => {
-        performSearch(query);
-    }, 600);
-});
-
-async function performSearch(query) {
-    venueList.innerHTML = '<div class="empty-state"><p>Buscando...</p></div>';
-    openSearchResultsModal(); // Show loading in modal
-
-    try {
-        // Strategy 1: Search in Extremadura first
-        let data = await runNominatimSearch(`${query} Extremadura`);
-
-        // Strategy 2: If no results, search globally
-        if (!data || data.length === 0) {
-            venueList.innerHTML = '<div class="empty-state"><p>Buscando fuera de Extremadura...</p></div>';
-            data = await runNominatimSearch(query);
-        }
-
-        // Process Data
-        let processedData = data.map(item => {
-            const lat = parseFloat(item.lat);
-            const lon = parseFloat(item.lon);
-            let dist = null;
-
-            if (userLocation) {
-                dist = getDistanceFromLatLonInKm(userLocation.lat, userLocation.lon, lat, lon);
-            }
-
-            // Extract contact info if available
-            const extras = item.extratags || {};
-            // Try specific keys for phone
-            const phone = extras.phone || extras['contact:phone'] || extras['contact:mobile'] || '';
-            // Try specific keys for email
-            const email = extras.email || extras['contact:email'] || '';
-            const website = extras.website || extras['contact:website'] || '';
-
-            // Append website to notes if found, useful for sales rep
-            let autoNotes = '';
-            if (website) autoNotes = `Web: ${website}`;
-
-            return {
-                id: 'nom_' + item.place_id,
-                name: item.name || item.display_name.split(',')[0],
-                address: item.display_name,
-                lat: lat,
-                lon: lon,
-                distance: dist,
-                phone: phone,
-                email: email,
-                notes: autoNotes
-            };
-        });
-
-        // Sort by distance (nearest first)
-        if (userLocation) {
-            processedData.sort((a, b) => a.distance - b.distance);
-        }
-
-        searchResults = processedData;
-        try {
-            localStorage.setItem('lastSearchResults', JSON.stringify(searchResults));
-        } catch (e) {
-            console.warn("Storage full?", e);
-        }
-        renderList(searchResults);
-        openSearchResultsModal(); // Open modal with results
-    } catch (error) {
-        console.error(error);
-        venueList.innerHTML = '<div class="empty-state"><p>Error al buscar. Intenta de nuevo.</p></div>';
-        openSearchResultsModal();
-    }
-}
-
-
-// === AI MAGIC REWRITE ===
-async function runNominatimSearch(q) {
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&extratags=1&limit=40`);
-    if (!response.ok) throw new Error('Network response was not ok');
-    return await response.json();
-}
-
-// Haversine Formula for distance
-function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-    var R = 6371; // Radius of the earth in km
-    var dLat = deg2rad(lat2 - lat1);
-    var dLon = deg2rad(lon2 - lon1);
-    var a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2)
-        ;
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    var d = R * c; // Distance in km
-    return d;
-}
-
-function deg2rad(deg) {
-    return deg * (Math.PI / 180)
-}
-
-// === RENDER LOGIC ===
-function renderList(data) {
-    venueList.innerHTML = '';
-
-    if (data.length === 0) {
-        venueList.innerHTML = '<div class="empty-state"><p>No se encontraron resultados.</p></div>';
-        return;
-    }
-
-    data.forEach(item => {
-        // Format distance badge
-        let distBadge = '';
-        if (item.distance !== null && item.distance !== undefined) {
-            const d = item.distance < 1 ? (item.distance * 1000).toFixed(0) + ' m' : item.distance.toFixed(1) + ' km';
-            distBadge = `<span style="font-size:0.75rem; color:var(--success); background:rgba(0,255,136,0.1); padding:2px 6px; border-radius:4px; margin-left:8px;">${d}</span>`;
-        }
-
-        const card = document.createElement('div');
-        card.className = 'venue-card';
-        card.innerHTML = `
-            <div class="venue-header">
-                <div>
-                    <span class="venue-name">${item.name}</span>
-                    ${distBadge}
-                </div>
-            </div>
-            <div class="venue-address">
-                <i class="fa-solid fa-location-dot"></i>
-                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.address}</span>
-            </div>
-            <div class="actions">
-                <button onclick="openDetail('${item.id}')" class="action-btn btn-primary">
-                    VER FICHA
-                </button>
-                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + ' ' + item.address)}" target="_blank" class="action-btn btn-secondary">
-                    MAPA
-                </a>
-            </div>
-        `;
-        venueList.appendChild(card);
-    });
-}
-
-// === MODAL & DATA ===
-function openDetail(id) {
-    const item = searchResults.find(i => i.id === id);
-    if (!item) return;
-
-    currentEditingId = id;
-
-    // Fill fields
-    document.getElementById('modalTitle').innerText = item.name;
-    inputName.value = item.name;
-    inputAddress.value = item.address;
-    inputPhone.value = item.phone || '';
-    inputEmail.value = item.email || '';
-
-    // Load Notes: Prefer user saved notes over API notes
-    const savedNotes = JSON.parse(localStorage.getItem('venueNotes') || '{}');
-    if (savedNotes[id] !== undefined) {
-        inputNotes.value = savedNotes[id];
-    } else {
-        inputNotes.value = item.notes || '';
-    }
-
-    updateActionLinks();
-
-    modal.classList.add('open');
-}
-
-function closeModal() {
-    modal.classList.remove('open');
-    currentEditingId = null;
-}
-
-function updateActionLinks() {
-    btnCall.href = inputPhone.value ? `tel:${inputPhone.value}` : '#';
-    btnEmail.href = inputEmail.value ? `mailto:${inputEmail.value}` : '#';
-}
-
-function openMap() {
-    const addr = inputAddress.value;
-    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`, '_blank');
-}
-
-
-// Listeners for dynamic link updates (even if read-only, good practice to keep)
-inputPhone.addEventListener('input', updateActionLinks);
-inputEmail.addEventListener('input', updateActionLinks);
-
-// === DEBT NOTES LOGIC ===
-const debtModal = document.getElementById('debtModal');
-const debtPad = document.getElementById('debtPad');
-
-// Filter Elements
-const debtSearchName = document.getElementById('debtSearchName');
-const debtSearchDate = document.getElementById('debtSearchDate');
-const debtFilterGreen = document.getElementById('debtFilterGreen');
-const debtFilterRed = document.getElementById('debtFilterRed');
-
-// Add Listeners for Filters
-debtSearchName.addEventListener('input', filterDebts);
-debtSearchDate.addEventListener('input', filterDebts);
-debtFilterGreen.addEventListener('change', filterDebts);
-debtFilterRed.addEventListener('change', filterDebts);
-
-function filterDebts() {
-    const termName = debtSearchName.value.toLowerCase();
-    const termDate = debtSearchDate.value.toLowerCase();
-    const showGreen = debtFilterGreen.checked;
-    const showRed = debtFilterRed.checked;
-
-    const rows = debtPad.querySelectorAll('.debt-row');
-
-    rows.forEach(row => {
-        const textDiv = row.querySelector('.debt-text');
-        const textContent = textDiv.textContent.toLowerCase();
-
-        // Extract Date if present: [dd/mm]
-        // Assumption: Date is usually at the start in brackets [12/05]
-        // But user might type anything. We check if the text *contains* the search term.
-
-        // Logic:
-        // 1. Name Match: Check entire text content (simplest) or try to exclude date?
-        //    Let's check entire content for Name input, but user knows to type name.
-        // 2. Date Match: Check entire content for Date input (simplest).
-        // 3. Color Match: Check class status-paid / status-pending.
-
-        const matchesName = termName === '' || textContent.includes(termName);
-        const matchesDate = termDate === '' || textContent.includes(termDate);
-
-        let matchesColor = true;
-        // If either filter is specified, we entered strict mode for colors
-        if (showGreen || showRed) {
-            const isPaid = textDiv.classList.contains('status-paid');
-            const isPending = textDiv.classList.contains('status-pending');
-
-            // Logic:
-            // Show if (GreenChecked AND isPaid) OR (RedChecked AND isPending)
-            // But wait, what if it's neither paid nor pending (no status)?
-            // And what if Both are checked?
-
-            matchesColor = false;
-            if (showGreen && isPaid) matchesColor = true;
-            if (showRed && isPending) matchesColor = true;
-
-            // If item has NO status, and we are filtering, it should probably be hidden 
-            // unless we want "uncolored" to show only when NO filters are active.
-        }
-
-        if (matchesName && matchesDate && matchesColor) {
-            row.style.display = 'flex';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
-
-function openDebtModal() {
-    try {
-        console.log("Opening Debt Modal...");
-        // Load saved content if any
-        const saved = localStorage.getItem('debtNotesContent');
-        console.log("Saved content check:", saved);
-
-        if (saved && saved.trim().length > 0) {
-            // If content is just text (legacy), wrap it? 
-            // Or if it contains 'debt-row', assume updated format.
-            if (!saved.includes('debt-row')) {
-                // Legacy Migration: wrap existing html in one simple row?
-                // Or just reset to empty row + legacy content?
-                debtPad.innerHTML = '';
-                addDebtRow(saved);
-            } else {
-                debtPad.innerHTML = saved;
-            }
-        } else {
-            // New clean start
-            debtPad.innerHTML = '';
-            addDebtRow();
-        }
-
-        // Reset filters on open
-        if (debtSearchName) debtSearchName.value = '';
-        if (debtSearchDate) debtSearchDate.value = '';
-        if (debtFilterGreen) debtFilterGreen.checked = false;
-        if (debtFilterRed) debtFilterRed.checked = false;
-
-        // Trigger reset view
-        const rows = debtPad.querySelectorAll('.debt-row');
-        rows.forEach(r => r.style.display = 'flex');
-
-        // Check if last row is empty? If not, adding a new one automatically could be annoying.
-        // Let's add a "New Entry" button in HTML instead or rely on user.
-        // But for now, let's just create a new row if the list is empty.
-        if (debtPad.children.length === 0) {
-            addDebtRow();
-        }
-
-        debtModal.classList.add('open');
-        console.log("Debt Modal Class List:", debtModal.classList);
-    } catch (e) {
-        console.error("Error opening Debt Modal:", e);
-        alert("Error al abrir Deudas: " + e.message);
-    }
-}
-
-
-// === AI MAGIC REWRITE ===
-function closeDebtModal() {
-    debtModal.classList.remove('open');
-}
-
-const saveIndicatorDebt = document.getElementById('saveIndicatorDebt');
-
-function addDebtRow(initialText = '') {
-    // Generate unique ID based on timestamp and random
-    const rowId = 'row_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-
-    // Create Date String if initialText is empty (new user line)
-    if (initialText === '') {
-        const now = new Date();
-        const dateStr = now.toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        }).replace(',', '');
-        initialText = `<b>[${dateStr}]</b> `;
-    }
-
-    const div = document.createElement('div');
-    div.className = 'debt-row';
-    div.id = rowId;
-    div.innerHTML = `
-        <button class="toggle-paid-btn unpaid" onclick="togglePaymentStatus('${rowId}')" title="Pulsa para marcar como pagado">
-            <i class="fa-solid fa-circle-xmark"></i>
-        </button>
-        <div class="debt-text status-pending" contenteditable="true" 
-            oninput="saveDebt()" 
-            onblur="saveDebt()"
-            style="min-height:24px; outline:none; flex:1;">
-            ${initialText}
-        </div>
-        <button class="dot-btn" style="background:#555; color:white; font-size:10px; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;" onclick="deleteRow('${rowId}')" title="Eliminar">X</button>
-    `;
-    debtPad.appendChild(div);
-
-    saveDebt();
-    return div.querySelector('.debt-text');
-}
-
-// Toggle payment status with single click - SIMPLE RED/GREEN
-function togglePaymentStatus(rowId) {
-    const row = document.getElementById(rowId);
-    if (!row) return;
-
-    const btn = row.querySelector('.toggle-paid-btn');
-    const textDiv = row.querySelector('.debt-text');
-
-    if (btn.classList.contains('unpaid')) {
-        // Change to PAID (green)
-        btn.classList.remove('unpaid');
-        btn.classList.add('paid');
-        btn.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
-        btn.title = 'PAGADO - Pulsa para desmarcar';
-        textDiv.classList.remove('status-pending');
-        textDiv.classList.add('status-paid');
-    } else {
-        // Change to UNPAID (red)
-        btn.classList.remove('paid');
-        btn.classList.add('unpaid');
-        btn.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
-        btn.title = 'Pulsa para marcar como pagado';
-        textDiv.classList.remove('status-paid');
-        textDiv.classList.add('status-pending');
-    }
-
-    saveDebt();
-}
-
-function setRowStatus(rowId, status) {
-    const row = document.getElementById(rowId);
-    if (!row) {
-        console.error("No se encuentra la fila:", rowId);
-        return;
-    }
-    const text = row.querySelector('.debt-text');
-
-    // Reset classes
-    text.classList.remove('status-paid', 'status-pending');
-
-    if (status === 'paid') text.classList.add('status-paid');
-    if (status === 'pending') text.classList.add('status-pending');
-
-    saveDebt();
-}
-
-function deleteRow(rowId) {
-    const row = document.getElementById(rowId);
-    if (row) row.remove();
-    saveDebt();
-}
-
-function clearDebtPad() {
-    if (confirm('¬øBorrar todas las notas de deuda?')) {
-        debtPad.innerHTML = '';
-        addDebtRow();
-        saveDebt();
-    }
-}
-
-
-// === AI MAGIC REWRITE ===
-function saveDebt() {
-    localStorage.setItem('debtNotesContent', debtPad.innerHTML);
-    if (saveIndicatorDebt) {
-        saveIndicatorDebt.style.opacity = '1';
-        setTimeout(() => {
-            saveIndicatorDebt.style.opacity = '0';
-        }, 1500);
-    }
-}
-
-
-// === AI MAGIC REWRITE ===
-// Auto-save on input listener is removed because we use oninput inline
-debtPad.addEventListener('input', () => {
-    saveDebt();
-});
-
-
-
-// === CHECKLIST MODAL LOGIC ===
-const checklistModal = document.getElementById('checklistModal');
-function openChecklist() {
-    checklistModal.classList.add('open');
-}
-function closeChecklist() {
-    checklistModal.classList.remove('open');
-}
-
-// === ROUTES MODAL LOGIC ===
-const routesModal = document.getElementById('routesModal');
-function openRoutes() {
-    routesModal.classList.add('open');
-}
-function closeRoutes() {
-    routesModal.classList.remove('open');
-}
-
-// === FOCUS MODAL LOGIC ===
-const focusModal = document.getElementById('focusModal');
-function openFocusModal() {
-    focusModal.classList.add('open');
-}
-function closeFocusModal() {
-    focusModal.classList.remove('open');
-}
-
-// === DISTRIBUIDORES MODAL LOGIC ===
-const distribuidoresModal = document.getElementById('distribuidoresModal');
-function openDistribuidoresModal() {
-    distribuidoresModal.classList.add('open');
-}
-function closeDistribuidoresModal() {
-    distribuidoresModal.classList.remove('open');
-}
-
-// === ZOOM MODAL LOGIC ===
-const zoomModal = document.getElementById('zoomModal');
-const zoomImage = document.getElementById('zoomImage');
-
-function openZoomModal(imageSrc) {
-    zoomImage.src = imageSrc;
-    zoomModal.style.display = 'flex'; // Changed to flex to use align-items
-    zoomModal.classList.add('open');
-}
-
-function closeZoomModal() {
-    zoomModal.style.display = 'none';
-    zoomModal.classList.remove('open');
-    zoomImage.src = '';
-}
-
-
-function saveToDebts() {
-    if (!currentEditingId) return;
-
-    // Find item
-    const item = searchResults.find(i => i.id === currentEditingId);
-    if (!item) return;
-
-    const phoneStr = item.phone ? ` - üìû ${item.phone}` : '';
-    const noteText = `New: ${item.name}${phoneStr}`;
-
-    // Add to debt list interactively
-    addDebtRow(noteText);
-
-    // Feedback
-    alert(`Guardado:\n${item.name}`);
-}
-
-// === PLANES (FOLDERS) LOGIC ===
-const planesModal = document.getElementById('planesModal');
-const planesTitle = document.getElementById('planesTitle');
-const planesContent = document.getElementById('planesContent');
-const planesControls = document.getElementById('planesControls');
-const saveIndicator = document.getElementById('saveIndicator');
-
-// Note Filters
-const notesSearchInput = document.getElementById('notesSearchInput');
-const notesFilterGreen = document.getElementById('notesFilterGreen');
-const notesFilterRed = document.getElementById('notesFilterRed');
-
-if (notesSearchInput) notesSearchInput.addEventListener('input', filterNotes);
-if (notesFilterGreen) notesFilterGreen.addEventListener('change', filterNotes);
-if (notesFilterRed) notesFilterRed.addEventListener('change', filterNotes);
-
-let currentFolderId = null;
-
-// Ensure Planes Data Structure exists
-// Structure: [ { id: 'folder_123', name: 'Ruta Enero', clients: [ { id: 'c_1', text: 'Info...', date: '...' } ] } ]
-function getPlanesData() {
-    const data = localStorage.getItem('planesData');
-    return data ? JSON.parse(data) : [];
-}
-
-function savePlanesData(data) {
-    localStorage.setItem('planesData', JSON.stringify(data));
-    showSaveFeedback();
-}
-
-function showSaveFeedback() {
-    if (saveIndicator) {
-        saveIndicator.style.opacity = '1';
-        setTimeout(() => {
-            saveIndicator.style.opacity = '0';
-        }, 1500);
-    }
-}
-
-
-// === AI MAGIC REWRITE ===
-function openPlanes() {
-    currentFolderId = null; // Start at root
-    renderFolders();
-    planesModal.classList.add('open');
-}
-
-function closePlanes() {
-    planesModal.classList.remove('open');
-}
-
-// RENDER FOLDERS (LEVEL 1)
-function renderFolders() {
-    const planes = getPlanesData();
-    planesTitle.innerText = '?? Mis Notas (Carpetas)';
-    planesTitle.innerText = '?? Mis Notas (Carpetas)';
-    // Controls for Root
-    planesControls.innerHTML = `
-        <button onclick="createNewFolder()" class="add-btn" style="background:var(--primary-gradient);"><i class="fa-solid fa-folder-plus"></i> Nueva Carpeta</button>
-        <button onclick="syncNotion_FINAL()" class="add-btn" style="background:#333; border: 1px solid #777;" title="Bajar datos de Notion"><i class="fa-solid fa-cloud-arrow-down"></i> Importar Notion (NEW)</button>
-        <button onclick="exportBackup()" class="add-btn" style="background:#555;" title="Descargar archivo"><i class="fa-solid fa-download"></i> Copia</button>
-        <button onclick="document.getElementById('backupInput').click()" class="add-btn" style="background:#555;"><i class="fa-solid fa-upload"></i> Restaurar</button>
-        <button onclick="configureSettings()" class="add-btn" style="background:#333; border: 1px solid #777; width:auto; padding:12px 15px;" title="Configurar API">
-            <i class="fa-solid fa-gear"></i>
-        </button>
-    `;
-
-    // Hide filter bar in root view (optional, but cleaner)
-    const filterBar = document.querySelector('#planesModal .filter-bar');
-    if (filterBar) filterBar.style.display = 'none';
-
-    if (planes.length === 0) {
-        planesContent.innerHTML = '<div class="empty-state" style="color:#aaa;">No tienes carpetas creadas.</div>';
-        return;
-    }
-
-    planesContent.innerHTML = '';
-    planes.forEach(folder => {
-        const div = document.createElement('div');
-        div.className = 'nav-item';
-        div.style.cssText = `
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 15px; margin-bottom: 10px; background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
-            cursor: pointer; transition: 0.2s;
-        `;
-        div.innerHTML = `
-            <div onclick="openFolder('${folder.id}')" style="display:flex; align-items:center; gap:15px; flex:1;">
-                <i class="fa-solid fa-folder-closed" style="font-size:1.5rem; color:#ffd700;"></i>
-                <span style="font-size:1.1rem; font-weight:bold; color:white;">${folder.name}</span>
-                <span style="font-size:0.8rem; color:#aaa;">(${folder.clients.length} notas)</span>
-            </div>
-            <div style="display:flex; gap:10px;">
-                <button onclick="editFolder('${folder.id}')" style="background:none; border:none; color:#aaa; cursor:pointer;"><i class="fa-solid fa-pen"></i></button>
-                <button onclick="deleteFolder('${folder.id}')" style="background:none; border:none; color:#ff4444; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
-            </div>
-        `;
-        planesContent.appendChild(div);
-    });
-}
-
-// RENDER CLIENTS (LEVEL 2)
-function openFolder(folderId) {
-    currentFolderId = folderId;
-    const planes = getPlanesData();
-    const folder = planes.find(f => f.id === folderId);
-    if (!folder) return;
-
-    planesTitle.innerText = `?? ${folder.name}`;
-
-    // Controls for Folder
-    planesControls.innerHTML = `
-        <button onclick="renderFolders()" class="add-btn" style="background:#555; width:auto; padding:12px 15px;"><i class="fa-solid fa-arrow-left"></i></button>
-        <button onclick="addClientRow()" class="add-btn"><i class="fa-solid fa-plus"></i> Nota</button>
-        <button onclick="syncFolderToNotion()" class="add-btn" style="background:#333; border: 1px solid #777;">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png" style="width:16px; margin-right:5px;"> 
-            Sync
-        </button>
-        <button onclick="configureSettings()" class="add-btn" style="background:#333; border: 1px solid #777; width:auto; padding:12px 15px;" title="Configurar API (Notion y AI)">
-            <i class="fa-solid fa-gear"></i>
-        </button>
-    `;
-
-    // Show filter bar in folder view
-    const filterBar = document.querySelector('#planesModal .filter-bar');
-    if (filterBar) filterBar.style.display = 'flex';
-
-    renderClientList(folder);
-}
-
-function renderClientList(folder) {
-    planesContent.innerHTML = '';
-
-    if (folder.clients.length === 0) {
-        planesContent.innerHTML = '<div class="empty-state" style="color:#aaa;">Carpeta vacÌa. AÒade notas.</div>';
-        return;
-    }
-
-    folder.clients.forEach(client => {
-        const rowId = client.id;
-        // Determine classes for status
-        let statusClass = '';
-        if (client.status === 'paid') statusClass = 'status-paid'; // reusing 'paid' for Green/Done
-        if (client.status === 'pending') statusClass = 'status-pending'; // reusing 'pending' for Red/Urgent
-
-        const div = document.createElement('div');
-        div.className = 'debt-row plane-row'; // Added plane-row class for filtering
-        div.id = rowId;
-        div.dataset.status = client.status || ''; // Store status in dataset
-        // Set Active Note on Click
-        div.onclick = function () { localStorage.setItem('activeNoteId', rowId); };
-
-        div.innerHTML = `
-            <div class="debt-text ${statusClass}" contenteditable="true" 
-                oninput="saveClientEdit('${rowId}')" 
-                onblur="saveClientEdit('${rowId}')"
-                onfocus="localStorage.setItem('activeNoteId', '${rowId}')"
-                style="min-height:24px; outline:none;">
-                ${client.text}
-            </div>
-            <div class="debt-dots">
-                <button class="dot-btn dot-green" onclick="setClientStatus('${rowId}', 'paid')" title="Hecho"></button>
-                <button class="dot-btn dot-red" onclick="setClientStatus('${rowId}', 'pending')" title="Pendiente"></button>
-
-                <button class="dot-btn" style="background:#3b82f6; color:white; font-size:10px; display:flex; align-items:center; justify-content:center;" onclick="openMoveModal('${rowId}')" title="Mover"><i class="fa-solid fa-arrow-right"></i></button>
-                <button class="dot-btn" style="background:#555; color:white; font-size:10px; display:flex; align-items:center; justify-content:center;" onclick="deleteClientRow('${rowId}')" title="Borrar">X</button>
-            </div>
-        `;
-        planesContent.appendChild(div);
-    });
-
-    // Apply filters immediately after rendering
-    filterNotes();
-}
-
-function setClientStatus(rowId, status) {
-    if (!currentFolderId) return;
-    const planes = getPlanesData();
-    const folder = planes.find(f => f.id === currentFolderId);
-    if (!folder) return;
-
-    const client = folder.clients.find(c => c.id === rowId);
-    if (!client) return;
-
-    // Toggle logic: if clicking same status, remove it
-    if (client.status === status) {
-        client.status = null;
-    } else {
-        client.status = status;
-    }
-
-    savePlanesData(planes);
-    renderClientList(folder); // Re-render to show changes
-}
-
-function filterNotes() {
-    const term = notesSearchInput ? notesSearchInput.value.toLowerCase() : '';
-    const showGreen = notesFilterGreen ? notesFilterGreen.checked : false;
-    const showRed = notesFilterRed ? notesFilterRed.checked : false;
-
-    // Select only the rows in the current view (planesContent)
-    const rows = planesContent.querySelectorAll('.plane-row');
-
-    rows.forEach(row => {
-        const textDiv = row.querySelector('.debt-text');
-        const textContent = textDiv.textContent.toLowerCase();
-        const status = row.dataset.status;
-
-        const matchesText = term === '' || textContent.includes(term);
-
-        // Color Filter Logic
-        let matchesColor = true;
-        if (showGreen || showRed) {
-            matchesColor = false;
-            if (showGreen && status === 'paid') matchesColor = true;
-            if (showRed && status === 'pending') matchesColor = true;
-        }
-
-        if (matchesText && matchesColor) {
-            row.style.display = 'flex';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-
-    // Special case for folders view (if we want to hide filter bar there? for now let's keep it but it won't do much on folders)
-    // Actually, maybe hide filter bar when in Root Folder view?
-    // Let's handle visibility in Render
-}
-
-
-// ACTIONS - FOLDERS
-function createNewFolder() {
-    const name = prompt("Nombre de la nueva carpeta:");
-    if (!name) return;
-
-    const planes = getPlanesData();
-    planes.push({
-        id: 'folder_' + Date.now(),
-        name: name,
-        clients: []
-    });
-    savePlanesData(planes);
-    renderFolders();
-}
-
-function editFolder(id) {
-    const planes = getPlanesData();
-    const folder = planes.find(f => f.id === id);
-    if (!folder) return;
-
-    const newName = prompt("Nuevo nombre:", folder.name);
-    if (newName) {
-        folder.name = newName;
-        savePlanesData(planes);
-        renderFolders();
-    }
-}
-
-
-// === AI MAGIC REWRITE ===
-function deleteFolder(id) {
-    if (!confirm("¬øSeguro que quieres borrar esta carpeta y todo su contenido?")) return;
-    let planes = getPlanesData();
-    planes = planes.filter(f => f.id !== id);
-    savePlanesData(planes);
-    renderFolders();
-}
-
-// ACTIONS - CLIENTS
-function addClientRow() {
-    if (!currentFolderId) return;
-
-    const planes = getPlanesData();
-    const folder = planes.find(f => f.id === currentFolderId);
-
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
-
-    const newClient = {
-        id: 'cli_' + Date.now(),
-        text: `<b>[${dateStr}]</b> Nueva Nota...`,
-        date: new Date().toISOString()
-    };
-
-    folder.clients.push(newClient);
-    savePlanesData(planes);
-
-    // Re-render to show new item
-    renderClientList(folder);
-}
-
-function saveClientEdit(rowId) {
-    if (!currentFolderId) return;
-
-    const row = document.getElementById(rowId);
-    if (!row) return;
-
-    const textDiv = row.querySelector('.debt-text');
-    if (!textDiv) return;
-
-    const textContent = textDiv.innerHTML;
-
-    const planes = getPlanesData();
-    const folder = planes.find(f => f.id === currentFolderId);
-    if (folder) {
-        const client = folder.clients.find(c => c.id === rowId);
-        if (client) {
-            client.text = textContent;
-            savePlanesData(planes);
-            // Track active note for Catalog integration
-            localStorage.setItem('activeNoteId', rowId);
-        }
-    }
-}
-
-
-// === AI MAGIC REWRITE ===
-function deleteClientRow(rowId) {
-    if (!currentFolderId) return;
-    if (!confirm("¬øBorrar nota?")) return;
-
-    const planes = getPlanesData();
-    const folder = planes.find(f => f.id === currentFolderId);
-    if (folder) {
-        folder.clients = folder.clients.filter(c => c.id !== rowId);
-        savePlanesData(planes);
-        renderClientList(folder);
-    }
-}
-
-
-// === AI MAGIC REWRITE ===
-// Initialize Data if empty
-if (!localStorage.getItem('planesData')) {
-    savePlanesData([
-        { id: 'f1', name: 'General', clients: [] }
-    ]);
-}
-
-
-// === BACKUP SYSTEM ===
-function exportBackup() {
-    const data = {
-        planes: getPlanesData(),
-        debts: localStorage.getItem('debtNotesContent') || ''
-    };
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    const date = new Date().toISOString().split('T')[0];
-    a.download = `backup_hostelhub_${date}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    alert('Copia de seguridad descargada. Gu√°rdala en lugar seguro.');
-}
-
-function copyBackup() {
-    const data = {
-        planes: getPlanesData(),
-        debts: localStorage.getItem('debtNotesContent') || ''
-    };
-
-    const text = JSON.stringify(data, null, 2);
-
-    navigator.clipboard.writeText(text).then(() => {
-        alert('¬°Copia copiada al portapapeles! üìã\n\nAhora puedes pegarla en las Notas de tu iPad o envi√°rtela por correo.');
-    }).catch(err => {
-        console.error('Error al copiar: ', err);
-        alert('No se pudo copiar autom√°ticamente. Intenta usar el botÛn de Descarga.');
-    });
-}
-
-function importBackup(input) {
-    const file = input.files[0];
-    if (!file) return;
-
-    if (!confirm('ATENCI√ìN: Esto sobrescribir√° tus datos actuales con los del archivo. ¬øSeguro?')) {
-        input.value = ''; // Reset
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        try {
-            const data = JSON.parse(e.target.result);
-
-            if (data.planes) {
-                savePlanesData(data.planes);
-            }
-            if (data.debts !== undefined) {
-                localStorage.setItem('debtNotesContent', data.debts);
-            }
-
-            alert('¬°Datos restaurados con √©xito!');
-            renderFolders(); // Refresh view
-
-        } catch (err) {
-            console.error(err);
-            alert('Error al leer el archivo. Aseg√∫rate de que es una copia v√°lida.');
-        }
-        input.value = ''; // Reset
-    };
-    reader.readAsText(file);
-}
-
-// === MOVE CLIENT LOGIC ===
-const moveClientModal = document.getElementById('moveClientModal');
-const moveTargetSelect = document.getElementById('moveTargetSelect');
-let clientToMoveId = null;
-
-function openMoveModal(clientId) {
-    clientToMoveId = clientId;
-
-    // Populate Select with OTHER folders
-    const planes = getPlanesData();
-    const otherFolders = planes.filter(f => f.id !== currentFolderId);
-
-    if (otherFolders.length === 0) {
-        alert("No tienes otras carpetas para mover el cliente. Crea una nueva primero.");
-        return;
-    }
-
-    moveTargetSelect.innerHTML = otherFolders.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
-    moveClientModal.classList.add('open');
-}
-
-function closeMoveModal() {
-    moveClientModal.classList.remove('open');
-    clientToMoveId = null;
-}
-
-
-// === PERSISTENCE ADDITIONS (CHECKLIST & VENUE NOTES) ===
-
-// 1. Checklist Persistence
-const checklistInputs = document.querySelectorAll('.checklist-container input[type="checkbox"]');
-
-function loadChecklistState() {
-    try {
-        const saved = JSON.parse(localStorage.getItem('checklistState') || '[]');
-        checklistInputs.forEach((input, index) => {
-            if (saved[index]) input.checked = true;
-        });
-    } catch (e) {
-        console.error("Error loading checklist:", e);
-    }
-}
-
-
-
-function saveChecklistState() {
-    const state = Array.from(checklistInputs).map(input => input.checked);
-    localStorage.setItem('checklistState', JSON.stringify(state));
-}
-
-// Attach listeners to checklist
-if (checklistInputs.length > 0) {
-    checklistInputs.forEach(input => {
-        input.addEventListener('change', saveChecklistState);
-    });
-    // Load on init
-    loadChecklistState();
-}
-
-// 2. Venue Detail Notes Persistence
-// We listen to inputNotes and save keyed by currentEditingId
-if (inputNotes) {
-    inputNotes.addEventListener('input', () => {
-        if (currentEditingId) {
-            const savedNotes = JSON.parse(localStorage.getItem('venueNotes') || '{}');
-            savedNotes[currentEditingId] = inputNotes.value;
-            localStorage.setItem('venueNotes', JSON.stringify(savedNotes));
-        }
-    });
-}
-
-
-function executeMove() {
-    if (!clientToMoveId || !currentFolderId) return;
-
-    const targetFolderId = moveTargetSelect.value;
-    if (!targetFolderId) return;
-
-    const planes = getPlanesData();
-
-    // Find Source Folder and Client
-    const sourceFolder = planes.find(f => f.id === currentFolderId);
-    if (!sourceFolder) return;
-
-    const clientIndex = sourceFolder.clients.findIndex(c => c.id === clientToMoveId);
-    if (clientIndex === -1) return;
-
-    // Get Client Data
-    const clientData = sourceFolder.clients[clientIndex];
-
-    // Remove from Source
-    sourceFolder.clients.splice(clientIndex, 1);
-
-    // Add to Target
-    const targetFolder = planes.find(f => f.id === targetFolderId);
-    if (targetFolder) {
-        targetFolder.clients.push(clientData);
-        savePlanesData(planes);
-
-        closeMoveModal();
-        renderClientList(sourceFolder); // Refresh current view
-        alert(`Cliente movido a "${targetFolder.name}"`);
-    }
-}
-
-
-
-// === RESTORE SEARCH RESULTS ===
-try {
-    const lastSearch = localStorage.getItem('lastSearchResults');
-    if (lastSearch) {
-        const parsed = JSON.parse(lastSearch);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-            searchResults = parsed; // Update state
-            renderList(searchResults); // Render
-        }
-    }
-} catch (e) {
-    console.error("Error restoring search:", e);
-}
-/* Calculator Logic */
-let calcExpression = '';
-
-// --- TAB SWITCHING ---
-function switchCalcTab(mode) {
-    const tabBasic = document.getElementById('tabBasic');
-    const tabOffer = document.getElementById('tabOffer');
-    const bodyBasic = document.getElementById('calcBodyBasic');
-    const bodyOffer = document.getElementById('calcBodyOffer');
-
-    // Reset all first
-    tabBasic.style.borderBottom = '2px solid transparent';
-    tabBasic.style.color = '#aaa';
-    tabBasic.style.fontWeight = 'normal';
-
-    tabOffer.style.borderBottom = '2px solid transparent';
-    tabOffer.style.color = '#aaa';
-    tabOffer.style.fontWeight = 'normal';
-
-    bodyBasic.style.display = 'none';
-    bodyOffer.style.display = 'none';
-
-    if (mode === 'basic') {
-        // Activate Basic
-        tabBasic.style.borderBottom = '2px solid var(--primary-color)';
-        tabBasic.style.color = 'white';
-        tabBasic.style.fontWeight = 'bold';
-        bodyBasic.style.display = 'block';
-        setTimeout(() => document.getElementById('calcDisplay').focus(), 100);
-
-    } else if (mode === 'offer') {
-        // Activate Offer
-        tabOffer.style.borderBottom = '2px solid var(--primary-color)';
-        tabOffer.style.color = 'white';
-        tabOffer.style.fontWeight = 'bold';
-        bodyOffer.style.display = 'block';
-        setTimeout(() => document.getElementById('bonPrice').focus(), 100);
-    }
-}
-
-// --- BONIFICATION LOGIC (MULTI-PRODUCT REFACTOR) ---
-
-// Cart State
-let calcCart = {
-    buy: [],  // { id: timestamp, name: string, price: number, qty: number, discount: number }
-    gift: []  // { id: timestamp, name: string, price: number, qty: number, discount: number }
-};
-
-// Add product to Buy list
-// Add product to Buy list
-function selectCalcProduct(product) {
-    // Grouping Logic
-    const existingIndex = calcCart.buy.findIndex(item => item.name === product.name);
-
-    if (existingIndex >= 0) {
-        // Increment quantity by 1
-        calcCart.buy[existingIndex].qty += 1;
-        renderBonificationLists();
-    } else {
-        // Add new
-        calcCart.buy.push({
-            id: Date.now(),
-            name: product.name,
-            price: product.price,
-            qty: 1,
-            discount: product.defaultDiscount !== undefined ? product.defaultDiscount : 0
-        });
-        renderBonificationLists();
-    }
-}
-
-// Add product to Gift list
-function selectGiftProduct(product) {
-    const existingIndex = calcCart.gift.findIndex(item => item.name === product.name);
-
-    // Determine default discount (try to match first buy item's discount or 0)
-    let defaultDisc = 0;
-    if (calcCart.buy.length > 0) defaultDisc = calcCart.buy[0].discount;
-
-    if (existingIndex >= 0) {
-        calcCart.gift[existingIndex].qty += 1;
-        renderBonificationLists();
-    } else {
-        calcCart.gift.push({
-            id: Date.now(),
-            name: product.name,
-            price: product.price,
-            qty: 1,
-            discount: defaultDisc // Auto-match discount
-        });
-        renderBonificationLists();
-    }
-}
-
-function changeQty(type, index, delta) {
-    if (type === 'buy') {
-        const newQty = calcCart.buy[index].qty + delta;
-        if (newQty < 1) return; // Prevent 0
-        calcCart.buy[index].qty = newQty;
-        // Also force integer? No, maybe they sell 1.5 boxes? Assuming integer for now.
-    } else {
-        const newQty = calcCart.gift[index].qty + delta;
-        calcCart.gift[index].qty = newQty >= 0 ? newQty : 0;
-    }
-    renderBonificationLists();
-}
-
-// Render the two lists
-function renderBonificationLists() {
-    const buyContainer = document.getElementById('calcListBuy');
-    const giftContainer = document.getElementById('calcListGift');
-
-    if (!buyContainer || !giftContainer) return;
-
-    // RENDER BUY LIST
-    buyContainer.innerHTML = '';
-    if (calcCart.buy.length === 0) {
-        buyContainer.innerHTML = '<div style="color:#666; font-size:0.8rem; text-align:center; padding:10px; border:1px dashed #444; border-radius:4px;">Selecciona productos del cat·logo para COMPRAR</div>';
-    } else {
-        calcCart.buy.forEach((item, index) => {
-            const row = document.createElement('div');
-            row.style.cssText = 'display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.03); padding:5px; border-radius:4px; border-left: 2px solid #4ade80;';
-            row.innerHTML = `
-                <div style="flex:1; overflow:hidden;">
-                    <div style="font-size:0.75rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
-                    <div style="font-size:0.7rem; color:#4ade80;">${item.price.toFixed(2)}Ä</div>
-                </div>
-                <div style="display:flex; flex-direction:column; width:80px; align-items:center;">
-                    <label style="font-size:0.65rem; color:#aaa;">Cant.</label>
-                    <div style="display:flex; align-items:center; gap:2px;">
-                        <button onclick="changeQty('buy', ${index}, -1)" style="background:#444; color:white; border:none; width:20px; height:20px; border-radius:3px; cursor:pointer;">-</button>
-                        <input type="number" value="${item.qty}" min="1" 
-                            onchange="updateCartItem('buy', ${index}, 'qty', this.value)"
-                            style="width:35px; background:#222; border:1px solid #444; color:white; border-radius:3px; padding:2px; text-align:center; font-size:0.8rem;">
-                        <button onclick="changeQty('buy', ${index}, 1)" style="background:#444; color:white; border:none; width:20px; height:20px; border-radius:3px; cursor:pointer;">+</button>
-                    </div>
-                </div>
-                <div style="display:flex; flex-direction:column; width:45px;">
-                    <label style="font-size:0.65rem; color:#aaa;">Dto%</label>
-                    <input type="number" value="${item.discount}" min="0" max="100" 
-                        onchange="updateCartItem('buy', ${index}, 'discount', this.value)"
-                        style="width:100%; background:#222; border:1px solid #444; color:white; border-radius:3px; padding:2px; text-align:center; font-size:0.8rem;">
-                </div>
-                <button onclick="removeCartItem('buy', ${index})" style="background:none; border:none; color:#f87171; cursor:pointer; font-size:0.9rem; padding:0 5px;">&times;</button>
-            `;
-            buyContainer.appendChild(row);
-        });
-    }
-
-    // RENDER GIFT LIST
-    giftContainer.innerHTML = '';
-    if (calcCart.gift.length === 0) {
-        giftContainer.innerHTML = '<div style="color:#666; font-size:0.8rem; text-align:center; padding:5px;">(Opcional) Usa ?? para aÒadir regalos</div>';
-    } else {
-        calcCart.gift.forEach((item, index) => {
-            const row = document.createElement('div');
-            row.style.cssText = 'display:flex; align-items:center; gap:8px; background:rgba(251, 191, 36, 0.05); padding:5px; border-radius:4px; border-left: 2px solid #fbbf24;';
-            row.innerHTML = `
-                <div style="flex:1; overflow:hidden;">
-                    <div style="font-size:0.75rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
-                    <div style="font-size:0.7rem; color:#fbbf24;">(Valor: ${(item.price * (1 - item.discount / 100)).toFixed(2)}Ä)</div>
-                </div>
-                <div style="display:flex; flex-direction:column; width:75px; align-items:center;">
-                    <label style="font-size:0.65rem; color:#aaa;">Cant.</label>
-                    <div style="display:flex; align-items:center; gap:2px;">
-                        <button onclick="changeQty('gift', ${index}, -1)" style="background:rgba(251, 191, 36, 0.2); color:#fbbf24; border:none; width:20px; height:20px; border-radius:3px; cursor:pointer;">-</button>
-                        <input type="number" value="${item.qty}" min="1" 
-                            onchange="updateCartItem('gift', ${index}, 'qty', this.value)"
-                            style="width:35px; background:rgba(251, 191, 36, 0.1); border:1px solid rgba(251, 191, 36, 0.3); color:#fbbf24; border-radius:3px; padding:2px; text-align:center; font-size:0.8rem; font-weight:bold;">
-                        <button onclick="changeQty('gift', ${index}, 1)" style="background:rgba(251, 191, 36, 0.2); color:#fbbf24; border:none; width:20px; height:20px; border-radius:3px; cursor:pointer;">+</button>
-                    </div>
-                </div>
-                <div style="display:flex; flex-direction:column; width:45px;">
-                    <label style="font-size:0.65rem; color:#aaa;">Dto%</label>
-                    <input type="number" value="${item.discount}" min="0" max="100" 
-                        onchange="updateCartItem('gift', ${index}, 'discount', this.value)"
-                        style="width:100%; background:rgba(251, 191, 36, 0.1); border:1px solid rgba(251, 191, 36, 0.3); color:#fbbf24; border-radius:3px; padding:2px; text-align:center; font-size:0.8rem;">
-                </div>
-                <button onclick="removeCartItem('gift', ${index})" style="background:none; border:none; color:#f87171; cursor:pointer; font-size:0.9rem; padding:0 5px;">&times;</button>
-            `;
-            giftContainer.appendChild(row);
-        });
-    }
-
-    calculateBonification();
-}
-
-function updateCartItem(type, index, field, value) {
-    if (type === 'buy') {
-        calcCart.buy[index][field] = parseFloat(value) || 0;
-    } else {
-        calcCart.gift[index][field] = parseFloat(value) || 0;
-    }
-    renderBonificationLists(); // Re-render to update dependent values (like net value display)
-}
-
-function removeCartItem(type, index) {
-    if (type === 'buy') {
-        calcCart.buy.splice(index, 1);
-    } else {
-        calcCart.gift.splice(index, 1);
-    }
-    renderBonificationLists();
-}
-
-function clearCalcCart(type) {
-    if (type === 'buy') calcCart.buy = [];
-    if (type === 'gift') calcCart.gift = [];
-    renderBonificationLists();
-}
-
-function clearBonification() {
-    calcCart.buy = [];
-    calcCart.gift = [];
-    renderBonificationLists();
-}
-
-function calculateBonification() {
-    // 1. Calculate Total Payment (Buy List)
-    let totalFactura = 0;
-    let totalBuyUnits = 0;
-    let totalBuyTarifa = 0;
-
-    calcCart.buy.forEach(item => {
-        const netPrice = item.price * (1 - (item.discount / 100));
-        totalFactura += item.qty * netPrice;
-        totalBuyUnits += item.qty;
-        totalBuyTarifa += item.qty * item.price;
-    });
-
-    // 2. Calculate Total Gift Value (Gift List)
-    let totalGiftNetValue = 0;
-    let totalGiftUnits = 0;
-    let totalGiftTarifa = 0;
-
-    calcCart.gift.forEach(item => {
-        const netPrice = item.price * (1 - (item.discount / 100));
-        totalGiftNetValue += item.qty * netPrice;
-        totalGiftUnits += item.qty;
-        totalGiftTarifa += item.qty * item.price;
-    });
-
-    // 3. Logic: Total Net Value Received vs Total Paid
-    // Effective Price = (Total Paid - Value gained from gift) / Total Paid Units
-    // This assumes the gift value is "money returned" to the customer
-
-    let avgEffectivePrice = 0;
-    if (totalBuyUnits > 0) {
-        avgEffectivePrice = (totalFactura - totalGiftNetValue) / totalBuyUnits;
-        if (avgEffectivePrice < 0) avgEffectivePrice = 0;
-    }
-
-    // 4. Calculate Global Equivalent Discount
-    const totalValueReceived = totalBuyTarifa + totalGiftTarifa;
-    let globalDiscount = 0;
-    if (totalValueReceived > 0) {
-        globalDiscount = (1 - (totalFactura / totalValueReceived)) * 100;
-    }
-
-    // UPDATE UI
-    const formatter = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
-
-    document.getElementById('bonResultPrice').innerText = formatter.format(avgEffectivePrice);
-
-    const percentEl = document.getElementById('bonResultPercent');
-    if (percentEl) percentEl.innerText = globalDiscount.toFixed(1) + '%';
-
-    document.getElementById('bonResultTotal').innerText = formatter.format(totalFactura);
-
-    // Update Counts
-    const paidQtyEl = document.getElementById('bonPaidQty');
-    const freeQtyEl = document.getElementById('bonFreeQty');
-
-    if (paidQtyEl) paidQtyEl.innerText = totalBuyUnits;
-    if (freeQtyEl) freeQtyEl.innerText = totalGiftUnits;
-}
-
-
-
-
-
-function openCalculator() {
-    document.getElementById('calculatorModal').classList.add('open');
-    switchCalcTab('basic'); // Reset to basic on open
-    calcExpression = '';
-    updateCalcDisplay();
-    // Always render products when opening
-    renderCalcProducts();
-}
-
-function closeCalculator() {
-    document.getElementById('calculatorModal').classList.remove('open');
-}
-
-function updateCalcDisplay() {
-    const display = document.getElementById('calcDisplay');
-    display.value = calcExpression || '0';
-    // Auto scroll to end
-    display.scrollLeft = display.scrollWidth;
-}
+Ôªø// === CALCULATOR FUNCTIONS ===
+let calcValue = '0';
+let calcOperator = '';
+let calcPrevValue = '';
 
 function calcAppend(val) {
-    if (val === '.' && calcExpression.slice(-1) === '.') return;
-    if (['+', '-', '*', '/'].includes(val) && ['+', '-', '*', '/'].includes(calcExpression.slice(-1))) {
-        // Replace operator
-        calcExpression = calcExpression.slice(0, -1) + val;
+    const display = document.getElementById('calcDisplay');
+    if (calcValue === '0' && val !== '.') {
+        calcValue = val;
     } else {
-        calcExpression += val;
+        calcValue += val;
     }
-    updateCalcDisplay();
+    display.value = calcValue;
 }
 
 function calcClear() {
-    calcExpression = '';
-    updateCalcDisplay();
+    calcValue = '0';
+    calcOperator = '';
+    calcPrevValue = '';
+    document.getElementById('calcDisplay').value = '0';
 }
 
 function calcBackspace() {
-    calcExpression = calcExpression.slice(0, -1);
-    updateCalcDisplay();
+    if (calcValue.length > 1) {
+        calcValue = calcValue.slice(0, -1);
+    } else {
+        calcValue = '0';
+    }
+    document.getElementById('calcDisplay').value = calcValue;
 }
 
 function calcCalculate() {
     try {
-        // Safe evaluation
-        // Valid characters only
-        if (/[^0-9+\-*/.]/.test(calcExpression)) {
-            calcExpression = 'Error';
-        } else {
-            // Eval is safe here due to regex check above (basic calculator)
-            const result = eval(calcExpression);
-            if (!isFinite(result) || isNaN(result)) {
-                calcExpression = 'Error';
-            } else {
-                calcExpression = result.toString();
-            }
-        }
+        const result = eval(calcValue);
+        calcValue = result.toString();
+        document.getElementById('calcDisplay').value = calcValue;
     } catch (e) {
-        calcExpression = 'Error';
-    }
-    updateCalcDisplay();
-}
-
-// --- PRODUCT CATALOG SIDEBAR (MOCK DATA) ---
-// --- PRODUCT CATALOG SIDEBAR (REAL DATA) ---
-const productCatalog = [
-    { name: 'Coca-Cola 2L (Caja)', price: 28.68, image: 'cocacola_logo.jpg', defaultDiscount: 71 },
-    { name: 'Coca-Cola Zero 2L (Caja)', price: 28.68, image: 'cocacola_zero_logo.png', defaultDiscount: 71 },
-    { name: 'Coca-Cola Zero Zero 2L (Caja)', price: 28.68, image: 'cocacola_zero_logo.png', defaultDiscount: 71 },
-    { name: 'Fanta Naranja 2L (Caja)', price: 27.06, image: 'fanta_logo.jpg', defaultDiscount: 71 },
-    { name: 'Fanta LimÛn 2L (Caja)', price: 27.06, image: 'fanta_logo.jpg', defaultDiscount: 71 },
-    { name: 'Coca-Cola Lata 33cl (Caja 24)', price: 39.36, image: 'cocacola_logo.jpg', defaultDiscount: 62 },
-    { name: 'Coca-Cola Zero Lata 33cl (Caja 24)', price: 39.36, image: 'cocacola_zero_logo.png', defaultDiscount: 62 },
-    { name: 'Coca-Cola Zero Zero Lata 33cl (Caja 24)', price: 39.36, image: 'cocacola_zero_logo.png', defaultDiscount: 62 },
-    { name: 'Fanta Naranja Lata 33cl (Caja 24)', price: 37.68, image: 'fanta_logo.jpg', defaultDiscount: 62 },
-    { name: 'Fanta LimÛn Lata 33cl (Caja 24)', price: 37.68, image: 'fanta_logo.jpg', defaultDiscount: 62 },
-    { name: 'Aquarius LimÛn Lata 33cl (Caja 24)', price: 41.04, image: 'aquarius_logo.png', defaultDiscount: 60 },
-    { name: 'Aquarius Naranja Lata 33cl (Caja 24)', price: 41.04, image: 'aquarius_logo.png', defaultDiscount: 60 },
-    { name: 'Fuze Tea Lata 33cl (Caja 24)', price: 39.60, image: 'fuzetea_logo.jpg', defaultDiscount: 60 },
-    { name: 'Sprite 2L (Caja)', price: 27.06, image: 'sprite_logo.jpg', defaultDiscount: 60 },
-    { name: 'Aquabona 1.5L (Caja 6)', price: 9.30, image: 'aquabona_logo.png', defaultDiscount: 60 },
-    { name: 'Royal Bliss Vidrio 20cl (Caja24)', price: 31.92, image: 'royalbliss_logo.png', defaultDiscount: 0 },
-    { name: 'Monster Lata 50cl (Caja 24)', price: 56.16, image: 'monster_logo.jpg', defaultDiscount: 50 },
-];
-
-function renderCalcProducts(filter = '') {
-    const list = document.getElementById('calcProdList');
-    if (!list) return;
-
-    list.innerHTML = ''; // Clear
-
-    const filtered = productCatalog.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
-
-    if (filtered.length === 0) {
-        list.innerHTML = '<div style="grid-column:1/-1; color:#aaa; text-align:center; padding:20px;">No encontrado</div>';
-        return;
-    }
-
-    // SMART EXCEL LAUNCHER (WEB ONLY MODE)
-    window.openExcelSmart = function () {
-        // Direct link to dashboard to avoid iOS "Open in App?" prompts
-        window.open('https://www.office.com', '_blank');
-    };
-
-    filtered.forEach(p => {
-        const item = document.createElement('div');
-        // TOUCH FIX: Removed complex border transitions that might block clicks
-        item.style.cssText = 'background:rgba(255,255,255,0.05); border-radius:12px; padding:10px; position:relative; text-align:center; border:1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; align-items:center; cursor:pointer; min-height:120px;';
-
-        // TOUCH FIX: Use onclick directly and ensure it's clickable
-        item.onclick = (e) => {
-            // Check if we clicked the gift button
-            if (e.target.closest('.gift-btn')) return;
-
-            // Visual feedback for touch
-            item.style.transform = 'scale(0.95)';
-            setTimeout(() => item.style.transform = 'scale(1)', 100);
-
-            selectCalcProduct(p);
-        };
-
-        // Product IMAGE (Logo)
-        const icon = document.createElement('img');
-        icon.src = p.image || 'cocacola_logo.jpg';
-        icon.style.cssText = 'width:50px; height:50px; object-fit:contain; margin-bottom:8px; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));';
-        icon.onerror = function () { this.src = 'cocacola_logo.jpg'; }; // Fallback
-
-        // Product Name
-        const name = document.createElement('div');
-        name.style.cssText = 'font-size:0.7rem; font-weight:600; color:#e5e5e5; margin-bottom:4px; line-height:1.2; flex:1; display:flex; align-items:center; justify-content:center; width:100%;';
-        name.innerText = p.name.replace('(Caja)', '').replace('(Caja 24)', ''); // Cleaner names
-
-        // Price Row
-        const priceRow = document.createElement('div');
-        priceRow.style.cssText = 'display:flex; justify-content:center; align-items:center; gap:8px; width:100%; margin-top:5px;';
-
-        // Price
-        const price = document.createElement('div');
-        price.style.cssText = 'font-size:0.95rem; color:#4ade80; font-weight:800; font-family:monospace;';
-        price.innerText = p.price.toFixed(2) + 'Ä';
-
-        // Gift Button (Small icon)
-        const giftBtn = document.createElement('button');
-        giftBtn.className = 'gift-btn';
-        giftBtn.innerHTML = '<i class="fa-solid fa-gift"></i>';
-        giftBtn.title = 'Seleccionar como Regalo';
-        giftBtn.style.cssText = 'background:none; border:none; color:#fbbf24; cursor:pointer; font-size:1.1rem; padding:5px;';
-
-        giftBtn.onclick = (e) => {
-            e.stopPropagation(); // Stop bubbling
-            selectGiftProduct(p);
-        };
-
-        priceRow.appendChild(price);
-        priceRow.appendChild(giftBtn);
-
-        item.appendChild(icon);
-        item.appendChild(name);
-        item.appendChild(priceRow);
-
-        list.appendChild(item);
-    });
-}
-
-
-
-function filterCalcProducts() {
-    const text = document.getElementById('calcProdSearch').value;
-    renderCalcProducts(text);
-}
-
-// Direct selection functions (called from product row buttons)
-function saveSpyReport() {
-    const brand = document.getElementById('spyBrand').value;
-    const type = document.getElementById('spyType').value;
-    const notes = document.getElementById('spyNotes').value.trim();
-    const statusDiv = document.getElementById('spyStatus');
-
-    if (notes.length === 0) {
-        alert("?? Por favor escribe alg˙n detalle del informe.");
-        return;
-    }
-
-    const report = {
-        id: Date.now(),
-        brand: brand,
-        type: type,
-        notes: notes,
-        date: new Date().toISOString()
-    };
-
-    // Save properly to local storage (append to list)
-    const reports = JSON.parse(localStorage.getItem('spyReports') || '[]');
-    reports.push(report);
-    localStorage.setItem('spyReports', JSON.stringify(reports));
-
-    // UI Feedback
-    statusDiv.innerHTML = '<i class="fa-solid fa-check"></i> Enviado correctamente';
-
-    // Clear form
-    document.getElementById('spyNotes').value = '';
-
-    // Clear success msg after 2s
-    setTimeout(() => {
-        statusDiv.innerHTML = '';
-    }, 2000);
-
-    // Optional: Alert for immediate feedback since toast might be hidden
-    alert(`??? INFORME GUARDADO\n\nMarca: ${brand}\nAcciÛn: ${type}\n\n°Buen trabajo, agente!`);
-}
-
-
-
-// === NOTION INTEGRATION ===
-const NOTION_KEY_DEFAULT = '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'; // Transcribed from screenshot
-const NOTION_DB_ID_DEFAULT = '2ee60cbd80db80b0ae41d3eb9f774f26';
-const CORS_PROXY = 'https://corsproxy.io/?';
-
-// === AUTO-FIX: CORREGIR ID ANTIGUO GUARDADO EN MEMORIA ===
-try {
-    const currentStored = localStorage.getItem('notionDb');
-    // Si tiene el ID viejo (con la b), lo forzamos al nuevo (con la e)
-    if (currentStored && currentStored.includes('2eb60cbd')) {
-        console.log("FIXING BROKEN ID IN STORAGE...");
-        localStorage.setItem('notionDb', NOTION_DB_ID_DEFAULT);
-    }
-} catch (e) { console.warn("Storage warning", e); }
-
-// === SETTINGS MODAL LOGIC ===
-const settingsModal = document.getElementById('settingsModal');
-const settingNotionKey = document.getElementById('settingNotionKey');
-const settingNotionDb = document.getElementById('settingNotionDb');
-const settingNotionAppUrl = document.getElementById('settingNotionAppUrl');
-
-function openNotionApp() {
-    const storedUrl = localStorage.getItem('notionAppUrl');
-
-    // Check if we have a URL
-    if (storedUrl) {
-        // If user pasted normal https link, simple replace protocol (basic heuristic)
-        let finalUrl = storedUrl;
-        if (finalUrl.startsWith('https://')) {
-            finalUrl = finalUrl.replace('https://', 'notion://');
-        } else if (!finalUrl.startsWith('notion://')) {
-            // If it doesn't start with notion:// or https://, maybe assume notion://? 
-            // Or just try opening it. But user instruction says "change https to notion".
-            // Let's ensure protocol is notion://
-            if (!finalUrl.includes('://')) {
-                finalUrl = 'notion://' + finalUrl;
-            }
-        }
-        window.location.href = finalUrl;
-    } else {
-        // If not configured, try to show alert or open settings
-        if (confirm("?? A˙n no has configurado el enlace directo a la App de Notion.\n\nøQuieres configurarlo ahora?")) {
-            configureSettings();
-        }
-    }
-}
-
-function configureSettings() { // Kept name for compatibility with existing button
-    const currentKey = localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT;
-    const currentDb = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
-
-    // Pre-fill inputs
-    const currentAppUrl = localStorage.getItem('notionAppUrl') || '';
-
-    if (settingNotionKey) settingNotionKey.value = currentKey;
-    if (settingNotionDb) settingNotionDb.value = currentDb;
-    if (settingNotionAppUrl) settingNotionAppUrl.value = currentAppUrl;
-
-    settingsModal.classList.add('open');
-}
-
-function closeSettingsModal() {
-    settingsModal.classList.remove('open');
-}
-
-function saveSettings() {
-    const newKey = settingNotionKey.value.trim();
-    const newDb = settingNotionDb.value.trim();
-
-    // Validation removed as user has 'ntn_' key format
-    if (newKey.length < 10) {
-        alert("?? La clave parece demasiado corta. Aseg˙rate de copiarla entera.");
-        return;
-    }
-
-    // Prevent pasting Key into DB ID
-    if (newDb.startsWith('ntn_') || newDb.startsWith('secret_')) {
-        alert("?? ERROR: Has pegado la Clave en el hueco del ID.\n\nEl 'Database ID' es diferente (b˙scalo en la URL de tu Notion).");
-        return;
-    }
-
-    // Auto-format Notion ID helper (Smart Extract V4 - View ID Fix)
-    const formatUUID = (input) => {
-        if (!input) return "";
-
-        // Fix: If URL contains ?v= (View ID), we might be grabbing the wrong one at the end.
-        // We want the MAIN ID (the first 32-char sequence).
-
-        // Remove non-hex chars BUT keep some separators to distinguish blocks if needed?
-        // Better strategy: Find ALL 32-char hex sequences in the original string.
-        const matches = input.match(/[a-fA-F0-9]{32}/g);
-
-        if (matches && matches.length > 0) {
-            // The Database ID is always the FIRST full UUID in the URL
-            // (The second one, if exists, is usually the View ID after ?v=)
-            const id = matches[0];
-            return `${id.substr(0, 8)}-${id.substr(8, 4)}-${id.substr(12, 4)}-${id.substr(16, 4)}-${id.substr(20)}`;
-        }
-
-        // Fallback or if user input just the ID
-        const clean = input.replace(/[^a-fA-F0-9]/g, '');
-        if (clean.length >= 32) {
-            const id = clean.substr(0, 32); // Take first 32 if cleaned
-            return `${id.substr(0, 8)}-${id.substr(8, 4)}-${id.substr(12, 4)}-${id.substr(16, 4)}-${id.substr(20)}`;
-        }
-
-        return input;
-    };
-
-    localStorage.setItem('notionKey', newKey);
-    localStorage.setItem('notionDb', formatUUID(newDb.replace(/-/g, '')));
-
-    // Save App URL
-    if (settingNotionAppUrl) {
-        localStorage.setItem('notionAppUrl', settingNotionAppUrl.value.trim());
-    }
-
-    closeSettingsModal();
-
-    // Trigger test
-    testNotionConnection();
-}
-
-// FORCE UPDATE KEY logic removed to allow user customization
-
-
-
-// === AI MAGIC REWRITE ===
-async function testNotionConnection() {
-    const NOTION_KEY = localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT;
-    // We don't test DB connection here, only User token. 
-    // But let's verify DB ID format just in case user wants to know
-    const rawDb = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
-    const url = `${CORS_PROXY}https://api.notion.com/v1/users/me`;
-
-    // Show spinner on the gear button if possible, or just alert "Comprobando..."
-    // Since this is triggered from prompt or button, let's just use alert flow or simple console log for now, 
-    // but better user feedback is an alert that says "Checking..." then updates.
-    // We can't update a JS alert. We'll verify and then alert.
-
-    try {
-        // DEBUG: Mostrar la clave que se est√° usando realmente
-        alert(`?? DIAGN”STICO:\n\nUsando clave: ${NOTION_KEY.substring(0, 15)}...${NOTION_KEY.substring(NOTION_KEY.length - 5)}\n\n(Comprueba si coincide con tu clave ntn_)`);
-
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${NOTION_KEY}`,
-                'Notion-Version': '2022-06-28'
-            }
-        });
-
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.message || 'Error de conexi√≥n');
-        }
-
-        const data = await response.json();
-        alert(`?? °CONEXI”N EXITOSA!\n\n?? Bot detectado: ${data.bot ? data.bot.owner.type : 'Usuario'}\n? Tu API Key funciona perfectamente.\n\nSi la sincronizaciÛn falla, el problema es que NO has dado permiso al bot en la base de datos (Men˙ Copas > Conexiones).`);
-
-    } catch (e) {
-        alert(`‚ùå ERROR DE CONEXI√ìN:\n"${e.message}"\n\nEsto significa que la Clave INTERNAL INTEGRATION SECRET (Notion) est· MAL copiada/pegada (No confundir con Gemini).`);
-    }
-}
-
-
-
-async function syncFolderToNotion() {
-    if (!currentFolderId) return;
-
-    const formatUUID = (id) => {
-        if (!id) return id;
-        const clean = id.replace(/-/g, '');
-        if (clean.length !== 32) return id; // Return original if not 32 hex
-        return `${clean.substr(0, 8)}-${clean.substr(8, 4)}-${clean.substr(12, 4)}-${clean.substr(16, 4)}-${clean.substr(20)}`;
-    };
-
-    const NOTION_KEY = localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT;
-    let NOTION_DB_ID = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
-    NOTION_DB_ID = formatUUID(NOTION_DB_ID);
-
-    const planes = getPlanesData();
-    const folder = planes.find(f => f.id === currentFolderId);
-    if (!folder || folder.clients.length === 0) {
-        alert("La carpeta est· vacÌa.");
-        return;
-    }
-
-    if (!confirm(`øEnviar ${folder.clients.length} notas a Notion?\nEsto crear· o actualizar· las entradas en tu base de datos.`)) return;
-
-    // Show loading state
-    const syncBtn = planesControls.querySelector('button:last-child');
-    const originalText = syncBtn.innerHTML;
-    syncBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
-    syncBtn.disabled = true;
-
-    let successCount = 0;
-    let errorCount = 0;
-    let lastErrorMsg = "";
-
-    for (const client of folder.clients) {
-        try {
-            await sendNoteToNotion(client, folder.name);
-            successCount++;
-        } catch (e) {
-            console.error("Error syncing note:", client, e);
-            errorCount++;
-            lastErrorMsg = e.message;
-        }
-    }
-
-    // Save changes (in case we added notion_ids)
-    savePlanesData(planes);
-
-    syncBtn.innerHTML = originalText;
-    syncBtn.disabled = false;
-
-    // FIX: Auth Error Interception (Evita que salga el error genÈrico si es Auth)
-    if (errorCount > 0 && (lastErrorMsg.includes("401") || lastErrorMsg.includes("AUTENTICACI”N") || lastErrorMsg.includes("iPad"))) {
-        alert(`? NO SE PUEDO SINCRONIZAR (iPad/MÛvil)\n\nEl dispositivo NO tiene la Clave de Notion guardada.\n\nSOLUCI”N:\n1. Ve a ConfiguraciÛn (??).\n2. Pega tu clave "ntn_...".\n3. Guarda.`);
-        return;
-    }
-
-    if (errorCount > 0) {
-        alert(`??è Problema en la sincronizaciÛn:\n\n? Enviados: ${successCount}\n‚ùå Fallos: ${errorCount}\n\n??ç ERROR DETECTADO:\n"${lastErrorMsg}"\n\n(Revisa que las columnas en Notion se llamen exactamente "Carpeta" y "Estado")`);
-    } else {
-        alert(`°SincronizaciÛn Perfecta! ??\n\n? Se han enviado ${successCount} notas a Notion.`);
-    }
-}
-
-
-// === AI MAGIC REWRITE ===
-async function sendNoteToNotion(client, folderName) {
-    // Re-fetch credentials inside loop/helper (or better pass them)
-    const NOTION_KEY = localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT;
-    let NOTION_DB_ID = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
-
-    // Helper inside (or move to global scope properly in next refactor)
-    const formatUUID = (id) => {
-        if (!id) return id;
-        const clean = id.replace(/-/g, '');
-        if (clean.length !== 32) return id;
-        return `${clean.substr(0, 8)}-${clean.substr(8, 4)}-${clean.substr(12, 4)}-${clean.substr(16, 4)}-${clean.substr(20)}`;
-    };
-    NOTION_DB_ID = formatUUID(NOTION_DB_ID);
-
-    // Strip HTML from text for title
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = client.text;
-    let plainText = tempDiv.textContent || tempDiv.innerText || "";
-
-    // CLEANUP: Robust multi-step removal
-    // CLEANUP: Robust multi-step removal
-    // 1. Remove the date prefix [17/1] (handling leading spaces)
-    plainText = plainText.replace(/^\s*\[.*?\]/, '').trim();
-
-    // 2. Remove ANY text that ends with "..." (common prefix pattern)
-    // This catches "Nueva Nota...", "Nuevo Cliente...", "Bla bla..."
-    if (plainText.includes('...')) {
-        plainText = plainText.replace(/^.*?\.\.\./, '').trim();
-    } else {
-        // Fallback for older prefixes like "Nueva Nota" without dots or just spaced
-        plainText = plainText.replace(/Nu.*?Nota\.*/i, '').trim();
-    }
-
-    // 3. Remove leading dots, spaces, or punctuation left over
-    plainText = plainText.replace(/^[\.\s\-\:]+/, '').trim();
-
-    // If cleanup left it empty (user didn't type anything), put a default
-    if (!plainText) plainText = "Nota sin t√≠tulo";
-
-    // Determine Status
-    const statusName = client.status === 'paid' ? 'Hecho' : (client.status === 'pending' ? 'Pendiente' : 'Sin Estado');
-
-    const payload = {
-        parent: { database_id: NOTION_DB_ID },
-        properties: {
-            "Name": { // Title property
-                title: [
-                    { text: { content: plainText } }
-                ]
-            },
-            "Carpeta": { // Select or Text property for Folder
-                rich_text: [
-                    { text: { content: folderName } }
-                ]
-            },
-            "Estado": { // Select property
-                select: { name: statusName }
-            },
-            "Fecha": { // Date propery (YYYY-MM-DD for no time)
-                date: { start: (client.date ? client.date.split('T')[0] : new Date().toISOString().split('T')[0]) }
-            }
-        }
-    };
-
-    let url = `${CORS_PROXY}https://api.notion.com/v1/pages`;
-    let method = 'POST';
-
-    if (client.notion_id) {
-        url = `${CORS_PROXY}https://api.notion.com/v1/pages/${client.notion_id}`;
-        method = 'PATCH';
-        delete payload.parent; // Parent cannot be updated in PATCH
-    }
-
-    const response = await fetch(url, {
-        method: method,
-        headers: {
-            'Authorization': `Bearer ${NOTION_KEY}`,
-            'Notion-Version': '2022-06-28',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-        // DETECCI”N ESPECÕFICA DE ERROR DE CLAVE (iPad/MÛvil)
-        if (response.status === 401) {
-            throw new Error("? ERROR DE AUTENTICACI”N (iPad/MÛvil): Tu clave API no est· guardada en este dispositivo. Ve a ConfiguraciÛn (??) y pÈgala de nuevo.");
-        }
-        const err = await response.json();
-        throw new Error(err.message || 'Notion API Error');
-    }
-
-    const data = await response.json();
-
-    // Store the Notion ID to enable updates next time
-    if (!client.notion_id) {
-        client.notion_id = data.id;
-    }
-}
-
-
-// === AI MAGIC REWRITE ===
-// === SYNC FUNCTION FINAL ===
-// === AI MAGIC REWRITE ===
-// === SYNC FUNCTION FINAL ===
-async function syncNotion_FINAL() {
-    console.log("?? syncNotion_FINAL Triggered"); // Debug Log
-
-    // 1. Get Credentials
-    const NOTION_KEY = (localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT).trim();
-    let NOTION_DB_ID = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
-
-    // Helper inside
-    const formatUUID = (id) => {
-        if (!id) return id;
-        const clean = id.replace(/-/g, '');
-        if (clean.length !== 32) return id;
-        return `${clean.substr(0, 8)}-${clean.substr(8, 4)}-${clean.substr(12, 4)}-${clean.substr(16, 4)}-${clean.substr(20)}`;
-    };
-    NOTION_DB_ID = formatUUID(NOTION_DB_ID);
-
-    if (!confirm("??  øQuieres IMPORTAR y RESTAURAR tus notas desde Notion PRO?\n\nEsto buscar· todas las notas en tu base de datos y las recrear· en esta aplicaciÛn. ⁄til si has perdido datos o cambiado de dispositivo.")) return;
-
-    // Show loading
-    const syncBtn = planesControls.querySelector('button[title="Bajar datos de Notion"]');
-    let originalText = "";
-    if (syncBtn) {
-        originalText = syncBtn.innerHTML;
-        syncBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Bajando...';
-        syncBtn.disabled = true;
-    }
-
-    // FEEDBACK
-    // alert("? Conectando con Notion...\n(Dale a Aceptar y espera unos segundos)"); // Commented out to reduce clicks
-
-    try {
-        let hasMore = true;
-        let startCursor = undefined;
-        let allPages = [];
-
-        // Debug First Fetch
-        console.log(`Connecting to DB: ${NOTION_DB_ID} with Key ending in ...${NOTION_KEY.slice(-4)}`);
-
-        // Fetch loop for pagination
-        while (hasMore) {
-            // Add cache buster (REMOVED: Notion API rejects query params on POST query)
-            const safeUrl = `${CORS_PROXY}https://api.notion.com/v1/databases/${NOTION_DB_ID}/query`;
-
-            let response = await fetch(safeUrl, {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + NOTION_KEY,
-                    'Notion-Version': '2022-06-28',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    page_size: 100,
-                    start_cursor: startCursor
-                })
-            });
-
-            // === ULTIMATE RECOVERY: SEARCH FOR ANY DATABASE ===
-            if (!response.ok) {
-                let err = await response.json(); // Read once
-                console.warn("First attempt failed:", err);
-
-                // HANDLE INVALID TOKEN (Most common on iPad)
-                if (response.status === 401 || err.code === 'unauthorized') {
-                    alert(`? ERROR DE AUTENTICACI”N (iPad/MÛvil)\n\nTu "API Key" no est· guardada en este dispositivo.\n\nSOLUCI”N:\n1. Toca el botÛn de engranaje (??) aquÌ abajo.\n2. Pega tu clave que empieza por "ntn_...".\n3. Guarda y prueba de nuevo.`);
-                    throw new Error("Clave inv·lida o no configurada en este dispositivo.");
-                }
-
-                // If we get ANY error (400, 404, 401), it means the ID is wrong OR we don't have access.
-                // Let's try to SEARCH for what databases we DO have access to.
-                if (response.status === 400 || response.status === 404 || err.code === 'object_not_found' || err.code === 'validation_error') {
-                    console.log("?????? ID failed. Searching for ANY accessible database...");
-
-                    const searchUrl = `${CORS_PROXY}https://api.notion.com/v1/search`;
-                    const searchResp = await fetch(searchUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': 'Bearer ' + NOTION_KEY,
-                            'Notion-Version': '2022-06-28',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            filter: {
-                                value: 'database',
-                                property: 'object'
-                            },
-                            page_size: 5 // Just need one
-                        })
-                    });
-
-                    if (searchResp.ok) {
-                        const searchData = await searchResp.json();
-                        const foundDbs = searchData.results;
-
-                        if (foundDbs.length > 0) {
-                            // We found databases! Use the first one.
-                            const bestDb = foundDbs[0];
-                            console.log("?? FOUND DATABASE VIA SEARCH:", bestDb.id);
-                            const dbName = bestDb.title && bestDb.title.length > 0 ? bestDb.title[0].plain_text : "Sin nombre";
-
-                            alert(`? °Lo encontrÈ! El ID que pusiste no funcionaba, pero he buscado y he encontrado tu base de datos: "${dbName}".\n\nVoy a usar esta autom·ticamente.`);
-
-                            // Update ID and Persist
-                            NOTION_DB_ID = bestDb.id.replace(/-/g, '');
-                            localStorage.setItem('notionDb', NOTION_DB_ID);
-
-                            // RETRY THE QUERY with new ID
-                            const retryUrl = `${CORS_PROXY}https://api.notion.com/v1/databases/${bestDb.id}/query`;
-                            response = await fetch(retryUrl, {
-                                method: 'POST',
-                                headers: {
-                                    'Authorization': 'Bearer ' + NOTION_KEY,
-                                    'Notion-Version': '2022-06-28',
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({ page_size: 100 })
-                            });
-
-                            // If retry fails, we need to handle it too
-                            if (!response.ok) {
-                                err = await response.json();
-                            }
-
-                        } else {
-                            throw new Error("? Tu ID era incorrecto, y he buscado pero NO veo ninguna base de datos compartida.\n\nPOR FAVOR: Ve a la tabla en Notion -> 3 puntos -> Conexiones -> AÒadir 'MI AUTOMATIZACION'.");
-                        }
-                    }
-                }
-
-                // Final check after potential retry
-                if (!response.ok) {
-                    // console.error("Notion Final Error:", err); // Removed to avoid circular json error if err is not json
-                    throw new Error(err.message || "Error al conectar con Notion. Verifica el ID y el acceso.");
-                }
-            }
-
-            const data = await response.json();
-
-            // --- SMART DEBUG OF COLUMNS (Only on first page) ---
-            if (allPages.length === 0 && data.results.length > 0) {
-                const sampleProps = data.results[0].properties;
-                const propNames = Object.keys(sampleProps);
-                console.log("Found Properties:", propNames);
-
-                const missing = [];
-                if (!propNames.includes("Name") && !propNames.includes("Nombre")) missing.push("Name (o Nombre)");
-                if (!propNames.includes("Carpeta")) missing.push("Carpeta");
-                if (!propNames.includes("Estado")) missing.push("Estado");
-                // Date is usually optional but good to have
-
-                if (missing.length > 0) {
-                    alert(`?? AVISO DE CONFIGURACI”N:\n\nTu base de datos de Notion parece tener nombres de columnas diferentes.\n\nFaltan (o se llaman diferente): \n- ${missing.join('\n- ')}\n\nColumnas encontradas: \n[ ${propNames.join(', ')} ]\n\nEl sistema intentar· importar lo que pueda.`);
-                }
-            }
-            // ---------------------------------------------------
-
-            allPages = allPages.concat(data.results);
-            hasMore = data.has_more;
-            startCursor = data.next_cursor;
-        }
-
-        // Process Results
-        const planes = getPlanesData();
-        let restoredCount = 0;
-        let updatedCount = 0;
-
-        allPages.forEach(page => {
-            const props = page.properties;
-
-            // Extract Data
-            // 1. Name (Title) - Essential - TRY "Name", "NAME", "Nombre", "title"
-            let text = "";
-            let nameProp = props.Name || props.NAME || props.Nombre || props.Title;
-
-            if (nameProp && nameProp.title && nameProp.title.length > 0) {
-                text = nameProp.title.map(t => t.plain_text).join('');
-            } else {
-                return; // Skip empty names
-            }
-
-            // 2. Folder (Carpeta) - TRY "Carpeta", "Folder", "Status" (if misused)
-            let folderName = "General";
-            let folderProp = props.Carpeta || props.Folder || props.Category;
-
-            if (folderProp) {
-                if (folderProp.type === 'rich_text' && folderProp.rich_text.length > 0) {
-                    folderName = folderProp.rich_text[0].plain_text;
-                } else if (folderProp.type === 'select' && folderProp.select) {
-                    folderName = folderProp.select.name;
-                } else if (folderProp.type === 'multi_select' && folderProp.multi_select.length > 0) {
-                    folderName = folderProp.multi_select[0].name; // Take first tag
-                } else if (folderProp.type === 'status' && folderProp.status) {
-                    folderName = folderProp.status.name;
-                }
-            }
-
-            // 3. Status (Estado) - TRY "Estado", "Status"
-            let status = null;
-            let statusProp = props.Estado || props.Status || props.State;
-
-            if (statusProp) {
-                let s = '';
-                if (statusProp.type === 'select' && statusProp.select) {
-                    s = statusProp.select.name.toLowerCase();
-                } else if (statusProp.type === 'status' && statusProp.status) {
-                    s = statusProp.status.name.toLowerCase();
-                }
-
-                if (s === 'hecho' || s === 'paid' || s === 'done' || s === 'completado') status = 'paid';
-                if (s === 'pendiente' || s === 'pending' || s === 'todo' || s === 'por hacer') status = 'pending';
-            }
-
-            // 4. Date (Fecha) - TRY "Fecha", "Date"
-            let dateIdx = new Date().toISOString();
-            let dateProp = props.Fecha || props.Date || props.Fech;
-
-            if (dateProp && dateProp.date && dateProp.date.start) {
-                dateIdx = dateProp.date.start;
-            }
-
-            // Find or Create Folder
-            let folder = planes.find(f => f.name.toLowerCase() === folderName.toLowerCase());
-            if (!folder) {
-                folder = {
-                    id: 'folder_' + Date.now() + Math.random().toString(36).substr(2, 5),
-                    name: folderName,
-                    clients: []
-                };
-                planes.push(folder);
-            }
-
-            // Check if Client Exists (by Notion ID)
-            let existingClient = folder.clients.find(c => c.notion_id === page.id);
-
-            // Construct the HTML text format [DD/MM] Name
-            const dObj = new Date(dateIdx);
-            const dStr = dObj.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }).replace(',', '');
-            const newTextFormatted = `<b>[${dStr}]</b> ${text}`;
-
-            if (existingClient) {
-                // UPDATE Existing
-                existingClient.text = newTextFormatted;
-                existingClient.status = status;
-                existingClient.date = dateIdx;
-                updatedCount++;
-            } else {
-                // CREATE New
-                folder.clients.push({
-                    id: 'cli_' + Date.now() + Math.random().toString(36).substr(2, 5), // generate new local ID
-                    text: newTextFormatted,
-                    date: dateIdx,
-                    status: status,
-                    notion_id: page.id
-                });
-                restoredCount++;
-            }
-        });
-
-        savePlanesData(planes);
-        renderFolders(); // Refresh View
-        alert(`? Proceso finalizado.\n\n?? Descargados: ${allPages.length}\n? Nuevos: ${restoredCount}\n?? Actualizados: ${updatedCount}`);
-
-    } catch (e) {
-        console.error(e);
-        alert("? Error al importar: " + e.message + "\n\n(Abre la consola (F12) para m·s detalles)");
-    } finally {
-        if (syncBtn) {
-            syncBtn.innerHTML = originalText || 'Importar Notion (NEW)';
-            syncBtn.disabled = false;
-        }
-    }
-}
-// End of syncNotion_FINAL
-
-
-
-// CHECK INTEGRITY
-// CHECK INTEGRITY
-// console.log("APP V3 LOADED OK");
-// alert("? SISTEMA OK (V3)");
-
-
-
-// === AI MAGIC REWRITE ===
-
-// === AI MAGIC REWRITE (FINAL) ===
-
-// === QR SHARE LOGIC ===
-const qrModal = document.getElementById('qrModal');
-const qrImage = document.getElementById('qrImage');
-const qrLink = document.getElementById('qrLink');
-
-function openQRModal() {
-    const url = window.location.href;
-    // Generate QR using API
-    const qrSource = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
-
-    qrImage.src = qrSource;
-    qrLink.textContent = url;
-
-    qrModal.classList.add('open');
-}
-
-function closeQRModal() {
-    qrModal.classList.remove('open');
-    qrImage.src = ''; // Clear to prevent stale image
-}
-
-// === REMINDER FEATURE (NOTION SYNC) ===
-const reminderModal = document.getElementById('reminderModal');
-const reminderText = document.getElementById('reminderText');
-const reminderDate = document.getElementById('reminderDate');
-const btnSaveReminder = document.getElementById('btnSaveReminder');
-
-function openReminderModal() {
-    reminderModal.classList.add('open');
-    // Set default date to Today
-    const today = new Date().toISOString().split('T')[0];
-    if (!reminderDate.value) reminderDate.value = today;
-
-    setTimeout(() => reminderText.focus(), 100);
-}
-
-function closeReminderModal() {
-    reminderModal.classList.remove('open');
-}
-
-// === PRIORITY LOGIC ===
-let currentPriority = "Media";
-
-function selectPriority(el, value) {
-    // Visual update
-    document.querySelectorAll('.p-chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-    // State update
-    currentPriority = value;
-    // Auto-save reminder if function exists
-    if (typeof autoSaveReminder === 'function') {
-        autoSaveReminder();
-    }
-}
-
-
-// === RADAR FEATURE ===
-// Lazy selectors to avoid loading issues
-
-// Function to parse OpenStreetMap opening_hours and check if open now
-function isOpenNow(opening_hours) {
-    if (!opening_hours || opening_hours === '24/7') return true;
-
-    const now = new Date();
-    const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-    const currentDay = dayNames[now.getDay()];
-    const currentTime = now.getHours() * 60 + now.getMinutes();
-
-    try {
-        const parts = opening_hours.split(';');
-
-        for (let part of parts) {
-            part = part.trim();
-            const match = part.match(/([\w,\-]+)\s+(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})/);
-            if (!match) continue;
-
-            const [_, days, startH, startM, endH, endM] = match;
-            const startTime = parseInt(startH) * 60 + parseInt(startM);
-            const endTime = parseInt(endH) * 60 + parseInt(endM);
-
-            let dayMatch = false;
-
-            if (days.includes('-')) {
-                const [startDay, endDay] = days.split('-');
-                const startIdx = dayNames.indexOf(startDay);
-                const endIdx = dayNames.indexOf(endDay);
-                const currentIdx = now.getDay();
-
-                if (startIdx <= endIdx) {
-                    dayMatch = currentIdx >= startIdx && currentIdx <= endIdx;
-                } else {
-                    dayMatch = currentIdx >= startIdx || currentIdx <= endIdx;
-                }
-            } else if (days.includes(',')) {
-                dayMatch = days.split(',').some(d => d.trim() === currentDay);
-            } else {
-                dayMatch = days === currentDay;
-            }
-
-            if (dayMatch && currentTime >= startTime && currentTime <= endTime) {
-                return true;
-            }
-        }
-
-        return false;
-    } catch (e) {
-        console.warn('Error parsing opening_hours:', opening_hours, e);
-        return null;
-    }
-}
-
-async function activateRadar() {
-    const radarModal = document.getElementById('radarModal');
-    const radarList = document.getElementById('radarList');
-    const radarStatus = document.getElementById('radarStatus');
-
-    if (!radarModal || !radarList) {
-        alert("Error: Radar UI not found.");
-        return;
-    }
-
-    radarModal.classList.add('open');
-    radarList.innerHTML = '';
-    radarStatus.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin"></i> Inicializando Radar...';
-
-    // DELAY FOR EFFECT
-    await new Promise(r => setTimeout(r, 800));
-
-    // CHECK GPS
-    if (!navigator.geolocation) {
-        runDemoMode("?? Tu iPad no tiene GPS. Iniciando MODO DEMO...");
-        return;
-    }
-
-    radarStatus.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin"></i> Escaneando satÈlites...';
-
-    navigator.geolocation.getCurrentPosition(
-        (pos) => {
-            const lat = pos.coords.latitude;
-            const lon = pos.coords.longitude;
-            radarStatus.innerHTML = "?? PosiciÛn fijada. Buscando clientes...";
-            searchNearbyPlaces(lat, lon);
-        },
-        (err) => {
-            console.error(err);
-            // FAILOVER TO DEMO MODE
-            runDemoMode("?? GPS Bloqueado. Iniciando MODO SIMULACI”N...");
-        },
-        { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 } // Low accuracy is faster
-    );
-
-    function runDemoMode(msg) {
-        radarStatus.innerHTML = msg;
+        calcValue = 'Error';
+        document.getElementById('calcDisplay').value = 'Error';
         setTimeout(() => {
-            const demoLat = 38.9; // Dummy
-            const demoLon = -6.3; // Dummy
-            // Mock Results
-            const mockData = [
-                { name: "Bar La Plaza", dist: 0.05, address: { road: "Plaza Mayor, 1" }, lat: demoLat + 0.0005, lon: demoLon + 0.0005 },
-                { name: "CafeterÌa Central", dist: 0.12, address: { road: "Calle Real, 14" }, lat: demoLat + 0.001, lon: demoLon + 0.001 },
-                { name: "Restaurante El Puente", dist: 0.35, address: { road: "Av. del RÌo" }, lat: demoLat + 0.003, lon: demoLon + 0.003 },
-                { name: "Pub The Corner", dist: 0.45, address: { road: "Esquina Verde" }, lat: demoLat + 0.004, lon: demoLon + 0.004 },
-                { name: "Hotel Avenida", dist: 0.8, address: { road: "Av. ConstituciÛn" }, lat: demoLat + 0.007, lon: demoLon + 0.007 }
-            ];
-            renderRadarResults(mockData);
+            calcClear();
         }, 1500);
     }
 }
 
-function closeRadarModal() {
-    const radarModal = document.getElementById('radarModal');
-    if (radarModal) radarModal.classList.remove('open');
-}
+// === TAB SWITCHING ===
+function switchCalcTab(tab) {
+    // Hide all tabs
+    document.getElementById('calcBodyBasic').style.display = 'none';
+    document.getElementById('calcBodyOffer').style.display = 'none';
 
-async function searchNearbyPlaces(lat, lon) {
-    const radarStatus = document.getElementById('radarStatus');
-    try {
-        // Get user preferences
-        const filterOpen = document.getElementById('radarFilterOpen')?.checked ?? true;
-        const radiusKm = parseFloat(document.getElementById('radarRadius')?.value ?? 1);
-        const radiusDeg = radiusKm / 111; // Approximate conversion km to degrees
+    // Remove active state from all buttons
+    document.getElementById('tabBasic').style.borderBottom = '2px solid transparent';
+    document.getElementById('tabBasic').style.color = '#aaa';
+    document.getElementById('tabBasic').style.fontWeight = 'normal';
 
-        // Query OpenStreetMap with extratags for opening_hours
-        let results = [];
-        try {
-            // Try Nominatim with extratags
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=bar+restaurant+cafe&limit=50&viewbox=${lon - radiusDeg},${lat + radiusDeg},${lon + radiusDeg},${lat - radiusDeg}&bounded=1&extratags=1`);
-            if (response.ok) results = await response.json();
-        } catch (e) {
-            console.warn("API Error, using internal mock for demo");
-        }
+    document.getElementById('tabOffer').style.borderBottom = '2px solid transparent';
+    document.getElementById('tabOffer').style.color = '#aaa';
+    document.getElementById('tabOffer').style.fontWeight = 'normal';
 
-        if (!results || results.length === 0) {
-            // Fallback to Demo if API returns nothing (common in remote areas)
-            radarStatus.innerText = "Sin seÒal de datos. Mostrando SIMULACI”N:";
-            runDemoMode("Modo Sin ConexiÛn");
-            return;
-        }
+    // Show selected tab
+    if (tab === 'basic') {
+        document.getElementById('calcBodyBasic').style.display = 'flex'; // Changed from block to flex
+        document.getElementById('tabBasic').style.borderBottom = '2px solid var(--primary-color)';
+        document.getElementById('tabBasic').style.color = 'white';
+        document.getElementById('tabBasic').style.fontWeight = 'bold';
+    } else if (tab === 'offer') {
+        document.getElementById('calcBodyOffer').style.display = 'flex'; // Changed from block to flex
+        document.getElementById('tabOffer').style.borderBottom = '2px solid var(--primary-color)';
+        document.getElementById('tabOffer').style.color = 'white';
+        document.getElementById('tabOffer').style.fontWeight = 'bold';
 
-        // Calculate distances and filter by selected radius
-        const processed = results.map(item => {
-            const dist = getDistanceFromLatLonInKm(lat, lon, item.lat, item.lon);
-            return { ...item, dist: dist };
-        })
-            .filter(item => item.dist <= radiusKm) // Only show within selected radius
-            .sort((a, b) => a.dist - b.dist);
-
-        radarStatus.innerText = `?? ${processed.length} Negocios encontrados`;
-        renderRadarResults(processed);
-
-    } catch (e) {
-        console.error(e);
-        radarStatus.innerText = "Error de Red.";
+        // Load products when opening bonification tab
+        loadCalcProducts();
     }
 }
 
-function renderRadarResults(items) {
-    const radarList = document.getElementById('radarList');
-    const radarStatus = document.getElementById('radarStatus');
-    const filterOpen = document.getElementById('radarFilterOpen')?.checked ?? true;
+// === BONIFICATION CALCULATOR ===
+let calcCartBuy = [];
+let calcCartGift = [];
 
-    radarList.innerHTML = '';
-    let displayedCount = 0;
+// Selected products tracking
+let selectedCalcProducts = new Set();
 
-    items.forEach(item => {
-        // Check opening hours
-        const opening_hours = item.extratags?.opening_hours || null;
-        const openStatus = isOpenNow(opening_hours);
+// Initial Discounts Configuration
+const initialDiscounts = {
+    // 2L Products (71%)
+    1: 71, 2: 71, // Coca-Cola
+    5: 71, 6: 71, // Fanta
+    8: 71,        // Sprite
 
-        // Apply filter: skip if user wants only open and this is closed
-        if (filterOpen && openStatus === false) return;
+    // Cans 33cl (62%)
+    3: 62, 4: 62, // Coca-Cola
+    7: 62,        // Fanta
+    9: 62,        // Sprite
+    11: 62,       // Aquarius
+    13: 62,       // Fuze Tea
 
-        // Logic for Client vs Prospect
-        const planes = getPlanesData();
-        let isClient = false;
+    // Monster (50%)
+    16: 50, 17: 50
+};
 
-        const name = item.name || (item.display_name ? item.display_name.split(',')[0] : 'Desconocido');
 
-        // Check deep in all folders
-        planes.forEach(f => {
-            if (f.clients.some(c => c.text.toLowerCase().includes(name.toLowerCase()))) isClient = true;
-        });
+// Toggle product selection
+function toggleCalcProductSelection(productId) {
+    console.log('Toggling product:', productId);
+    if (selectedCalcProducts.has(productId)) {
+        selectedCalcProducts.delete(productId);
+    } else {
+        selectedCalcProducts.add(productId);
+    }
+    loadCalcProducts();
+}
 
-        // Demo Randomizer
-        if (!isClient && Math.random() > 0.6) isClient = true;
+function loadCalcProducts() {
+    console.log('Loading calc products...');
+    const container = document.getElementById('calcProdList');
+    if (!container) {
+        console.error('Container calcProdList not found');
+        return;
+    }
 
-        const statusColor = isClient ? '#10b981' : '#ef4444'; // Green vs Red
-        const statusLabel = isClient ? 'CLIENTE' : 'PROSPECTO';
-        const statusBg = isClient ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)';
+    // CAT√ÅLOGO COMPLETO - Todos los productos 2L, 1.5L, Latas
+    const products = [
+        // COCA-COLA
+        { id: 1, name: 'Coca-Cola 2L', price: 28.68, logo: 'cocacola_logo.jpg', color: '#e60000', envase: '6 bot' },
+        { id: 2, name: 'Coca-Cola Zero 2L', price: 28.68, logo: 'cocacola_zero_logo.png', color: '#000000', envase: '6 bot' },
+        { id: 3, name: 'Coca-Cola Lata 33cl', price: 39.36, logo: 'cocacola_logo.jpg', color: '#e60000', envase: '24 latas' },
+        { id: 4, name: 'Coca-Cola Zero Lata 33cl', price: 39.36, logo: 'cocacola_zero_logo.png', color: '#000000', envase: '24 latas' },
 
-        // Open/Closed badge
-        let openBadge = '';
-        if (openStatus === true) {
-            openBadge = '<span style="font-size:0.7rem; background:#10b981; color:white; padding:2px 6px; border-radius:4px; margin-left:6px;">?? ABIERTO</span>';
-        } else if (openStatus === false) {
-            openBadge = '<span style="font-size:0.7rem; background:#ef4444; color:white; padding:2px 6px; border-radius:4px; margin-left:6px;">?? CERRADO</span>';
+        // FANTA
+        { id: 5, name: 'Fanta Naranja 2L', price: 27.06, logo: 'fanta_logo.jpg', color: '#ff8c00', envase: '6 bot' },
+        { id: 6, name: 'Fanta Lim√≥n 2L', price: 27.06, logo: 'fanta_logo.jpg', color: '#ffd700', envase: '6 bot' },
+        { id: 7, name: 'Fanta Lata 33cl', price: 37.68, logo: 'fanta_logo.jpg', color: '#ff8c00', envase: '24 latas' },
+
+        // SPRITE
+        { id: 8, name: 'Sprite 2L', price: 27.06, logo: 'sprite_logo.jpg', color: '#00d800', envase: '6 bot' },
+        { id: 9, name: 'Sprite Lata 33cl', price: 37.68, logo: 'sprite_logo.jpg', color: '#00d800', envase: '24 latas' },
+
+        // AQUARIUS
+        { id: 10, name: 'Aquarius 1.5L', price: 23.52, logo: 'aquarius_logo.png', color: '#4a90e2', envase: '6 bot' },
+        { id: 11, name: 'Aquarius Lata 33cl', price: 41.04, logo: 'aquarius_logo.png', color: '#4a90e2', envase: '24 latas' },
+
+        // FUZE TEA
+        { id: 12, name: 'Fuze Tea 1.5L', price: 21.54, logo: 'fuzetea_logo.jpg', color: '#d4a574', envase: '6 bot' },
+        { id: 13, name: 'Fuze Tea Lata 33cl', price: 39.60, logo: 'fuzetea_logo.jpg', color: '#d4a574', envase: '24 latas' },
+
+        // AQUABONA
+        { id: 14, name: 'Aquabona 1.5L', price: 9.30, logo: 'aquabona_logo.png', color: '#4a90e2', envase: '6 bot' },
+        { id: 15, name: 'Aquabona 50cl', price: 20.64, logo: 'aquabona_logo.png', color: '#4a90e2', envase: '24 bot' },
+
+        // MONSTER
+        { id: 16, name: 'Monster Energy 50cl', price: 56.16, logo: 'monster_logo.jpg', color: '#86bc25', envase: '12 latas' },
+        { id: 17, name: 'Monster Energy 25cl', price: 44.40, logo: 'monster_logo.jpg', color: '#86bc25', envase: '24 latas' },
+
+        // ROYAL BLISS
+        { id: 18, name: 'Royal Bliss 25cl', price: 15.48, logo: 'royalbliss_logo.png', color: '#c9a961', envase: '24 latas' },
+        { id: 19, name: 'Royal Bliss 20cl VR', price: 31.92, logo: 'royalbliss_logo.png', color: '#c9a961', envase: '24 bot' }
+    ];
+
+    container.innerHTML = '';
+    products.forEach(prod => {
+        const card = document.createElement('div');
+        const isSelected = selectedCalcProducts.has(prod.id);
+
+        // Use initialDiscounts for display
+        const discount = initialDiscounts[prod.id] || 0;
+        const finalPrice = discount > 0 ? prod.price * (1 - discount / 100) : prod.price;
+
+        let badgeHtml = '';
+        if (discount > 0) {
+            badgeHtml = `<div style="position: absolute; top: 6px; right: 6px; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 3px 7px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; box-shadow: 0 2px 8px rgba(239,68,68,0.4); z-index: 10;">-${discount}%</div>`;
         }
 
-        const div = document.createElement('div');
-        div.className = 'radar-item';
-        div.style.borderLeft = `4px solid ${statusColor}`;
-        div.style.background = statusBg;
-        div.onclick = () => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`, '_blank');
+        card.style.cssText = `
+            background: ${isSelected ? 'rgba(16, 185, 129, 0.12)' : 'rgba(255,255,255,0.03)'};
+            border-radius: 10px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid ${isSelected ? '#10b981' : 'rgba(255,255,255,0.08)'};
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            backdrop-filter: blur(10px);
+        `;
 
-        div.innerHTML = `
-            <div style="flex:1;">
-                <div class="radar-name">${name}${openBadge}</div>
-                <div class="radar-address">${(item.address && item.address.road) ? item.address.road : (item.address ? item.address : 'UbicaciÛn aproximada')}</div>
-                <div style="font-size:0.7rem; color:${statusColor}; font-weight:bold; margin-top:4px;">${statusLabel}</div>
+        // Direct onclick handler on the card container for better reliability
+        card.onclick = () => toggleCalcProductSelection(prod.id);
+
+        card.innerHTML = `
+            ${badgeHtml}
+            <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 4px; pointer-events: none;">
+                <img src="${prod.logo}" style="width: 42px; height: 42px; object-fit: contain; border-radius: 6px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));" alt="${prod.name}">
+                <div style="font-size: 0.7rem; text-align: center; color: #fff; font-weight: 600; line-height: 1.1; min-height: 28px; display: flex; align-items: center;">
+                    ${prod.name}
+                </div>
+                <div style="font-size: 0.65rem; color: #888; font-weight: 500;">
+                    ${prod.envase}
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%;">
+                    ${discount > 0 ? `
+                        <div style="font-size: 0.7rem; color: #999; font-weight: 500; text-decoration: line-through;">
+                            ${prod.price.toFixed(2)}‚Ç¨
+                        </div>
+                        <div style="font-size: 1rem; color: #00ff88; font-weight: 700; text-shadow: 0 0 10px rgba(0,255,136,0.3);">
+                            ${finalPrice.toFixed(2)}‚Ç¨
+                        </div>
+                    ` : `
+                        <div style="font-size: 0.95rem; color: #00ff88; font-weight: 700; margin-top: 4px;">
+                            ${prod.price.toFixed(2)}‚Ç¨
+                        </div>
+                    `}
+                </div>
             </div>
-            <div class="radar-dist">
-                ${(item.dist * 1000).toFixed(0)}m
+            <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 6px; width: 100%; pointer-events: auto;">
+                <button onclick="event.stopPropagation(); addToCalcCart(${prod.id}, '${prod.name}', ${prod.price});" 
+                    title="Agregar a compra"
+                    style="background: linear-gradient(135deg, #4ade80, #22c55e); color: white; border: none; padding: 6px 4px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; width: 100%; font-weight: 600; box-shadow: 0 2px 8px rgba(74,222,128,0.3); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 28px;">
+                    <span style="font-size: 0.9rem;">üõí</span> Comprar
+                </button>
+                <button onclick="event.stopPropagation(); addToGiftCart(${prod.id}, '${prod.name}', ${prod.price});" 
+                    title="Agregar a bonificaci√≥n"
+                    style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; border: none; padding: 6px 4px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; width: 100%; font-weight: 600; box-shadow: 0 2px 8px rgba(251,191,36,0.3); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 28px;">
+                    <span style="font-size: 0.9rem;">üéÅ</span> Bonif.
+                </button>
             </div>
         `;
-        radarList.appendChild(div);
-        displayedCount++;
-    });
 
-    // Update status message
-    if (displayedCount === 0) {
-        radarList.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">No hay negocios abiertos en este momento cerca de ti. Desactiva el filtro "Solo ABIERTOS" para ver todos.</div>';
+        card.onmouseenter = () => {
+            if (!selectedCalcProducts.has(prod.id)) {
+                card.style.borderColor = prod.color;
+            }
+            card.style.transform = 'translateY(-4px) scale(1.02)';
+            card.style.boxShadow = `0 8px 20px ${prod.color}40, 0 0 0 1px ${prod.color}20`;
+        };
+        card.onmouseleave = () => {
+            if (!selectedCalcProducts.has(prod.id)) {
+                card.style.borderColor = 'rgba(255,255,255,0.08)';
+            }
+            card.style.transform = 'translateY(0) scale(1)';
+            card.style.boxShadow = 'none';
+        };
+
+        container.appendChild(card);
+    });
+}
+
+function addToCalcCart(id, name, price) {
+    const safeId = parseInt(id);
+    console.log('Adding to cart:', safeId, name, price);
+
+    // Default discount from config or 0
+    const defaultDiscount = initialDiscounts[safeId] || 0;
+
+    const existing = calcCartBuy.find(i => i.id === safeId);
+    if (existing) {
+        existing.qty++;
     } else {
-        radarStatus.innerText = `?? ${displayedCount} ${filterOpen ? 'Abiertos' : 'Negocios'} detectados`;
+        calcCartBuy.push({
+            id: safeId,
+            name,
+            price,
+            qty: 1,
+            discount: defaultDiscount
+        });
+    }
+
+    // Visual feedback
+    showAddFeedback('buy', name);
+
+    renderCalcList('buy');
+    calculateBonification();
+}
+
+function addToGiftCart(id, name, price) {
+    const safeId = parseInt(id);
+    console.log('Adding to gift cart:', safeId, name, price);
+
+    const existing = calcCartGift.find(i => i.id === safeId);
+    if (existing) {
+        existing.qty++;
+    } else {
+        calcCartGift.push({
+            id: safeId,
+            name,
+            price,
+            qty: 1,
+            discount: 0
+        });
+    }
+
+    // Visual feedback
+    showAddFeedback('gift', name);
+
+    renderCalcList('gift');
+    calculateBonification();
+}
+
+function changeCalcDiscount(index, delta) {
+    const item = calcCartBuy[index];
+    if (!item) return;
+
+    item.discount += delta;
+    if (item.discount < 0) item.discount = 0;
+    if (item.discount > 100) item.discount = 100;
+
+    renderCalcList();
+    calculateBonification();
+}
+
+function changeCalcQty(index, delta) {
+    const item = calcCartBuy[index];
+    if (!item) return;
+
+    item.qty += delta;
+    if (item.qty <= 0) {
+        calcCartBuy.splice(index, 1);
+    }
+
+    renderCalcList();
+    calculateBonification();
+}
+
+function removeCalcItem(index) {
+    calcCartBuy.splice(index, 1);
+    renderCalcList();
+    calculateBonification();
+}
+
+function renderCalcList(type = 'buy') {
+    const cart = type === 'buy' ? calcCartBuy : calcCartGift;
+    const containerId = type === 'buy' ? 'calcListBuy' : 'calcListGift';
+    const container = document.getElementById(containerId);
+
+    if (!container) return;
+
+    // Show/hide gift section based on content
+    if (type === 'gift') {
+        const giftSection = container.parentNode;
+        if (giftSection) {
+            giftSection.style.display = calcCartGift.length > 0 ? 'block' : 'block'; // Always show for adding
+        }
+    }
+
+    if (cart.length === 0) {
+        if (type === 'buy') {
+            container.innerHTML = `
+                <div style="color:#666; font-size:0.8rem; text-align:center; padding:10px; border:1px dashed #444; border-radius:4px;">
+                    Selecciona productos del cat√°logo
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div style="color:#666; font-size:0.8rem; text-align:center; padding:5px;">
+                    (Opcional) A√±ade bonificaciones con üéÅ
+                </div>
+            `;
+        }
+        return;
+    }
+
+    container.innerHTML = '';
+    cart.forEach((item, index) => {
+        const discountedPrice = item.price * (1 - item.discount / 100);
+        const lineTotal = discountedPrice * item.qty;
+
+        const itemEl = document.createElement('div');
+        itemEl.style.cssText = `
+            background: linear-gradient(135deg, ${type === 'buy' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(251, 191, 36, 0.08)'}, ${type === 'buy' ? 'rgba(16, 185, 129, 0.03)' : 'rgba(251, 191, 36, 0.03)'});
+            padding: 8px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            border-left: 3px solid ${type === 'buy' ? '#10b981' : '#fbbf24'};
+            backdrop-filter: blur(10px);
+            transition: all 0.2s;
+        `;
+
+        itemEl.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: white; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</div>
+                    <div style="font-size: 0.65rem; color: #999;">${item.price.toFixed(2)}‚Ç¨ ${item.discount > 0 ? `‚Üí <span style="color: #00ff88; font-weight: 600;">${discountedPrice.toFixed(2)}‚Ç¨</span>` : ''}</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 0.95rem; font-weight: 700; color: #4ade80;">${lineTotal.toFixed(2)}‚Ç¨</div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 120px;">
+                    <div style="font-size: 0.65rem; color: #aaa; margin-bottom: 2px; font-weight: 600;">Cantidad</div>
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <button onclick="changeCalcQty('${type}', ${index}, -1)" 
+                            style="background: linear-gradient(135deg, #dc2626, #991b1b); color: white; border: none; width: 24px; height: 24px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(220,38,38,0.3);">
+                            ‚àí
+                        </button>
+                        <span style="color: white; font-weight: 700; min-width: 24px; text-align: center; font-size: 0.85rem;">${item.qty}</span>
+                        <button onclick="changeCalcQty('${type}', ${index}, 1)" 
+                            style="background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none; width: 24px; height: 24px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(34,197,94,0.3);">
+                            +
+                        </button>
+                    </div>
+                </div>
+                ${type === 'buy' ? `
+                <div style="flex: 1; min-width: 120px;">
+                    <div style="font-size: 0.65rem; color: #aaa; margin-bottom: 2px; font-weight: 600;">Descuento %</div>
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <button onclick="changeCalcDiscount(${index}, -1)" 
+                            style="background: linear-gradient(135deg, #dc2626, #991b1b); color: white; border: none; width: 24px; height: 24px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(220,38,38,0.3);">
+                            ‚àí
+                        </button>
+                        <span style="color: #fbbf24; font-weight: 700; min-width: 32px; text-align: center; font-size: 0.85rem;">${item.discount}%</span>
+                        <button onclick="changeCalcDiscount(${index}, 1)" 
+                            style="background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none; width: 24px; height: 24px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(34,197,94,0.3);">
+                            +
+                        </button>
+                    </div>
+                </div>` : ''}
+                <button onclick="removeCalcItem('${type}', ${index})" 
+                    style="background: linear-gradient(135deg, #991b1b, #7f1d1d); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; font-weight: 600; transition: all 0.2s; box-shadow: 0 2px 6px rgba(153,27,27,0.3); white-space: nowrap;">
+                    √ó Eliminar
+                </button>
+            </div>
+        `;
+
+        // Add hover effect
+        itemEl.onmouseenter = () => {
+            itemEl.style.background = `linear-gradient(135deg, ${type === 'buy' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(251, 191, 36, 0.12)'}, ${type === 'buy' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(251, 191, 36, 0.05)'})`;
+            itemEl.style.transform = 'translateX(2px)';
+        };
+        itemEl.onmouseleave = () => {
+            itemEl.style.background = `linear-gradient(135deg, ${type === 'buy' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(251, 191, 36, 0.08)'}, ${type === 'buy' ? 'rgba(16, 185, 129, 0.03)' : 'rgba(251, 191, 36, 0.03)'})`;
+            itemEl.style.transform = 'translateX(0)';
+        };
+
+        container.appendChild(itemEl);
+    });
+}
+
+function changeCalcQty(type, index, delta) {
+    const cart = type === 'buy' ? calcCartBuy : calcCartGift;
+    const item = cart[index];
+    if (!item) return;
+
+    item.qty += delta;
+
+    if (item.qty <= 0) {
+        cart.splice(index, 1);
+    } else {
+        // If increasing quantity in BUY cart, check for bonification
+        if (type === 'buy' && delta > 0) {
+            checkParamsBonification(item.id, item.name, item.price, item.qty);
+        }
+    }
+
+    renderCalcList(type);
+    calculateBonification();
+}
+
+function removeCalcItem(type, index) {
+    const cart = type === 'buy' ? calcCartBuy : calcCartGift;
+    cart.splice(index, 1);
+    renderCalcList(type);
+    calculateBonification();
+}
+
+function calculateBonification() {
+    const totalPaid = calcCartBuy.reduce((sum, item) => sum + (item.price * (1 - item.discount / 100) * item.qty), 0);
+    const totalQtyPaid = calcCartBuy.reduce((sum, item) => sum + item.qty, 0);
+    const totalQtyGift = calcCartGift.reduce((sum, item) => sum + item.qty, 0);
+    const totalQty = totalQtyPaid + totalQtyGift;
+
+    // Calculate average price per box
+    const avgPrice = totalQty > 0 ? totalPaid / totalQty : 0;
+
+    // Update UI
+    document.getElementById('bonResultPrice').textContent = avgPrice.toFixed(2) + ' ‚Ç¨';
+    document.getElementById('bonPaidQty').textContent = totalQtyPaid;
+    document.getElementById('bonFreeQty').textContent = totalQtyGift;
+    document.getElementById('bonResultTotal').textContent = totalPaid.toFixed(2) + '‚Ç¨';
+    document.getElementById('calcTotalGift').textContent = totalQtyGift; // Added this line based on the instruction's implied change
+}
+
+function clearCalcCart(type) {
+    if (type === 'buy') {
+        calcCartBuy = [];
+        renderCalcList('buy');
+    } else if (type === 'gift') {
+        calcCartGift = [];
+        renderCalcList('gift');
+    }
+    calculateBonification();
+}
+
+function clearBonification() {
+    calcCartBuy = [];
+    calcCartGift = [];
+    renderCalcList('buy');
+    renderCalcList('gift');
+    calculateBonification();
+}
+
+function filterCalcProducts() {
+    const search = document.getElementById('calcProdSearch').value.toLowerCase();
+    const products = document.querySelectorAll('#calcProdList > div');
+
+    products.forEach(prod => {
+        const text = prod.textContent.toLowerCase();
+        if (text.includes(search)) {
+            prod.style.display = 'flex';
+        } else {
+            prod.style.display = 'none';
+        }
+    });
+}
+
+// === VISUAL FEEDBACK ===
+function showAddFeedback(type, productName) {
+    const color = type === 'buy' ? '#4ade80' : '#fbbf24';
+    const icon = type === 'buy' ? 'üõí' : 'üéÅ';
+
+    // Create feedback element
+    const feedback = document.createElement('div');
+    feedback.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.8);
+        background: linear-gradient(135deg, ${color}, ${color}dd);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        box-shadow: 0 8px 32px ${color}60;
+        z-index: 10000;
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        pointer-events: none;
+    `;
+    feedback.innerHTML = `${icon} Agregado: ${productName}`;
+    document.body.appendChild(feedback);
+
+    // Animate in
+    setTimeout(() => {
+        feedback.style.opacity = '1';
+        feedback.style.transform = 'translate(-50%, -50%) scale(1)';
+    }, 10);
+
+    // Animate out and remove
+    setTimeout(() => {
+        feedback.style.opacity = '0';
+        feedback.style.transform = 'translate(-50%, -50%) scale(0.8)';
+        setTimeout(() => feedback.remove(), 300);
+    }, 1500);
+}
+
+// === EXPOSE FUNCTIONS TO WINDOW ===
+window.toggleCalcProductSelection = toggleCalcProductSelection;
+window.addToCalcCart = addToCalcCart;
+window.addToGiftCart = addToGiftCart;
+window.changeCalcQty = changeCalcQty;
+window.changeCalcDiscount = changeCalcDiscount;
+window.removeCalcItem = removeCalcItem;
+window.clearCalcCart = clearCalcCart;
+window.clearBonification = clearBonification;
+window.filterCalcProducts = filterCalcProducts;
+window.renderCalcList = renderCalcList;
+window.loadCalcProducts = loadCalcProducts;
+
+
+// === DISTANCE CALCULATION HELPER ===
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radius of the earth in km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c; // Distance in km
+    return d;
+}
+
+function deg2rad(deg) {
+    return deg * (Math.PI / 180);
+}
+
+// === REMINDER MODAL FUNCTIONS ===
+let currentPriority = "Media";
+
+function openReminderModal() {
+    const modal = document.getElementById('reminderModal');
+    if (modal) {
+        modal.classList.add('open');
+
+        // Set default date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('reminderDate').value = today;
     }
 }
 
-async function saveReminderToNotion() {
+function closeReminderModal() {
+    const modal = document.getElementById('reminderModal');
+    if (modal) {
+        modal.classList.remove('open');
+    }
+}
+
+function selectPriority(priority) {
+    currentPriority = priority;
+
+    // Remove active class from all chips
+    document.querySelectorAll('.p-chip').forEach(chip => {
+        chip.classList.remove('active');
+    });
+
+    // Add active class to selected chip
+    event.target.classList.add('active');
+}
+
+async function saveReminder() {
+    const reminderText = document.getElementById('reminderText');
+    const reminderDate = document.getElementById('reminderDate');
+    const btnSaveReminder = document.getElementById('btnSaveReminder');
+
     const text = reminderText.value.trim();
     const date = reminderDate.value;
 
     if (!text) {
-        alert("?? Por favor, escribe quÈ quieres recordar.");
+        alert('‚ö†Ô∏è Por favor escribe un recordatorio');
         return;
     }
 
-    // Reuse settings
-    const NOTION_KEY = (localStorage.getItem('notionKey') || NOTION_KEY_DEFAULT).trim();
-    let NOTION_DB_ID = localStorage.getItem('notionDb') || NOTION_DB_ID_DEFAULT;
+    if (!date) {
+        alert('‚ö†Ô∏è Por favor selecciona una fecha');
+        return;
+    }
 
-    // UI Loading
-    btnSaveReminder.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+    btnSaveReminder.innerHTML = '‚è≥ Guardando...';
     btnSaveReminder.disabled = true;
 
     try {
-        // Format ID generic helper
-        const genericCleanId = NOTION_DB_ID.replace(/-/g, '');
-        const formattedId = `${genericCleanId.substr(0, 8)}-${genericCleanId.substr(8, 4)}-${genericCleanId.substr(12, 4)}-${genericCleanId.substr(16, 4)}-${genericCleanId.substr(20)}`;
+        // Try to save to Notion (if credentials exist)
+        const notionToken = localStorage.getItem('notionToken');
+        const notionDbId = localStorage.getItem('notionDbId');
 
-        let isDatabase = false;
-        let dbIdToQuery = formattedId;
-        let schema = null;
-
-        // 1. Check if configured ID is a Database
-        let dbResp = await fetch(`${CORS_PROXY}https://api.notion.com/v1/databases/${formattedId}`, {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${NOTION_KEY}`, 'Notion-Version': '2022-06-28' }
-        });
-
-        if (dbResp.ok) {
-            isDatabase = true;
-            const d = await dbResp.json();
-            schema = d.properties;
-        } else {
-            // If direct ID fails, try Search or just Fallback immediately to avoid long waits
-            console.warn("Direct DB access failed, trying search...");
-            const searchResp = await fetch(`${CORS_PROXY}https://api.notion.com/v1/search`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${NOTION_KEY}`, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    filter: { value: 'database', property: 'object' },
-                    page_size: 5
-                })
-            });
-
-            if (searchResp.ok) {
-                const searchData = await searchResp.json();
-                const bestMatch = searchData.results[0]; // Just take the first one found
-                if (bestMatch) {
-                    dbIdToQuery = bestMatch.id;
-                    isDatabase = true;
-                    schema = bestMatch.properties;
+        if (notionToken && notionDbId) {
+            const payload = {
+                parent: { database_id: notionDbId },
+                properties: {
+                    "Nombre": {
+                        title: [{ text: { content: text } }]
+                    },
+                    "Fecha": {
+                        date: { start: date }
+                    },
+                    "Prioridad": {
+                        select: { name: currentPriority }
+                    }
                 }
-            }
-        }
+            };
 
-        // SAVE
-        if (isDatabase && schema) {
-            const props = {};
-
-            // Title
-            const titleProp = Object.values(schema).find(p => p.type === 'title');
-            const titleName = titleProp ? Object.keys(schema).find(key => schema[key] === titleProp) : "Name";
-            props[titleName] = { title: [{ text: { content: text } }] };
-
-            // Date
-            const dateProp = Object.values(schema).find(p => p.type === 'date');
-            if (dateProp) {
-                const dateName = Object.keys(schema).find(key => schema[key] === dateProp);
-                props[dateName] = { date: { start: date } };
-            }
-
-            // Status (Default to Pendiente)
-            const statusProp = Object.values(schema).find(p => p.type === 'status' || p.type === 'select');
-            if (statusProp) {
-                const statusName = Object.keys(schema).find(key => schema[key] === statusProp);
-                if (statusProp.type === 'status') {
-                    props[statusName] = { status: { name: "Pendiente" } };
-                } else {
-                    props[statusName] = { select: { name: "Pendiente" } };
-                }
-            }
-
-            // Priority
-            const priorityProp = Object.values(schema).find(p => {
-                const n = Object.keys(schema).find(key => schema[key] === p).toLowerCase();
-                return n.includes('prioridad') || n.includes('priority');
-            });
-
-            if (priorityProp) {
-                const pName = Object.keys(schema).find(key => schema[key] === priorityProp);
-                props[pName] = { select: { name: currentPriority } };
-            }
-
-            const payload = { parent: { database_id: dbIdToQuery }, properties: props };
-
-            const resp = await fetch(`${CORS_PROXY}https://api.notion.com/v1/pages`, {
+            const resp = await fetch('https://api.notion.com/v1/pages', {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${NOTION_KEY}`, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' },
+                headers: {
+                    'Authorization': `Bearer ${notionToken}`,
+                    'Notion-Version': '2022-06-28',
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(payload)
             });
 
             if (resp.ok) {
-                handleSuccess("", "Notion (Nube)");
                 return;
             }
         }
 
-        throw new Error("No se pudo conectar con Notion.");
 
     } catch (e) {
-        console.error("Notion Error:", e);
         // FALLBACK: SAVE LOCALLY
         saveLocally(text, date, currentPriority);
     } finally {
@@ -2665,7 +703,6 @@ async function saveReminderToNotion() {
         localStorage.setItem('offlineReminders', JSON.stringify(localReminders));
 
         // Use Alert because Toasts are disabled
-        alert(`?? NOTION NO RESPONDE\n\nPero tranquilo/a, he guardado la nota en la MEMORIA DEL IPAD.\n\nSe guardÛ como: "${text}"`);
 
         reminderText.value = '';
         closeReminderModal();
@@ -2676,7 +713,7 @@ async function saveReminderToNotion() {
         closeReminderModal();
 
         // Use Alert because Toasts are disabled
-        alert(`? °GUARDADO!\n\nTu recordatorio se ha subido correctamente a ${savedType}.`);
+        alert(`‚úÖ GUARDADO!\n\nTu recordatorio se ha subido correctamente a ${savedType}.`);
 
         triggerConfetti();
 
@@ -2824,12 +861,12 @@ function activateRadar() {
 
     // Check if geolocation is available
     if (!navigator.geolocation) {
-        statusEl.innerHTML = '? Tu navegador no soporta geolocalizaciÛn';
-        listEl.innerHTML = '<div style="color:#ff4444; text-align:center; padding:20px;">GeolocalizaciÛn no disponible en este dispositivo</div>';
+        statusEl.innerHTML = '‚ùå Tu navegador no soporta geolocalizaci√≥n';
+        listEl.innerHTML = '<div style="color:#ff4444; text-align:center; padding:20px;">Geolocalizaci√≥n no disponible en este dispositivo</div>';
         return;
     }
 
-    statusEl.innerHTML = '?? Solicitando permisos de ubicaciÛn...';
+    statusEl.innerHTML = 'üîç Solicitando permisos de ubicaci√≥n...';
     listEl.innerHTML = '';
 
     // Request location with high accuracy
@@ -2839,8 +876,8 @@ function activateRadar() {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
 
-            console.log('?? Location acquired:', lat, lon);
-            statusEl.innerHTML = '?? Escaneando negocios cercanos...';
+            console.log('üìç Location acquired:', lat, lon);
+            statusEl.innerHTML = 'üì° Escaneando negocios cercanos...';
 
             // Get selected radius
             const radiusSelect = document.getElementById('radarRadius');
@@ -2862,33 +899,33 @@ function activateRadar() {
                 case error.PERMISSION_DENIED:
                     errorMsg = `
                         <div style="color:#ff4444; padding:20px; text-align:center;">
-                            <h3 style="margin:0 0 15px 0;">?? GPS BLOQUEADO</h3>
+                            <h3 style="margin:0 0 15px 0;">üö´ GPS BLOQUEADO</h3>
                             <p style="margin:0 0 10px 0; font-size:0.9rem; line-height:1.5;">
-                                Has denegado el permiso de ubicaciÛn.
+                                Has denegado el permiso de ubicaci√≥n.
                             </p>
                             <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:8px; margin-top:15px; text-align:left;">
-                                <p style="margin:0 0 10px 0; font-weight:bold;">?? Para activar en iPad/iPhone:</p>
+                                <p style="margin:0 0 10px 0; font-weight:bold;">üì± Para activar en iPad/iPhone:</p>
                                 <ol style="margin:0; padding-left:20px; font-size:0.85rem; line-height:1.6;">
-                                    <li>Ve a <strong>Ajustes</strong> ? <strong>Safari</strong></li>
-                                    <li>Busca <strong>UbicaciÛn</strong></li>
+                                    <li>Ve a <strong>Ajustes</strong> ‚Üí <strong>Safari</strong></li>
+                                    <li>Busca <strong>Ubicaci√≥n</strong></li>
                                     <li>Selecciona <strong>"Preguntar" o "Permitir"</strong></li>
-                                    <li>Recarga esta p·gina</li>
+                                    <li>Recarga esta p√°gina</li>
                                 </ol>
                             </div>
                             <p style="margin-top:15px; font-size:0.8rem; color:#aaa;">
-                                ?? TambiÈn puedes usar la b˙squeda manual escribiendo el nombre de la ciudad
+                                üí° Tambi√©n puedes usar la b√∫squeda manual escribiendo el nombre de la ciudad
                             </p>
                         </div>
                     `;
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">? UbicaciÛn no disponible. Verifica tu conexiÛn GPS.</div>';
+                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">üìç Ubicaci√≥n no disponible. Verifica tu conexi√≥n GPS.</div>';
                     break;
                 case error.TIMEOUT:
-                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">?? Tiempo agotado. Intenta de nuevo.</div>';
+                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">‚è±Ô∏è Tiempo agotado. Intenta de nuevo.</div>';
                     break;
                 default:
-                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">? Error desconocido al obtener ubicaciÛn.</div>';
+                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">‚ùå Error desconocido al obtener ubicaci√≥n.</div>';
             }
 
             statusEl.innerHTML = '';
@@ -2911,85 +948,92 @@ function closeRadarModal() {
 }
 
 // Scan nearby businesses using Overpass API (OpenStreetMap)
+// Shared function to fetch businesses from Overpass API
+async function fetchNearbyPlaces(lat, lon, radiusKm, onlyOpen = false) {
+    // Convert radius to meters
+    const radiusM = radiusKm * 1000;
+
+    // Overpass query for bars, restaurants, cafes
+    const query = `
+        [out:json][timeout:25];
+        (
+            node["amenity"~"bar|restaurant|cafe|pub"](around:${radiusM},${lat},${lon});
+            way["amenity"~"bar|restaurant|cafe|pub"](around:${radiusM},${lat},${lon});
+        );
+        out body;
+        >;
+        out skel qt;
+    `;
+
+    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Error en la API de Overpass');
+
+    const data = await response.json();
+    const elements = data.elements || [];
+
+    // Filter and process results
+    let businesses = elements
+        .filter(el => el.tags && el.tags.name)
+        .map(el => {
+            const elLat = el.lat || (el.center ? el.center.lat : null);
+            const elLon = el.lon || (el.center ? el.center.lon : null);
+
+            if (!elLat || !elLon) return null;
+
+            const distance = getDistanceFromLatLonInKm(lat, lon, elLat, elLon);
+
+            return {
+                name: el.tags.name,
+                type: el.tags.amenity,
+                address: el.tags['addr:street'] || '',
+                phone: el.tags.phone || el.tags['contact:phone'] || '',
+                opening_hours: el.tags.opening_hours || '',
+                distance: distance,
+                lat: elLat,
+                lon: elLon
+            };
+        })
+        .filter(b => b !== null);
+
+    // Sort by distance
+    businesses.sort((a, b) => a.distance - b.distance);
+
+    // Filter by radius (double check)
+    businesses = businesses.filter(b => b.distance <= radiusKm);
+
+    // Check if open now (if filter is active)
+    if (onlyOpen) {
+        // Simple check - this could be improved with a proper library
+        businesses = businesses.filter(b => {
+            if (!b.opening_hours) return true; // Include if no hours specified
+            return !b.opening_hours.toLowerCase().includes('closed');
+        });
+    }
+
+    return businesses;
+}
+
+// Scan nearby businesses using Overpass API (OpenStreetMap)
 async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
     const statusEl = document.getElementById('radarStatus');
     const listEl = document.getElementById('radarList');
 
     try {
-        // Convert radius to meters
-        const radiusM = radiusKm * 1000;
-
-        // Overpass query for bars, restaurants, cafes
-        const query = `
-            [out:json][timeout:25];
-            (
-                node["amenity"~"bar|restaurant|cafe|pub"](around:${radiusM},${lat},${lon});
-                way["amenity"~"bar|restaurant|cafe|pub"](around:${radiusM},${lat},${lon});
-            );
-            out body;
-            >;
-            out skel qt;
-        `;
-
-        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Error en la API de Overpass');
-
-        const data = await response.json();
-        const elements = data.elements || [];
-
-        // Filter and process results
-        let businesses = elements
-            .filter(el => el.tags && el.tags.name)
-            .map(el => {
-                const elLat = el.lat || (el.center ? el.center.lat : null);
-                const elLon = el.lon || (el.center ? el.center.lon : null);
-
-                if (!elLat || !elLon) return null;
-
-                const distance = getDistanceFromLatLonInKm(lat, lon, elLat, elLon);
-
-                return {
-                    name: el.tags.name,
-                    type: el.tags.amenity,
-                    address: el.tags['addr:street'] || '',
-                    phone: el.tags.phone || el.tags['contact:phone'] || '',
-                    opening_hours: el.tags.opening_hours || '',
-                    distance: distance,
-                    lat: elLat,
-                    lon: elLon
-                };
-            })
-            .filter(b => b !== null);
-
-        // Sort by distance
-        businesses.sort((a, b) => a.distance - b.distance);
-
-        // Filter by radius (double check)
-        businesses = businesses.filter(b => b.distance <= radiusKm);
-
-        // Check if open now (if filter is active)
-        if (onlyOpen) {
-            const now = new Date();
-            businesses = businesses.filter(b => {
-                if (!b.opening_hours) return true; // Include if no hours specified
-                // Simple check - this could be improved with a proper library
-                return !b.opening_hours.toLowerCase().includes('closed');
-            });
-        }
+        const businesses = await fetchNearbyPlaces(lat, lon, radiusKm, onlyOpen);
 
         // Display results
         if (businesses.length === 0) {
-            statusEl.innerHTML = '?? No se encontraron negocios';
+            statusEl.innerHTML = 'üîç No se encontraron negocios';
             listEl.innerHTML = `
                 <div style="color:#aaa; text-align:center; padding:20px;">
                     <p>No hay bares o restaurantes en un radio de ${radiusKm}km</p>
-                    <p style="font-size:0.8rem; margin-top:10px;">Prueba aumentando el radio de b˙squeda</p>
+                    <p style="font-size:0.8rem; margin-top:10px;">Prueba aumentando el radio de b√∫squeda</p>
                 </div>
             `;
         } else {
-            statusEl.innerHTML = `? ${businesses.length} negocio${businesses.length > 1 ? 's' : ''} encontrado${businesses.length > 1 ? 's' : ''}`;
+            statusEl.innerHTML = `‚úÖ ${businesses.length} negocio${businesses.length > 1 ? 's' : ''} encontrado${businesses.length > 1 ? 's' : ''}`;
 
             listEl.innerHTML = '';
             businesses.forEach(biz => {
@@ -3001,18 +1045,18 @@ async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
                     : `${biz.distance.toFixed(2)}km`;
 
                 const typeIcon = {
-                    'bar': '??',
-                    'restaurant': '???',
-                    'cafe': '?',
-                    'pub': '??'
-                }[biz.type] || '??';
+                    'bar': 'üç∫',
+                    'restaurant': 'üçΩÔ∏è',
+                    'cafe': '‚òï',
+                    'pub': 'üçª'
+                }[biz.type] || 'üè™';
 
                 card.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:5px;">
                         <div style="flex:1;">
                             <div style="font-weight:bold; color:white; font-size:0.95rem;">${typeIcon} ${biz.name}</div>
                             ${biz.address ? `<div style="font-size:0.75rem; color:#aaa; margin-top:3px;">${biz.address}</div>` : ''}
-                            ${biz.phone ? `<div style="font-size:0.75rem; color:#4ade80; margin-top:3px;">?? ${biz.phone}</div>` : ''}
+                            ${biz.phone ? `<div style="font-size:0.75rem; color:#4ade80; margin-top:3px;">üìû ${biz.phone}</div>` : ''}
                         </div>
                         <div style="background:rgba(0,255,136,0.2); color:#00ff88; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:bold; white-space:nowrap; margin-left:10px;">
                             ${distText}
@@ -3021,12 +1065,12 @@ async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
                     <div style="display:flex; gap:8px; margin-top:10px;">
                         <a href="https://www.google.com/maps/search/?api=1&query=${biz.lat},${biz.lon}" target="_blank" 
                            style="flex:1; background:#3b82f6; color:white; padding:6px; border-radius:6px; text-align:center; text-decoration:none; font-size:0.8rem;">
-                            ?? Ver Mapa
+                            üó∫Ô∏è Ver Mapa
                         </a>
                         ${biz.phone ? `
                         <a href="tel:${biz.phone}" 
                            style="flex:1; background:#10b981; color:white; padding:6px; border-radius:6px; text-align:center; text-decoration:none; font-size:0.8rem;">
-                            ?? Llamar
+                            üìû Llamar
                         </a>
                         ` : ''}
                     </div>
@@ -3038,13 +1082,464 @@ async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
 
     } catch (error) {
         console.error('Error scanning businesses:', error);
-        statusEl.innerHTML = '? Error al escanear';
+        statusEl.innerHTML = '‚ùå Error al escanear';
         listEl.innerHTML = `
             <div style="color:#ff4444; text-align:center; padding:20px;">
                 <p>Error al buscar negocios cercanos</p>
                 <p style="font-size:0.8rem; margin-top:10px;">${error.message}</p>
             </div>
-        `
-            ;
+        `;
+    }
+}
+
+// === CALCULATOR MODAL FUNCTIONS ===
+// === CALCULATOR MODAL FUNCTIONS ===
+function openCalculator() {
+    console.log('Opening calculator...');
+    const modal = document.getElementById('calculatorModal');
+    if (modal) {
+        modal.classList.add('open');
+        console.log('Calculator modal class added: open');
+
+        // Initialize after modal is displayed
+        setTimeout(() => {
+            // Initialize calculator display
+            const display = document.getElementById('calcDisplay');
+            if (display) {
+                display.value = '0';
+            }
+
+            // Load products for bonification calculator
+            loadCalcProducts();
+
+            // Ensure basic tab is active by default
+            switchCalcTab('basic');
+        }, 10);
+    } else {
+        console.error('Calculator modal NOT found');
+        alert('Error: Calculadora no encontrada. Recarga la p√°gina.');
+    }
+}
+
+// Ensure global availability
+window.openCalculator = openCalculator;
+
+
+function closeCalculator() {
+    const modal = document.getElementById('calculatorModal');
+    if (modal) {
+        modal.classList.remove('open');
+    }
+}
+
+// === SEARCH AND NAVIGATION FUNCTIONS ===
+// === SEARCH AND NAVIGATION FUNCTIONS ===
+function searchNearMe() {
+    // Check if running on local file - Geolocation often fails here
+    if (window.location.protocol === 'file:') {
+        alert('‚ö†Ô∏è IMPORTANTE: La geolocalizaci√≥n no suele funcionar en archivos locales (file://). Para probar esta funci√≥n, necesitas subir la web a un servidor o usar "Live Server".');
+    }
+
+    if (!navigator.geolocation) {
+        alert('‚ùå Tu navegador no soporta geolocalizaci√≥n');
+        return;
+    }
+
+    const btn = document.querySelector('.btn-cerca');
+    const originalText = btn ? btn.innerHTML : 'CERCA (100km)';
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Buscando...';
+
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            try {
+                // Use fetchNearbyPlaces with 5km radius (100km is too aggressive for browser)
+                // We'll use 5km as a "reasonable" near me, even if button says 100km
+                const businesses = await fetchNearbyPlaces(lat, lon, 5, false);
+                displaySearchResults(businesses);
+            } catch (error) {
+                console.error('Search error:', error);
+                alert('‚ùå Error al buscar negocios: ' + error.message);
+            } finally {
+                if (btn) btn.innerHTML = originalText;
+            }
+        },
+        (error) => {
+            console.error('Geolocation error:', error);
+            if (btn) btn.innerHTML = originalText;
+
+            // Detailed error messages
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    alert('üö´ ACCESO DENEGADO\n\nNo has permitido el acceso a tu ubicaci√≥n. Por favor:\n1. Ve a los ajustes del navegador.\n2. Permite la ubicaci√≥n para este sitio.\n3. Int√©ntalo de nuevo.');
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert('üìç UBICACI√ìN NO DISPONIBLE\n\nNo se pudo determinar tu posici√≥n. Verifica que el GPS est√© activo.');
+                    break;
+                case error.TIMEOUT:
+                    alert('‚è±Ô∏è TIEMPO AGOTADO\n\nLa b√∫squeda de GPS tard√≥ demasiado. Int√©ntalo de nuevo en un lugar abierto.');
+                    break;
+                default:
+                    alert('‚ùå OCURRI√ì UN ERROR\n\nNo se pudo obtener la ubicaci√≥n. (C√≥digo: ' + error.code + ')');
+            }
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        }
+    );
+}
+
+function displaySearchResults(venues) {
+    const modal = document.getElementById('searchResultsModal');
+    const venueList = document.getElementById('venueList');
+
+    if (!modal || !venueList) return;
+
+    // Ensure logic to open modal is here or called before
+    modal.classList.add('open');
+
+    if (venues.length === 0) {
+        venueList.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">No se encontraron locales cercanos (5km)</div>';
+    } else {
+        venueList.innerHTML = '';
+        venues.forEach(venue => {
+            // Reuse similar card style but adapted for list
+            const distText = venue.distance < 1
+                ? `${(venue.distance * 1000).toFixed(0)}m`
+                : `${venue.distance.toFixed(2)}km`;
+
+            const typeIcon = {
+                'bar': 'üç∫',
+                'restaurant': 'üçΩÔ∏è',
+                'cafe': '‚òï',
+                'pub': 'üçª'
+            }[venue.type] || 'üè™';
+
+            const card = document.createElement('div');
+            card.className = 'venue-card';
+            card.style.cssText = `
+                background: rgba(255,255,255,0.05);
+                margin-bottom: 8px;
+                padding: 12px;
+                border-radius: 8px;
+                border-left: 3px solid #00ff88;
+                cursor: pointer;
+            `;
+
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:start;">
+                    <div style="flex:1;">
+                        <div class="venue-name" style="font-weight:bold; color:white; font-size:1rem;">${typeIcon} ${venue.name}</div>
+                        <div class="venue-address" style="color:#aaa; font-size:0.8rem; margin-top:4px;">${venue.address || 'Sin direcci√≥n'}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <span style="background:rgba(0,255,136,0.1); color:#00ff88; padding:2px 6px; border-radius:4px; font-size:0.75rem; font-weight:bold;">${distText}</span>
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                     <button onclick="event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=${venue.lat},${venue.lon}', '_blank')"
+                        style="flex:1; background:#3b82f6; border:none; color:white; padding:6px; border-radius:4px; cursor:pointer; font-size:0.85rem;">
+                        <i class="fa-solid fa-map"></i> Mapa
+                    </button>
+                    ${venue.phone ? `
+                    <button onclick="event.stopPropagation(); window.location.href='tel:${venue.phone}'"
+                        style="flex:1; background:#10b981; border:none; color:white; padding:6px; border-radius:4px; cursor:pointer; font-size:0.85rem;">
+                        <i class="fa-solid fa-phone"></i> Llamar
+                    </button>` : ''}
+                </div>
+            `;
+            // Optional: Click card to see details if implemented
+            // card.onclick = () => openModal(venue);
+            venueList.appendChild(card);
+        });
+    }
+}
+
+function closeSearchResultsModal() {
+    const modal = document.getElementById('searchResultsModal');
+    if (modal) {
+        modal.classList.remove('open');
+    }
+}
+
+// === MODAL FUNCTIONS ===
+function openChecklist() {
+    const modal = document.getElementById('checklistModal');
+    if (modal) {
+        modal.classList.add('open');
+    }
+}
+
+function closeChecklist() {
+    const modal = document.getElementById('checklistModal');
+    if (modal) {
+        modal.classList.remove('open');
+    }
+}
+
+function openFocusModal() {
+    const modal = document.getElementById('focusModal');
+    if (modal) {
+        modal.classList.add('open');
+    }
+}
+
+function closeFocusModal() {
+    const modal = document.getElementById('focusModal');
+    if (modal) {
+        modal.classList.remove('open');
+    }
+}
+
+function openDebtModal() {
+    const modal = document.getElementById('debtModal');
+    if (modal) {
+        modal.classList.add('open');
+        loadDebtData();
+    }
+}
+
+function closeDebtModal() {
+    const modal = document.getElementById('debtModal');
+    if (modal) {
+        modal.classList.remove('open');
+    }
+}
+
+function openDistribuidoresModal() {
+    const modal = document.getElementById('distribuidoresModal');
+    if (modal) {
+        modal.classList.add('open');
+    }
+}
+
+function closeDistribuidoresModal() {
+    const modal = document.getElementById('distribuidoresModal');
+    if (modal) {
+        modal.classList.remove('open');
+    }
+}
+
+function openModal(venue) {
+    const modal = document.getElementById('detailModal');
+    if (!modal) return;
+
+    document.getElementById('modalTitle').textContent = venue.name || 'Detalle';
+    document.getElementById('inputName').value = venue.name || '';
+    document.getElementById('inputAddress').value = venue.address || '';
+    document.getElementById('inputPhone').value = venue.phone || '';
+    document.getElementById('inputEmail').value = venue.email || '';
+    document.getElementById('inputNotes').value = venue.notes || '';
+
+    // Update action buttons
+    const btnCall = document.getElementById('btnCall');
+    const btnEmail = document.getElementById('btnEmail');
+
+    if (venue.phone) {
+        btnCall.href = `tel:${venue.phone}`;
+    }
+    if (venue.email) {
+        btnEmail.href = `mailto:${venue.email}`;
+    }
+
+    modal.classList.add('open');
+}
+
+function closeModal() {
+    const modal = document.getElementById('detailModal');
+    if (modal) {
+        modal.classList.remove('open');
+    }
+}
+
+function saveToDebts() {
+    const name = document.getElementById('inputName').value;
+    const notes = document.getElementById('inputNotes').value;
+
+    if (!name) {
+        alert('‚ö†Ô∏è Por favor ingresa un nombre');
+        return;
+    }
+
+    // Get existing debts
+    const debts = JSON.parse(localStorage.getItem('debts') || '[]');
+
+    // Add new debt
+    debts.push({
+        id: Date.now(),
+        name: name,
+        notes: notes,
+        date: new Date().toISOString().split('T')[0],
+        status: 'pending'
+    });
+
+    // Save to localStorage
+    localStorage.setItem('debts', JSON.stringify(debts));
+
+    alert('‚úÖ Guardado correctamente');
+    closeModal();
+}
+
+// === DEBT MANAGEMENT ===
+function loadDebtData() {
+    const debtPad = document.getElementById('debtPad');
+    if (!debtPad) return;
+
+    const debts = JSON.parse(localStorage.getItem('debts') || '[]');
+
+    if (debts.length === 0) {
+        debtPad.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">No hay notas guardadas</div>';
+        return;
+    }
+
+    debtPad.innerHTML = '';
+    debts.forEach((debt, index) => {
+        const row = document.createElement('div');
+        row.className = 'debt-row';
+        row.innerHTML = `
+            <div style="flex:1;">
+                <div style="font-weight:bold; color:white;">${debt.name}</div>
+                <div style="font-size:0.8rem; color:#aaa;">${debt.date}</div>
+                <div style="font-size:0.85rem; color:#ccc; margin-top:5px;">${debt.notes || ''}</div>
+            </div>
+            <button onclick="deleteDebt(${index})" style="background:#ef4444; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        `;
+        debtPad.appendChild(row);
+    });
+}
+
+function addDebtRow() {
+    const name = prompt('Nombre del cliente:');
+    if (!name) return;
+
+    const notes = prompt('Notas:');
+
+    const debts = JSON.parse(localStorage.getItem('debts') || '[]');
+    debts.push({
+        id: Date.now(),
+        name: name,
+        notes: notes || '',
+        date: new Date().toISOString().split('T')[0],
+        status: 'pending'
+    });
+
+    localStorage.setItem('debts', JSON.stringify(debts));
+    loadDebtData();
+
+    // Show save indicator
+    const indicator = document.getElementById('saveIndicatorDebt');
+    if (indicator) {
+        indicator.style.opacity = '1';
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+        }, 2000);
+    }
+}
+
+function deleteDebt(index) {
+    if (!confirm('¬øEliminar esta nota?')) return;
+
+    const debts = JSON.parse(localStorage.getItem('debts') || '[]');
+    debts.splice(index, 1);
+    localStorage.setItem('debts', JSON.stringify(debts));
+    loadDebtData();
+}
+
+// === PLANES/NOTES MODAL ===
+function openPlanes() {
+    const modal = document.getElementById('planesModal');
+    if (modal) {
+        modal.classList.add('open');
+        loadPlanesData();
+    }
+}
+
+function closePlanes() {
+    const modal = document.getElementById('planesModal');
+    if (modal) {
+        modal.classList.remove('open');
+    }
+}
+
+function loadPlanesData() {
+    const content = document.getElementById('planesContent');
+    if (!content) return;
+
+    const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+
+    if (notes.length === 0) {
+        content.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">No hay notas guardadas</div>';
+        return;
+    }
+
+    content.innerHTML = '';
+    notes.forEach((note, index) => {
+        const row = document.createElement('div');
+        row.className = 'debt-row';
+        row.innerHTML = `
+            <div style="flex:1;">
+                <div style="font-weight:bold; color:white;">${note.title || 'Sin t√≠tulo'}</div>
+                <div style="font-size:0.8rem; color:#aaa;">${note.date}</div>
+                <div style="font-size:0.85rem; color:#ccc; margin-top:5px;">${note.content || ''}</div>
+            </div>
+            <button onclick="deleteNote(${index})" style="background:#ef4444; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        `;
+        content.appendChild(row);
+    });
+}
+
+function deleteNote(index) {
+    if (!confirm('¬øEliminar esta nota?')) return;
+
+    const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+    notes.splice(index, 1);
+    localStorage.setItem('notes', JSON.stringify(notes));
+    loadPlanesData();
+}
+
+// === ZOOM MODAL ===
+function openZoomModal(imageSrc) {
+    // Create zoom modal if it doesn't exist
+    let zoomModal = document.getElementById('zoomModal');
+    if (!zoomModal) {
+        zoomModal = document.createElement('div');
+        zoomModal.id = 'zoomModal';
+        zoomModal.className = 'modal-overlay';
+        zoomModal.innerHTML = `
+            <div class="modal-content" style="max-width:90vw; max-height:90vh; padding:0;">
+                <div class="modal-header">
+                    <h2>Imagen</h2>
+                    <button class="close-btn" onclick="closeZoomModal()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <img id="zoomImage" src="" style="width:100%; height:auto; border-radius:0 0 12px 12px;">
+            </div>
+        `;
+        document.body.appendChild(zoomModal);
+    }
+
+    document.getElementById('zoomImage').src = imageSrc;
+    zoomModal.classList.add('open');
+}
+
+function closeZoomModal() {
+    const modal = document.getElementById('zoomModal');
+    if (modal) {
+        modal.classList.remove('open');
+    }
+}
+
+// === QR MODAL ===
+function closeQRModal() {
+    const modal = document.getElementById('qrModal');
+    if (modal) {
+        modal.classList.remove('open');
     }
 }

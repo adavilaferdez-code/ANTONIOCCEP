@@ -657,7 +657,6 @@
 
         // DATA
         const PRODUCTS = [
-            // ... (PRODUCTS array remains unchanged) ...
             // 1. COCA-COLA (All)
             { id: 1, name: 'COCA-COLA', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas', icon: '<img src="cocacola_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 2, name: 'CC LIGHT / CC ZERO', category: 'Vidrio Rellenable 23,7cl', price: 25.44, envase: '24 botellas', icon: '<img src="cocacola_zero_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
@@ -688,46 +687,34 @@
             { id: 34, name: 'FUZE TEA', category: 'Lata 33cl', price: 39.60, envase: '24 latas', icon: '<img src="fuzetea_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 38, name: 'FUZE TEA (6 uds.)', category: 'PET 1,5L', price: 21.54, envase: '6 botellas', icon: '<img src="fuzetea_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
 
-            // 5. RESTO (Sorted roughly by logic or original order)
+            // 5. SPRITE (All)
             { id: 5, name: 'SPRITE', category: 'Vidrio Rellenable 23,7cl', price: 24.96, envase: '24 botellas', icon: '<img src="sprite_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 21, name: 'SPRITE', category: 'Vidrio Rellenable 35cl', price: 29.28, envase: '12 botellas', icon: '<img src="sprite_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 32, name: 'SPRITE', category: 'Lata 33cl', price: 37.68, envase: '24 latas', icon: '<img src="sprite_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 41, name: 'SPRITE (6 ud) / SPRITE ZERO', category: 'PET 2,0 Lts', price: 27.06, envase: '6 botellas', icon: '<img src="sprite_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
 
+            // 6. ROYAL BLISS (All)
             { id: 6, name: 'ROYAL BLISS TON, CREATIV, YUZ, ZER Y BERRY', category: 'Vidrio Rellenable 20cl', price: 31.92, envase: '24 botellas', icon: '<img src="royalbliss_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 7, name: 'ROYAL BLISS CÍTRICOS', category: 'Vidrio Rellenable 20cl', price: 28.80, envase: '24 botellas', icon: '<img src="royalbliss_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
-            { id: 8, name: 'NORDIC MIST TÓNICA', category: 'Vidrio Rellenable 20cl', price: 30.96, envase: '24 botellas', icon: '🍸' },
-            { id: 9, name: 'NORDIC MIST TÓNICA BLUE/ROSE', category: 'Vidrio Rellenable 20cl', price: 30.96, envase: '24 botellas', icon: '🍸' },
             { id: 10, name: 'ROYAL BLISS TÓNICAS', category: 'Vidrio No Rellenable 20cl', price: 36.72, envase: '24 botellas', icon: '<img src="royalbliss_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 11, name: 'ROYAL BLISS SODA', category: 'Vidrio No Rellenable 20cl', price: 36.72, envase: '24 botellas', icon: '<img src="royalbliss_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 12, name: 'ROYAL BLISS GINGER ALE', category: 'Vidrio No Rellenable 20cl', price: 36.72, envase: '24 botellas', icon: '<img src="royalbliss_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 26, name: 'ROYAL BLISS', category: 'Lata 25cl Slim', price: 15.48, envase: '24 latas', icon: '<img src="royalbliss_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
-            { id: 27, name: 'TÓNICA NORDIC Y ZERO', category: 'Lata 25cl Sleek', price: 33.60, envase: '24 latas', icon: '🍸' },
 
+            // 7. MONSTER (All)
             { id: 24, name: 'MONSTER ENERGY / ULTRA', category: 'Lata 25cl', price: 44.40, envase: '24 latas', icon: '<img src="monster_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 28, name: 'MONSTER ENERGY / ULTRA', category: 'Lata 355 ML', price: 24.96, envase: '12 latas', icon: '<img src="monster_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 33, name: 'MONSTER ENERGY', category: 'Lata 25cl', price: 44.40, envase: '24 latas', icon: '<img src="monster_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 36, name: 'MONSTER ENERGY / REHAB / RIPPER / ULTRA', category: 'Lata 50cl', price: 56.16, envase: '12 latas', icon: '<img src="monster_logo.jpg" style="width:100%; height:100%; object-fit:contain;">' },
 
-            { id: 25, name: 'BURN / BURN ZERO', category: 'Lata 25cl', price: 58.80, envase: '24 latas', icon: '🔥' },
-            { id: 35, name: 'BURN / BURN ZERO', category: 'Lata 50cl', price: 36.48, envase: '12 latas', icon: '🔥' },
-
-            { id: 13, name: 'MARE ROSSO', category: 'Vidrio No Rellenable 20cl', price: 36.72, envase: '24 botellas', icon: '🍷' },
-            { id: 14, name: 'APPELTISER', category: 'VNR 0,275 Lit.', price: 32.88, envase: '24 botellas', icon: '🍎' },
-            { id: 15, name: 'APPELTISER', category: 'VNR 0,75 Lit.', price: 16.14, envase: '12 botellas', icon: '🍎' },
-            { id: 42, name: 'MINUTE MAID SELECCIÓN', category: 'Zumos 200 S/R', price: 38.16, envase: '27 briks', icon: '🧃' },
-            { id: 43, name: 'MINUTE MAID L&N / N&N', category: 'Zumos 200 S/R', price: 38.16, envase: '27 briks', icon: '🧃' },
-            { id: 44, name: 'M. MAID LIMÓN&NADA', category: 'PET 1 LITRO', price: 24.48, envase: '12 botellas', icon: '🧃' },
-
+            // 8. AQUABONA (All)
             { id: 45, name: 'AQUABONA SINGULAR CON GAS', category: 'Aguas VR 365', price: 24.00, envase: '20 botellas', icon: '<img src="aquabona_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 46, name: 'AQUABONA', category: 'Aguas Ret. 500cc', price: 20.20, envase: '20 botellas', icon: '<img src="aquabona_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 47, name: 'AQUABONA', category: 'Aguas Ret. Litro', price: 19.32, envase: '12 botellas', icon: '<img src="aquabona_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 48, name: 'AQUABONA', category: 'Aguas PET 35CL', price: 17.76, envase: '24 botellas', icon: '<img src="aquabona_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 49, name: 'AQUABONA', category: 'Aguas PET 50CL', price: 20.64, envase: '24 botellas', icon: '<img src="aquabona_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
             { id: 50, name: 'AQUABONA SINGULAR CON GAS', category: 'Aguas PET 50CL', price: 11.00, envase: '6 botellas', icon: '<img src="aquabona_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
-            { id: 51, name: 'AQUABONA', category: 'Aguas PET 1,5L', price: 9.30, envase: '6 botellas', icon: '<img src="aquabona_logo.png" style="width:100%; height:100%; object-fit:contain;">' },
-            { id: 52, name: 'VILAS DEL TURBÓN', category: 'Aguas VNR 33CL', price: 27.36, envase: '24 botellas', icon: '💧' },
-            { id: 53, name: 'VILAS DEL TURBÓN', category: 'Aguas VNR 75CL', price: 12.30, envase: '6 botellas', icon: '💧' }
+            { id: 51, name: 'AQUABONA', category: 'Aguas PET 1,5L', price: 9.30, envase: '6 botellas', icon: '<img src="aquabona_logo.png" style="width:100%; height:100%; object-fit:contain;">' }
         ];
 
         // LOGIC

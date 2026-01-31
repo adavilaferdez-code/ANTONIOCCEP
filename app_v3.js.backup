@@ -1,0 +1,416 @@
+                body: JSON.stringify(payload)
+            });
+
+            if (resp.ok) {
+                handleSuccess("", "Notion (Nube)");
+                return;
+            }
+        }
+
+        throw new Error("No se pudo conectar con Notion.");
+
+    } catch (e) {
+        console.error("Notion Error:", e);
+        // FALLBACK: SAVE LOCALLY
+        saveLocally(text, date, currentPriority);
+    } finally {
+        btnSaveReminder.innerHTML = 'GUARDAR';
+        btnSaveReminder.disabled = false;
+    }
+
+    function saveLocally(text, date, priority) {
+        const localReminders = JSON.parse(localStorage.getItem('offlineReminders') || '[]');
+        localReminders.push({
+            id: Date.now(),
+            text: text,
+            date: date,
+            priority: priority,
+            status: 'pending',
+            synced: false
+        });
+        localStorage.setItem('offlineReminders', JSON.stringify(localReminders));
+
+        // Use Alert because Toasts are disabled
+        alert(`?? NOTION NO RESPONDE\n\nPero tranquilo/a, he guardado la nota en la MEMORIA DEL IPAD.\n\nSe guard como: "${text}"`);
+
+        reminderText.value = '';
+        closeReminderModal();
+    }
+
+    function handleSuccess(url, savedType) {
+        reminderText.value = '';
+        closeReminderModal();
+
+        // Use Alert because Toasts are disabled
+        alert(`? GUARDADO!\n\nTu recordatorio se ha subido correctamente a ${savedType}.`);
+
+        triggerConfetti();
+
+        // Reset priority to default
+        currentPriority = "Media";
+        document.querySelectorAll('.p-chip').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.p-chip')[1].classList.add('active');
+    }
+}
+
+// === QUICK DATE LOGIC ===
+function setQuickDate(offset) {
+    const date = new Date();
+
+    if (offset === 'nextMonday') {
+        // Calculate days until next Monday
+        const day = date.getDay();
+        const diff = (day === 0 ? 1 : 8) - day; // If Sunday(0), +1. If Mon(1), +7. etc.
+        date.setDate(date.getDate() + diff);
+    } else {
+        date.setDate(date.getDate() + offset);
+    }
+
+    // Format YYYY-MM-DD
+    const isoDate = date.toISOString().split('T')[0];
+    document.getElementById('reminderDate').value = isoDate;
+}
+
+// === PREMIUM CONFETTI EFFECT ===
+function triggerConfetti() {
+    const duration = 2000;
+    const end = Date.now() + duration;
+
+    // Create canvas if not exists
+    let canvas = document.getElementById('confetti-canvas');
+    if (!canvas) {
+        canvas = document.createElement('canvas');
+        canvas.id = 'confetti-canvas';
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.pointerEvents = 'none';
+        canvas.style.zIndex = '99999';
+        document.body.appendChild(canvas);
+    }
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+    const particles = [];
+
+    // Init particles
+    for (let i = 0; i < 150; i++) {
+        particles.push({
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            vx: (Math.random() - 0.5) * 20,
+            vy: (Math.random() - 0.5) * 20,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            size: Math.random() * 5 + 2,
+            life: Math.random() * 100 + 50
+        });
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
+
+        particles.forEach(p => {
+            if (p.life > 0) {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.5; // Gravity
+                p.life--;
+
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+                active = true;
+            }
+        });
+
+        if (active) requestAnimationFrame(animate);
+        else canvas.remove();
+    }
+
+    animate();
+}
+
+// === PREMIUM TOAST FUNCTION ===
+function showToast(title, message, type = 'info') {
+    // Ensure container exists
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    // Icons mapping
+    const icons = {
+        success: '<i class="fa-solid fa-circle-check"></i>',
+        error: '<i class="fa-solid fa-circle-xmark"></i>',
+        info: '<i class="fa-solid fa-circle-info"></i>'
+    };
+
+    // Create Toast Element
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <div class="toast-icon">${icons[type] || icons.info}</div>
+        <div class="toast-content">
+            <span class="toast-title">${title}</span>
+            <span class="toast-msg">${message}</span>
+        </div>
+    `;
+
+    container.appendChild(toast);
+
+    // Play Sound (Optional, subtle click)
+    // const audio = new Audio('path/to/sound.mp3'); audio.play().catch(()=>{});
+
+    // Remove after 3s
+    setTimeout(() => {
+        toast.style.animation = 'toastOut 0.4s forwards';
+        toast.remove();
+    }, 4000);
+}
+
+// === RADAR FUNCTIONALITY ===
+function activateRadar() {
+    const modal = document.getElementById('radarModal');
+    const statusEl = document.getElementById('radarStatus');
+    const listEl = document.getElementById('radarList');
+
+    if (!modal) {
+        alert('Error: Modal del RADAR no encontrado');
+        return;
+    }
+
+    // Open modal
+    modal.classList.add('open');
+
+    // Check if geolocation is available
+    if (!navigator.geolocation) {
+        statusEl.innerHTML = '? Tu navegador no soporta geolocalizacin';
+        listEl.innerHTML = '<div style="color:#ff4444; text-align:center; padding:20px;">Geolocalizacin no disponible en este dispositivo</div>';
+        return;
+    }
+
+    statusEl.innerHTML = '?? Solicitando permisos de ubicacin...';
+    listEl.innerHTML = '';
+
+    // Request location with high accuracy
+    navigator.geolocation.getCurrentPosition(
+        // Success callback
+        (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            console.log('?? Location acquired:', lat, lon);
+            statusEl.innerHTML = '?? Escaneando negocios cercanos...';
+
+            // Get selected radius
+            const radiusSelect = document.getElementById('radarRadius');
+            const radiusKm = radiusSelect ? parseFloat(radiusSelect.value) : 0.5;
+
+            // Get filter preference
+            const filterOpen = document.getElementById('radarFilterOpen');
+            const onlyOpen = filterOpen ? filterOpen.checked : true;
+
+            // Scan for businesses
+            scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen);
+        },
+        // Error callback
+        (error) => {
+            console.error('Geolocation error:', error);
+
+            let errorMsg = '';
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMsg = `
+                        <div style="color:#ff4444; padding:20px; text-align:center;">
+                            <h3 style="margin:0 0 15px 0;">?? GPS BLOQUEADO</h3>
+                            <p style="margin:0 0 10px 0; font-size:0.9rem; line-height:1.5;">
+                                Has denegado el permiso de ubicacin.
+                            </p>
+                            <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:8px; margin-top:15px; text-align:left;">
+                                <p style="margin:0 0 10px 0; font-weight:bold;">?? Para activar en iPad/iPhone:</p>
+                                <ol style="margin:0; padding-left:20px; font-size:0.85rem; line-height:1.6;">
+                                    <li>Ve a <strong>Ajustes</strong> ? <strong>Safari</strong></li>
+                                    <li>Busca <strong>Ubicacin</strong></li>
+                                    <li>Selecciona <strong>"Preguntar" o "Permitir"</strong></li>
+                                    <li>Recarga esta pgina</li>
+                                </ol>
+                            </div>
+                            <p style="margin-top:15px; font-size:0.8rem; color:#aaa;">
+                                ?? Tambin puedes usar la bsqueda manual escribiendo el nombre de la ciudad
+                            </p>
+                        </div>
+                    `;
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">? Ubicacin no disponible. Verifica tu conexin GPS.</div>';
+                    break;
+                case error.TIMEOUT:
+                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">?? Tiempo agotado. Intenta de nuevo.</div>';
+                    break;
+                default:
+                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">? Error desconocido al obtener ubicacin.</div>';
+            }
+
+            statusEl.innerHTML = '';
+            listEl.innerHTML = errorMsg;
+        },
+        // Options
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+
+function closeRadarModal() {
+    const modal = document.getElementById('radarModal');
+    if (modal) {
+        modal.classList.remove('open');
+    }
+}
+
+// Scan nearby businesses using Overpass API (OpenStreetMap)
+async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
+    const statusEl = document.getElementById('radarStatus');
+    const listEl = document.getElementById('radarList');
+
+    try {
+        // Convert radius to meters
+        const radiusM = radiusKm * 1000;
+
+        // Overpass query for bars, restaurants, cafes
+        const query = `
+            [out:json][timeout:25];
+            (
+                node["amenity"~"bar|restaurant|cafe|pub"](around:${radiusM},${lat},${lon});
+                way["amenity"~"bar|restaurant|cafe|pub"](around:${radiusM},${lat},${lon});
+            );
+            out body;
+            >;
+            out skel qt;
+        `;
+
+        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Error en la API de Overpass');
+
+        const data = await response.json();
+        const elements = data.elements || [];
+
+        // Filter and process results
+        let businesses = elements
+            .filter(el => el.tags && el.tags.name)
+            .map(el => {
+                const elLat = el.lat || (el.center ? el.center.lat : null);
+                const elLon = el.lon || (el.center ? el.center.lon : null);
+
+                if (!elLat || !elLon) return null;
+
+                const distance = getDistanceFromLatLonInKm(lat, lon, elLat, elLon);
+
+                return {
+                    name: el.tags.name,
+                    type: el.tags.amenity,
+                    address: el.tags['addr:street'] || '',
+                    phone: el.tags.phone || el.tags['contact:phone'] || '',
+                    opening_hours: el.tags.opening_hours || '',
+                    distance: distance,
+                    lat: elLat,
+                    lon: elLon
+                };
+            })
+            .filter(b => b !== null);
+
+        // Sort by distance
+        businesses.sort((a, b) => a.distance - b.distance);
+
+        // Filter by radius (double check)
+        businesses = businesses.filter(b => b.distance <= radiusKm);
+
+        // Check if open now (if filter is active)
+        if (onlyOpen) {
+            const now = new Date();
+            businesses = businesses.filter(b => {
+                if (!b.opening_hours) return true; // Include if no hours specified
+                // Simple check - this could be improved with a proper library
+                return !b.opening_hours.toLowerCase().includes('closed');
+            });
+        }
+
+        // Display results
+        if (businesses.length === 0) {
+            statusEl.innerHTML = '?? No se encontraron negocios';
+            listEl.innerHTML = `
+                <div style="color:#aaa; text-align:center; padding:20px;">
+                    <p>No hay bares o restaurantes en un radio de ${radiusKm}km</p>
+                    <p style="font-size:0.8rem; margin-top:10px;">Prueba aumentando el radio de bsqueda</p>
+                </div>
+            `;
+        } else {
+            statusEl.innerHTML = `? ${businesses.length} negocio${businesses.length > 1 ? 's' : ''} encontrado${businesses.length > 1 ? 's' : ''}`;
+
+            listEl.innerHTML = '';
+            businesses.forEach(biz => {
+                const card = document.createElement('div');
+                card.style.cssText = 'background:rgba(255,255,255,0.05); border-radius:8px; padding:12px; border-left:3px solid #00ff88;';
+
+                const distText = biz.distance < 1
+                    ? `${(biz.distance * 1000).toFixed(0)}m`
+                    : `${biz.distance.toFixed(2)}km`;
+
+                const typeIcon = {
+                    'bar': '??',
+                    'restaurant': '???',
+                    'cafe': '?',
+                    'pub': '??'
+                }[biz.type] || '??';
+
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:5px;">
+                        <div style="flex:1;">
+                            <div style="font-weight:bold; color:white; font-size:0.95rem;">${typeIcon} ${biz.name}</div>
+                            ${biz.address ? `<div style="font-size:0.75rem; color:#aaa; margin-top:3px;">${biz.address}</div>` : ''}
+                            ${biz.phone ? `<div style="font-size:0.75rem; color:#4ade80; margin-top:3px;">?? ${biz.phone}</div>` : ''}
+                        </div>
+                        <div style="background:rgba(0,255,136,0.2); color:#00ff88; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:bold; white-space:nowrap; margin-left:10px;">
+                            ${distText}
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <a href="https://www.google.com/maps/search/?api=1&query=${biz.lat},${biz.lon}" target="_blank" 
+                           style="flex:1; background:#3b82f6; color:white; padding:6px; border-radius:6px; text-align:center; text-decoration:none; font-size:0.8rem;">
+                            ?? Ver Mapa
+                        </a>
+                        ${biz.phone ? `
+                        <a href="tel:${biz.phone}" 
+                           style="flex:1; background:#10b981; color:white; padding:6px; border-radius:6px; text-align:center; text-decoration:none; font-size:0.8rem;">
+                            ?? Llamar
+                        </a>
+                        ` : ''}
+                    </div>
+                `;
+
+                listEl.appendChild(card);
+            });
+        }
+
+    } catch (error) {
+        console.error('Error scanning businesses:', error);
+        statusEl.innerHTML = '? Error al escanear';
+        listEl.innerHTML = `
+            <div style="color:#ff4444; text-align:center; padding:20px;">
+                <p>Error al buscar negocios cercanos</p>
+                <p style="font-size:0.8rem; margin-top:10px;">${error.message}</p>
+            </div>
+        `
+            ;
+    }
+}

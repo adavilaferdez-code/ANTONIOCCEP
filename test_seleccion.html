@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Calculadora</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+        }
+
+        .product {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            padding: 20px;
+            margin: 10px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .product.selected {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.15);
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Test de Selección</h1>
+    <div id="container"></div>
+
+    <script>
+        let selectedCalcProducts = new Set();
+
+        function toggleCalcProductSelection(productId) {
+            console.log('Click en producto:', productId);
+            if (selectedCalcProducts.has(productId)) {
+                selectedCalcProducts.delete(productId);
+            } else {
+                selectedCalcProducts.add(productId);
+            }
+            loadProducts();
+        }
+
+        function loadProducts() {
+            const container = document.getElementById('container');
+            const products = [
+                { id: 1, name: 'Coca-Cola 2L' },
+                { id: 2, name: 'Fanta 2L' },
+                { id: 3, name: 'Sprite 2L' }
+            ];
+
+            container.innerHTML = '';
+            products.forEach(prod => {
+                const isSelected = selectedCalcProducts.has(prod.id);
+                const div = document.createElement('div');
+                div.className = 'product' + (isSelected ? ' selected' : '');
+                div.innerHTML = `
+                    <div onclick="toggleCalcProductSelection(${prod.id})">
+                        <h3 style="pointer-events: none;">${prod.name}</h3>
+                        <p style="pointer-events: none;">ID: ${prod.id}</p>
+                        <p style="pointer-events: none;">Estado: ${isSelected ? 'SELECCIONADO ✓' : 'No seleccionado'}</p>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        loadProducts();
+    </script>
+</body>
+
+</html>

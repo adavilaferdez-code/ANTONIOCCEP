@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Calculadora</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .test-btn {
+            background: #4ade80;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .test-btn:hover {
+            background: #22c55e;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .success {
+            color: #4ade80;
+        }
+
+        .error {
+            color: #ef4444;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🧪 Test de Calculadora - Bonificación</h1>
+
+    <div>
+        <button class="test-btn" onclick="testSwitchCalcTab()">Test switchCalcTab()</button>
+        <button class="test-btn" onclick="testLoadCalcProducts()">Test loadCalcProducts()</button>
+        <button class="test-btn" onclick="testOpenCalculator()">Test openCalculator()</button>
+    </div>
+
+    <div class="status" id="status">
+        <h3>Estado:</h3>
+        <div id="results">Haz clic en un botón para probar...</div>
+    </div>
+
+    <script src="app_v3.js?v=20260131_1508"></script>
+    <script>
+        function log(message, isError = false) {
+            const results = document.getElementById('results');
+            const className = isError ? 'error' : 'success';
+            results.innerHTML += `<div class="${className}">${isError ? '❌' : '✅'} ${message}</div>`;
+        }
+
+        function testSwitchCalcTab() {
+            document.getElementById('results').innerHTML = '<h4>Testing switchCalcTab()...</h4>';
+
+            try {
+                if (typeof switchCalcTab === 'function') {
+                    log('switchCalcTab está definida');
+                    log('Tipo: ' + typeof switchCalcTab);
+                } else {
+                    log('switchCalcTab NO está definida', true);
+                }
+            } catch (e) {
+                log('Error: ' + e.message, true);
+            }
+        }
+
+        function testLoadCalcProducts() {
+            document.getElementById('results').innerHTML = '<h4>Testing loadCalcProducts()...</h4>';
+
+            try {
+                if (typeof loadCalcProducts === 'function') {
+                    log('loadCalcProducts está definida');
+                    log('Tipo: ' + typeof loadCalcProducts);
+                } else {
+                    log('loadCalcProducts NO está definida', true);
+                }
+            } catch (e) {
+                log('Error: ' + e.message, true);
+            }
+        }
+
+        function testOpenCalculator() {
+            document.getElementById('results').innerHTML = '<h4>Testing openCalculator()...</h4>';
+
+            try {
+                if (typeof openCalculator === 'function') {
+                    log('openCalculator está definida');
+                    log('Tipo: ' + typeof openCalculator);
+                } else {
+                    log('openCalculator NO está definida', true);
+                }
+            } catch (e) {
+                log('Error: ' + e.message, true);
+            }
+        }
+
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('results').innerHTML = '<h4>Auto-test al cargar:</h4>';
+
+                const functions = [
+                    'switchCalcTab',
+                    'loadCalcProducts',
+                    'openCalculator',
+                    'closeCalculator',
+                    'calcAppend',
+                    'calcClear',
+                    'addToCalcCart',
+                    'toggleCalcProductSelection'
+                ];
+
+                functions.forEach(funcName => {
+                    if (typeof window[funcName] === 'function') {
+                        log(`${funcName} ✓`);
+                    } else {
+                        log(`${funcName} NO ENCONTRADA`, true);
+                    }
+                });
+            }, 100);
+        });
+    </script>
+</body>
+
+</html>
