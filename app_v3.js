@@ -896,8 +896,8 @@ function activateRadar() {
         // Options
         {
             enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
+            timeout: 30000,
+            maximumAge: 300000 // 5 minutes cache
         }
     );
 }
@@ -1015,6 +1015,55 @@ async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
     const statusEl = document.getElementById('radarStatus');
     const listEl = document.getElementById('radarList');
 
+    // MAP INITIALIZATION
+    let map = window.radarMapInstance;
+    if (!map) {
+        if (typeof L === 'undefined') {
+            console.error('Leaflet.js not loaded');
+        } else {
+            // Remove previous instance if any (safety check)
+            const container = L.DomUtil.get('radarMap');
+            if (container != null) {
+                container._leaflet_id = null;
+            }
+
+            map = L.map('radarMap').setView([lat, lon], 15);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
+
+            window.radarMapInstance = map;
+        }
+    } else {
+        // Reset view
+        if (map) map.setView([lat, lon], 15);
+    }
+
+    // Force map resize logic (wait for modal animation)
+    setTimeout(() => {
+        if (map) map.invalidateSize();
+    }, 300);
+
+    // Clear existing markers (except tile layer)
+    if (map) {
+        map.eachLayer((layer) => {
+            if (layer instanceof L.Marker) {
+                map.removeLayer(layer);
+            }
+        });
+
+        // Add User Marker (Blue)
+        const userIcon = L.divIcon({
+            className: 'user-marker-icon',
+            html: '<div style="background:#00aaff; width:14px; height:14px; border-radius:50%; border:2px solid white; box-shadow:0 0 10px #00aaff;"></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+        L.marker([lat, lon], { icon: userIcon }).addTo(map).bindPopup("<b>Tú estás aquí</b>");
+    }
+
     try {
         const businesses = await fetchNearbyPlaces(lat, lon, radiusKm, onlyOpen);
 
@@ -1032,8 +1081,30 @@ async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
 
             listEl.innerHTML = '';
             businesses.forEach(biz => {
+                // ADD MAP MARKER
+                if (map) {
+                    const markerColor = '#ff4444'; // Red for venues
+                    const venueIcon = L.divIcon({
+                        className: 'venue-marker-icon',
+                        html: `<div style="background:${markerColor}; width:12px; height:12px; border-radius:50%; border:2px solid white;"></div>`,
+                        iconSize: [16, 16],
+                        iconAnchor: [8, 8]
+                    });
+
+                    const popupContent = `
+                        <b>${biz.name}</b><br>
+                        <span style="font-size:0.8em">${biz.distance.toFixed(2)}km</span><br>
+                        ${biz.phone ? `<a href="tel:${biz.phone}" style="color:#10b981; font-weight:bold; text-decoration:none;">📞 Llamar</a>` : ''}
+                    `;
+
+                    L.marker([biz.lat, biz.lon], { icon: venueIcon })
+                        .addTo(map)
+                        .bindPopup(popupContent);
+                }
+
+                // ADD LIST CARD
                 const card = document.createElement('div');
-                card.style.cssText = 'background:rgba(255,255,255,0.05); border-radius:8px; padding:12px; border-left:3px solid #00ff88;';
+                card.style.cssText = 'background:rgba(255,255,255,0.05); border-radius:8px; padding:12px; border-left:3px solid #00ff88; margin-bottom:10px;';
 
                 const distText = biz.distance < 1
                     ? `${(biz.distance * 1000).toFixed(0)}m`
@@ -1182,8 +1253,8 @@ function searchNearMe() {
         },
         {
             enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 0
+            timeout: 30000,
+            maximumAge: 300000 // 5 minutes cache
         }
     );
 }

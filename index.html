@@ -15,6 +15,11 @@
     <link rel="stylesheet" href="style_append.css?v=premium_fixed_v2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- LEAFLET MAPS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
         /* Reminder Bell Button */
         .reminder-bell-btn {
@@ -618,6 +623,10 @@
             </div>
 
             <div style="padding:15px; text-align:center;">
+                <!-- MAPA INTERACTIVO -->
+                <div id="radarMap" style="width:100%; height:300px; border-radius:12px; margin-bottom:15px; z-index:1;">
+                </div>
+
                 <div id="radarStatus" style="color:#aaa; margin-bottom:15px;">Escaneando zona...</div>
                 <div id="radarList" class="radar-list" style="display:flex; flex-direction:column; gap:10px;">
                     <!-- Results will appear here -->
