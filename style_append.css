@@ -2883,6 +2883,46 @@ body.outdoor-mode .fab-reminder {
     position: relative;
     overflow: hidden;
     min-height: 70px;
+
+    /* 3D TILT SETUP */
+    transform-style: preserve-3d;
+    transform: perspective(1000px);
+    will-change: transform;
+}
+
+/* SAP STATUS DOT */
+.sap-status-dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    background-color: #00ff00;
+    /* Bright Green */
+    border-radius: 50%;
+    box-shadow: 0 0 5px #00ff00;
+    z-index: 5;
+    animation: pulseStatus 2s infinite;
+}
+
+@keyframes pulseStatus {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.7;
+        box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        opacity: 1;
+        box-shadow: 0 0 0 6px rgba(0, 255, 0, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        opacity: 0.7;
+        box-shadow: 0 0 0 0 rgba(0, 255, 0, 0);
+    }
 }
 
 .btn-gold-sap::before {
@@ -2930,4 +2970,71 @@ body.outdoor-mode .fab-reminder {
 .btn-gold-sap:active {
     transform: scale(0.95);
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2) !important;
+}
+/* === NEW SEARCH BAR DESIGN (FLOATING BUTTON) === */
+.search-container {
+    position: relative; /* Clave para que el botón se quede dentro */
+    width: 100%;
+    max-width: 600px; /* Ajusta el ancho máximo según necesites */
+    margin: 20px auto;
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Estilos de la barra de texto (Input) */
+.search-input {
+    width: 100%;
+    background-color: #1e1e1e; /* Color de fondo oscuro */
+    border: 1px solid #333;
+    border-radius: 50px; /* Bordes totalmente redondos */
+    padding: 18px 25px;
+    padding-right: 150px; /* Espacio extra a la derecha para que el texto no choque con el botón */
+    color: #b0b0b0;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+    box-sizing: border-box; /* Asegura que el padding no rompa el ancho */
+}
+
+/* Efecto al hacer clic en la barra */
+.search-input:focus {
+    border-color: #555;
+    background-color: #252525;
+    color: #fff;
+}
+
+/* Estilos del Botón "Flotante" */
+.search-btn {
+    position: absolute; /* Lo posiciona 'encima' de la barra */
+    right: 6px; /* Separación desde la derecha */
+    top: 6px;   /* Separación desde arriba */
+    bottom: 6px; /* Separación desde abajo */
+    
+    background: linear-gradient(135deg, #ff4d4d 0%, #cc0000 100%); /* Tu degradado rojo */
+    color: white;
+    border: none;
+    border-radius: 50px; /* Redondo igual que la barra */
+    padding: 0 24px; /* Ancho del botón */
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espacio entre lupa y texto */
+    transition: transform 0.2s;
+}
+
+.search-btn:hover {
+    transform: scale(1.02); /* Pequeño efecto zoom al pasar el mouse */
+    filter: brightness(1.1);
+}
+
+/* Icono de Lupa (usando un SVG simple para no depender de librerías) */
+.icon-search {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: white;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }

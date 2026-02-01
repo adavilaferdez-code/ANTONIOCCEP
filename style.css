@@ -127,6 +127,11 @@ body {
     width: 100%;
     max-width: 600px;
     transition: transform 0.3s ease;
+    z-index: 100;
+    /* Ensure it floats above other elements */
+    display: flex;
+    /* Ensure proper containment */
+    align-items: center;
 }
 
 .search-wrapper:focus-within {
@@ -135,11 +140,11 @@ body {
 
 .search-input {
     width: 100%;
-    padding: 20px 24px 20px 54px;
+    padding: 20px 140px 20px 60px;
+    /* Increased left padding for icon */
     border-radius: 50px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(255, 255, 255, 0.03);
-    /* Lighter touch */
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     color: white;
@@ -164,8 +169,57 @@ body {
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-secondary);
-    font-size: 1.1rem;
+    width: 20px;
+    height: 20px;
     pointer-events: none;
+    z-index: 101;
+    fill: currentColor;
+    /* For SVG */
+}
+
+.search-btn-inside {
+    position: absolute;
+    right: 8px;
+    /* Spacing from right edge */
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #2979FF, #1565C0);
+    /* Vibrant Blue */
+    color: white;
+    border: none;
+    border-radius: 40px;
+    /* Pillow shape inside pill */
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(41, 121, 255, 0.4);
+    transition: all 0.3s ease;
+    z-index: 102;
+    /* Above input */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-btn-inside:hover {
+    transform: translateY(-50%) scale(1.05);
+    /* Maintain Y centering */
+    box-shadow: 0 6px 20px rgba(41, 121, 255, 0.6);
+}
+
+.search-btn-inside:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.search-btn-inside:hover {
+    transform: translateY(-50%) scale(1.05);
+    /* Maintain Y centering */
+    box-shadow: 0 6px 20px rgba(244, 0, 9, 0.6);
+}
+
+.search-btn-inside:active {
+    transform: translateY(-50%) scale(0.95);
 }
 
 /* === GRID SYSTEM === */

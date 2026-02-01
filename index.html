@@ -11,9 +11,10 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="logo_antonio.png">
     <title>HostelHub Premium</title>
-    <link rel="stylesheet" href="style.css?v=premium_fixed_v2">
-    <link rel="stylesheet" href="style_append.css?v=premium_fixed_v2">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css?v=20260201_1345">
+    <link rel="stylesheet" href="style_append.css?v=20260201_1345">
+    <!-- Font Awesome Removed for Local Compatibility -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
     <!-- LEAFLET MAPS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -160,7 +161,7 @@
             </div>
             <!-- Showroom Toggle -->
             <button class="showroom-toggle" onclick="toggleShowroom()">
-                <i class="fa-solid fa-eye"></i>
+                <span style="font-size: 1.2rem;">👁️</span>
             </button>
         </header>
 
@@ -169,12 +170,22 @@
 
             <!-- Hero Search -->
             <section class="search-hero commercial-data">
-                <div class="search-wrapper">
-                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                    <input type="text" id="searchInput" class="search-input"
-                        placeholder="Buscar bar, restaurante, ciudad...">
+                <form class="search-wrapper" role="search" onsubmit="event.preventDefault(); searchNearMe();">
+                    <!-- Optimized SVG Icon -->
+                    <svg class="search-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M11 2C6.03 2 2 6.03 2 11C2 15.97 6.03 20 11 20C13.03 20 14.9 19.32 16.42 18.16L20.29 22.03C20.68 22.42 21.32 22.42 21.71 22.03C22.1 21.64 22.1 21.01 21.71 20.62L17.84 16.75C19.08 15.16 19.88 13.16 19.88 11C19.88 6.03 15.97 2 11 2ZM11 4C14.87 4 18 7.13 18 11C18 14.87 14.87 18 11 18C7.13 18 4 14.87 4 11C4 7.13 7.13 4 11 4Z" />
+                    </svg>
 
-                </div>
+                    <!-- Input with Semantic Label -->
+                    <input type="text" id="searchInput" class="search-input"
+                        placeholder="Buscar bar, restaurante, ciudad..." aria-label="Buscar lugares cercanos">
+
+                    <!-- Botón Integrado (Pill) -->
+                    <button type="submit" class="search-btn-inside" aria-label="Realizar búsqueda">
+                        BUSCAR
+                    </button>
+                </form>
             </section>
 
             <div class="actions-container">
@@ -182,10 +193,7 @@
                 <!-- DASHBOARD CARD (Grupos unificados) -->
                 <div class="dashboard-card">
 
-                    <!-- 1. Button -->
-                    <button class="btn-cerca commercial-data" onclick="searchNearMe()">
-                        <i class="fa-solid fa-location-crosshairs"></i> CERCA (100km)
-                    </button>
+
 
                     <!-- 2. Shortcuts Grid -->
                     <div class="bento-grid">
@@ -193,40 +201,42 @@
                         <!-- 1. Productos -->
                         <div class="bento-card commercial-data" onclick="window.location.href='catalogo_premium.html'"
                             style="cursor:pointer; border: 2px solid #00ff00;">
-                            <i class="fa-solid fa-box-open" style="color: #fbbf24;"></i>
+                            <span style="font-size: 1.5rem;">📦</span>
                             <span>CATÁLOGO</span>
                         </div>
 
                         <!-- 2. Power BI -->
                         <div class="bento-card sensitive-data"
                             onclick="window.open('https://app.powerbi.com/', '_blank'); return false;">
-                            <i class="fa-solid fa-chart-pie" style="color: #f59e0b;"></i>
+                            <span style="font-size: 1.5rem;">📊</span>
                             <span>Power BI</span>
                         </div>
 
                         <!-- 3. Checklist -->
                         <div class="bento-card sensitive-data" onclick="openChecklist()">
-                            <i class="fa-solid fa-clipboard-check" style="color: #d946ef;"></i>
+                            <span style="font-size: 1.5rem;">📋</span>
                             <span>Checklist</span>
                         </div>
 
                         <!-- 4. Negociaciones -->
                         <div class="bento-card sensitive-data"
                             onclick="window.open('https://gemini.google.com', '_blank')">
-                            <i class="fa-solid fa-handshake" style="color: #10b981;"></i>
+                            <span style="font-size: 1.5rem;">🤝</span>
                             <span>Negociación</span>
                         </div>
 
                         <!-- 5. Catálogo Clientes -->
                         <div class="bento-card commercial-data" onclick="window.open('catalogo_2025.pdf', '_blank')"
                             style="cursor:pointer;">
-                            <i class="fa-solid fa-images" style="color: #3b82f6;"></i>
+                            <span style="font-size: 1.5rem;">🖼️</span>
                             <span>Catálogo</span>
                         </div>
 
                         <!-- 6. SAP SHORTCUT (GOLD) -->
-                        <a href="shortcuts://run-shortcut?name=SAP" class="bento-card btn-gold-sap sensitive-data">
-                            <i class="fa-solid fa-key"></i>
+                        <a href="shortcuts://run-shortcut?name=SAP" class="bento-card btn-gold-sap sensitive-data"
+                            id="sapButton">
+                            <div class="sap-status-dot"></div>
+                            <span id="sapIcon" style="font-size: 1.5rem;">🔑</span>
                             <span>SAP</span>
                         </a>
 
@@ -237,7 +247,7 @@
                     <!-- 3. Distribuidores -->
                     <div class="capsule-btn cap-blue sensitive-data" onclick="openDistribuidoresModal()"
                         style="width: 100%; justify-content: center; margin-top: 5px;">
-                        <i class="fa-solid fa-truck-fast"></i> DISTRIBUIDORES
+                        <span style="margin-right: 8px;">🚚</span> DISTRIBUIDORES
                     </div>
 
                 </div>
@@ -251,16 +261,16 @@
                 <div class="hero-card commercial-data" onclick="openFocusModal()">
                     <img src="focos_dashboard.jpg" class="hero-bg" alt="Focos">
                     <div class="hero-overlay">
-                        <div class="hero-title"><i class="fa-solid fa-star"></i> FOCOS ENERO</div>
+                        <div class="hero-title"><span>⭐</span> FOCOS ENERO</div>
                         <div class="hero-sub">Clic para ver novedades</div>
                     </div>
                 </div>
 
                 <!-- DEUDAS -->
                 <div class="hero-card sensitive-data" onclick="openDebtModal()">
-                    <img src="deudas_v2.jpg" class="hero-bg" alt="Deudas">
+                    <img src="deudas_2026_new.png" class="hero-bg" alt="Deudas">
                     <div class="hero-overlay">
-                        <div class="hero-title"><i class="fa-solid fa-file-invoice-dollar"></i> DEUDAS</div>
+                        <div class="hero-title"><span>💸</span> DEUDAS</div>
                         <div class="hero-sub">Clic para ver listado oficial</div>
                     </div>
                 </div>
@@ -269,10 +279,13 @@
                 <div class="hero-card commercial-data" onclick="activateRadar()">
                     <div class="hero-bg"
                         style="background:#1e3a8a; display:flex; align-items:center; justify-content:center;">
-                        <i class="fa-solid fa-location-dot" style="font-size:3rem; color:rgba(255,255,255,0.2);"></i>
+                        <span style="font-size:3rem;">📍</span>
                     </div>
                     <div class="hero-overlay">
-                        <div class="hero-title"><i class="fa-solid fa-map-location-dot"></i> RADAR</div>
+                        <div class="hero-overlay">
+                            <div class="hero-title"><span>🗺️</span> RADAR</div>
+                            <div class="hero-sub">Detectar clientes cercanos</div>
+                        </div>
                         <div class="hero-sub">Detectar clientes cercanos</div>
                     </div>
                 </div>
@@ -293,7 +306,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Resultados</h2>
-                <button class="close-btn" onclick="closeSearchResultsModal()"><i class="fa-solid fa-xmark"></i></button>
+                <button class="close-btn" onclick="closeSearchResultsModal()"><span>❌</span></button>
             </div>
             <div id="venueList" class="venue-list"></div>
         </div>
@@ -304,12 +317,12 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Checklist</h2>
-                <button class="close-btn" onclick="closeChecklist()"><i class="fa-solid fa-xmark"></i></button>
+                <button class="close-btn" onclick="closeChecklist()"><span>❌</span></button>
             </div>
             <div class="checklist-container">
                 <!-- 1. Pre-Visit Analysis -->
                 <label class="check-item highlight-blue">
-                    <div class="check-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <div class="check-icon"><span>🕒</span></div>
                     <div class="check-content">
                         <span class="check-title">VER COMPRAS ANTERIORES</span>
                         <span class="check-sub">Analizar historial previo</span>
@@ -319,7 +332,7 @@
 
                 <!-- 2. Client Data -->
                 <label class="check-item">
-                    <div class="check-icon"><i class="fa-solid fa-address-card"></i></div>
+                    <div class="check-icon"><span>📇</span></div>
                     <div class="check-content">
                         <span class="check-title">DATOS DEL CLIENTE</span>
                         <span class="check-sub">Actualizar ficha</span>
@@ -329,7 +342,7 @@
 
                 <!-- 2b. Invoice Support -->
                 <label class="check-item">
-                    <div class="check-icon"><i class="fa-solid fa-file-invoice"></i></div>
+                    <div class="check-icon"><span>📄</span></div>
                     <div class="check-content">
                         <span class="check-title">SOPORTE FACTURAS</span>
                     </div>
@@ -338,7 +351,7 @@
 
                 <!-- 3. Debt (Critical) -->
                 <label class="check-item highlight-red">
-                    <div class="check-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                    <div class="check-icon"><span>💸</span></div>
                     <div class="check-content">
                         <span class="check-title">DEUDA</span>
                         <span class="check-sub">Verificar pendientes</span>
@@ -348,7 +361,7 @@
 
                 <!-- 4. GDA Objectives -->
                 <label class="check-item highlight-gold">
-                    <div class="check-icon"><i class="fa-solid fa-bullseye"></i></div>
+                    <div class="check-icon"><span>🎯</span></div>
                     <div class="check-content">
                         <span class="check-title">OBJETIVO GDA</span>
                         <span class="check-sub">Volumen Fanta VR, CCZZ VR, AQ/Fuze</span>
@@ -358,7 +371,7 @@
 
                 <!-- 5. Upselling -->
                 <label class="check-item">
-                    <div class="check-icon"><i class="fa-solid fa-box-open"></i></div>
+                    <div class="check-icon"><span style="font-size: 1.2rem;">📦</span></div>
                     <div class="check-content">
                         <span class="check-title">UNA CAJITA MÁS</span>
                         <span class="check-sub">Limón, Agua, Gas, Sprite, Energy</span>
@@ -368,7 +381,7 @@
 
                 <!-- 6. Captacion -->
                 <label class="check-item">
-                    <div class="check-icon"><i class="fa-solid fa-user-plus"></i></div>
+                    <div class="check-icon"><span style="font-size: 1.2rem;">👤+</span></div>
                     <div class="check-content">
                         <span class="check-title">CAPTACIÓN DE CLIENTES</span>
                     </div>
@@ -377,7 +390,7 @@
 
                 <!-- 7. ACTIVAR (High Energy) -->
                 <label class="check-item highlight-electric">
-                    <div class="check-icon"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="check-icon"><span style="font-size: 1.2rem;">⚡</span></div>
                     <div class="check-content">
                         <span class="check-title">ACTIVAR!!!!!!!!!!!!!</span>
                         <span class="check-sub">¡Energía a tope!</span>
@@ -387,7 +400,7 @@
 
                 <!-- 8. Audit -->
                 <label class="check-item">
-                    <div class="check-icon"><i class="fa-solid fa-camera"></i></div>
+                    <div class="check-icon"><span style="font-size: 1.2rem;">📷</span></div>
                     <div class="check-content">
                         <span class="check-title">EEFF, AUDIT FOTOS</span>
                     </div>
@@ -396,7 +409,7 @@
 
                 <!-- 9. Sustainability -->
                 <label class="check-item highlight-green">
-                    <div class="check-icon"><i class="fa-solid fa-leaf"></i></div>
+                    <div class="check-icon"><span style="font-size: 1.2rem;">🍃</span></div>
                     <div class="check-content">
                         <span class="check-title">SOSTENIBILIDAD</span>
                         <span class="check-sub">Por el Clima</span>
@@ -412,7 +425,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Focos Enero</h2>
-                <button class="close-btn" onclick="closeFocusModal()"><i class="fa-solid fa-xmark"></i></button>
+                <button class="close-btn" onclick="closeFocusModal()"><span>❌</span></button>
             </div>
             <img src="focos_dashboard.jpg" class="modal-image-view">
         </div>
@@ -423,7 +436,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modalTitle">Detalle</h2>
-                <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+                <button class="close-btn" onclick="closeModal()"><span>❌</span></button>
             </div>
             <div class="modal-body">
                 <div class="input-group">
@@ -447,10 +460,12 @@
                     <textarea id="inputNotes" class="modal-input" rows="3"></textarea>
                 </div>
                 <div class="modal-actions">
-                    <a id="btnCall" href="#" class="action-capsule call"><i class="fa-solid fa-phone"></i> Llamar</a>
-                    <a id="btnEmail" href="#" class="action-capsule email"><i class="fa-solid fa-envelope"></i>
+                    <a id="btnCall" href="#" class="action-capsule call"><span style="margin-right:5px;">📞</span>
+                        Llamar</a>
+                    <a id="btnEmail" href="#" class="action-capsule email"><span style="margin-right:5px;">✉️</span>
                         Correo</a>
-                    <button onclick="saveToDebts()" class="action-capsule save"><i class="fa-solid fa-floppy-disk"></i>
+                    <button onclick="saveToDebts()" class="action-capsule save"><span
+                            style="margin-right:5px;">💾</span>
                         GUARDAR</button>
                 </div>
             </div>
@@ -462,8 +477,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Distribuidores</h2>
-                <button class="close-btn" onclick="closeDistribuidoresModal()"><i
-                        class="fa-solid fa-xmark"></i></button>
+                <button class="close-btn" onclick="closeDistribuidoresModal()"><span>❌</span></button>
             </div>
 
             <!-- HTML TABLE REPLACEMENT -->
@@ -529,12 +543,12 @@
                 <h2>Deudas y Notas</h2>
                 <div id="saveIndicatorDebt"
                     style="font-size: 0.8rem; color: var(--success); margin-right: 10px; opacity: 0; transition: opacity 0.3s;">
-                    <i class="fa-solid fa-check"></i> Guardado
+                    <span>✅</span> Guardado
                 </div>
-                <button class="close-btn" onclick="closeDebtModal()"><i class="fa-solid fa-xmark"></i></button>
+                <button class="close-btn" onclick="closeDebtModal()"><span>❌</span></button>
             </div>
             <!-- Debt Image Header -->
-            <img src="deudas_v2.jpg" class="modal-image-view" style="margin-bottom: 20px;"
+            <img src="deudas_2026_new.png" class="modal-image-view" style="margin-bottom: 20px;"
                 onclick="openZoomModal(this.src)">
 
             <div class="filter-bar">
@@ -546,7 +560,7 @@
                 </div>
             </div>
             <div id="debtPad" class="debt-pad"></div>
-            <button onclick="addDebtRow()" class="add-btn"><i class="fa-solid fa-plus"></i> Nueva Nota</button>
+            <button onclick="addDebtRow()" class="add-btn"><span>➕</span> Nueva Nota</button>
         </div>
     </div>
 
@@ -554,15 +568,15 @@
     <nav class="bottom-nav">
         <!-- CORREO - Primera posición -->
         <a href="https://outlook.office.com/mail/" target="_blank" class="nav-item">
-            <i class="fa-solid fa-envelope"></i>
+            <span>✉️</span>
             <span>CORREO</span>
         </a>
         <a href="#" class="nav-item" onclick="openCalculator(); return false;">
-            <i class="fa-solid fa-calculator"></i>
+            <span>🧮</span>
             <span>CALC</span>
         </a>
         <a href="http://excel.cloud.microsoft" target="_blank" class="nav-item sensitive-data">
-            <i class="fa-solid fa-table-cells"></i>
+            <span>📅</span>
             <span>EXCEL</span>
         </a>
     </nav>
@@ -574,9 +588,9 @@
                 <h2 id="planesTitle">Notas (Carpetas)</h2>
                 <div id="saveIndicator"
                     style="font-size: 0.8rem; color: var(--success); margin-right: 10px; opacity: 0; transition: opacity 0.3s;">
-                    <i class="fa-solid fa-check"></i> Guardado
+                    <span>✅</span> Guardado
                 </div>
-                <button class="close-btn" onclick="closePlanes()"><i class="fa-solid fa-xmark"></i></button>
+                <button class="close-btn" onclick="closePlanes()"><span>❌</span></button>
             </div>
             <!-- Filter Bar for Notes -->
             <div class="filter-bar" style="margin-bottom: 15px;">
@@ -601,7 +615,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>📡 Radar de Clientes</h2>
-                <button class="close-btn" onclick="closeRadarModal()"><i class="fa-solid fa-xmark"></i></button>
+                <button class="close-btn" onclick="closeRadarModal()"><span>❌</span></button>
             </div>
 
             <!-- Controles de Filtrado -->
@@ -652,8 +666,8 @@
                 <h2>Comercial & Calculadora</h2>
                 <div style="display:flex; gap:10px;">
                     <button class="close-btn" onclick="toggleOutdoorMode()" title="Modo Exterior"
-                        style="background:rgba(255,255,255,0.1);"><i class="fa-solid fa-sun"></i></button>
-                    <button class="close-btn" onclick="closeCalculator()"><i class="fa-solid fa-xmark"></i></button>
+                        style="background:rgba(255,255,255,0.1);"><span>☀️</span></button>
+                    <button class="close-btn" onclick="closeCalculator()"><span>❌</span></button>
                 </div>
             </div>
 
@@ -679,8 +693,7 @@
                             <button class="calc-btn op" onclick="calcClear()">C</button>
                             <button class="calc-btn op" onclick="calcAppend('/')">/</button>
                             <button class="calc-btn op" onclick="calcAppend('*')">x</button>
-                            <button class="calc-btn op" onclick="calcBackspace()"><i
-                                    class="fa-solid fa-delete-left"></i></button>
+                            <button class="calc-btn op" onclick="calcBackspace()"><span>⌫</span></button>
 
                             <button class="calc-btn" onclick="calcAppend('7')">7</button>
                             <button class="calc-btn" onclick="calcAppend('8')">8</button>
@@ -788,7 +801,7 @@
                                 </div>
                                 <button onclick="clearBonification()"
                                     style="background:#444; color:white; border:none; padding:8px; border-radius:8px; margin-top:15px; width:100%;">
-                                    <i class="fa-solid fa-rotate-right"></i> Borrar Todo
+                                    <span>🔄</span> Borrar Todo
                                 </button>
                             </div>
                             <!-- END FOOTER -->
@@ -842,7 +855,7 @@
         <div class="modal-content" style="max-width:350px; text-align:center;">
             <div class="modal-header">
                 <h2>Escanea para abrir</h2>
-                <button class="close-btn" onclick="closeQRModal()"><i class="fa-solid fa-xmark"></i></button>
+                <button class="close-btn" onclick="closeQRModal()"><span>❌</span></button>
             </div>
             <div style="padding:20px; display:flex; flex-direction:column; align-items:center;">
                 <div style="background:white; padding:10px; border-radius:10px; margin-bottom:15px;">
@@ -929,13 +942,11 @@
 <script>
     function toggleShowroom() {
         document.body.classList.toggle('showroom-mode');
-        const btn = document.querySelector('.showroom-toggle i');
+        const btnSpan = document.querySelector('.showroom-toggle span');
         if (document.body.classList.contains('showroom-mode')) {
-            btn.classList.remove('fa-eye');
-            btn.classList.add('fa-eye-slash');
+            btnSpan.textContent = '🙈';
         } else {
-            btn.classList.remove('fa-eye-slash');
-            btn.classList.add('fa-eye');
+            btnSpan.textContent = '👁️';
         }
     }
 
@@ -948,11 +959,11 @@
         const btn = document.querySelector('#calculatorModal .close-btn[onclick*="toggleOutdoorMode"]');
         if (btn) {
             if (isOutdoor) {
-                btn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+                btn.innerHTML = '<span>🌙</span>';
                 btn.style.background = '#000';
                 btn.style.color = '#fff';
             } else {
-                btn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+                btn.innerHTML = '<span>☀️</span>';
                 btn.style.background = 'rgba(255,255,255,0.1)';
                 btn.style.color = '';
             }

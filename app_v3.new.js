@@ -1,4 +1,4 @@
-// === CALCULATOR FUNCTIONS ===
+﻿// === CALCULATOR FUNCTIONS ===
 let calcValue = '0';
 let calcOperator = '';
 let calcPrevValue = '';
@@ -120,7 +120,7 @@ function loadCalcProducts() {
         return;
     }
 
-    // CAT�LOGO COMPLETO - Todos los productos 2L, 1.5L, Latas
+    // CATÁLOGO COMPLETO - Todos los productos 2L, 1.5L, Latas
     const products = [
         // COCA-COLA
         { id: 1, name: 'Coca-Cola 2L', price: 28.68, logo: 'cocacola_logo.jpg', color: '#e60000', envase: '6 bot' },
@@ -130,7 +130,7 @@ function loadCalcProducts() {
 
         // FANTA
         { id: 5, name: 'Fanta Naranja 2L', price: 27.06, logo: 'fanta_logo.jpg', color: '#ff8c00', envase: '6 bot' },
-        { id: 6, name: 'Fanta Lim�n 2L', price: 27.06, logo: 'fanta_logo.jpg', color: '#ffd700', envase: '6 bot' },
+        { id: 6, name: 'Fanta Limón 2L', price: 27.06, logo: 'fanta_logo.jpg', color: '#ffd700', envase: '6 bot' },
         { id: 7, name: 'Fanta Lata 33cl', price: 37.68, logo: 'fanta_logo.jpg', color: '#ff8c00', envase: '24 latas' },
 
         // SPRITE
@@ -203,14 +203,14 @@ function loadCalcProducts() {
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%;">
                     ${discount > 0 ? `
                         <div style="font-size: 0.7rem; color: #999; font-weight: 500; text-decoration: line-through;">
-                            ${prod.price.toFixed(2)}�
+                            ${prod.price.toFixed(2)}€
                         </div>
                         <div style="font-size: 1rem; color: #00ff88; font-weight: 700; text-shadow: 0 0 10px rgba(0,255,136,0.3);">
-                            ${finalPrice.toFixed(2)}�
+                            ${finalPrice.toFixed(2)}€
                         </div>
                     ` : `
                         <div style="font-size: 0.95rem; color: #00ff88; font-weight: 700; margin-top: 4px;">
-                            ${prod.price.toFixed(2)}�
+                            ${prod.price.toFixed(2)}€
                         </div>
                     `}
                 </div>
@@ -219,12 +219,12 @@ function loadCalcProducts() {
                 <button onclick="event.stopPropagation(); addToCalcCart(${prod.id}, '${prod.name}', ${prod.price});" 
                     title="Agregar a compra"
                     style="background: linear-gradient(135deg, #4ade80, #22c55e); color: white; border: none; padding: 6px 4px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; width: 100%; font-weight: 600; box-shadow: 0 2px 8px rgba(74,222,128,0.3); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 28px;">
-                    <span style="font-size: 0.9rem;">??</span> Comprar
+                    <span style="font-size: 0.9rem;">🛒</span> Comprar
                 </button>
                 <button onclick="event.stopPropagation(); addToGiftCart(${prod.id}, '${prod.name}', ${prod.price});" 
-                    title="Agregar a bonificaci�n"
+                    title="Agregar a bonificación"
                     style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; border: none; padding: 6px 4px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; width: 100%; font-weight: 600; box-shadow: 0 2px 8px rgba(251,191,36,0.3); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 28px;">
-                    <span style="font-size: 0.9rem;">??</span> Bonif.
+                    <span style="font-size: 0.9rem;">🎁</span> Bonif.
                 </button>
             </div>
         `;
@@ -349,13 +349,13 @@ function renderCalcList(type = 'buy') {
         if (type === 'buy') {
             container.innerHTML = `
                 <div style="color:#666; font-size:0.8rem; text-align:center; padding:10px; border:1px dashed #444; border-radius:4px;">
-                    Selecciona productos del cat�logo
+                    Selecciona productos del catálogo
                 </div>
             `;
         } else {
             container.innerHTML = `
                 <div style="color:#666; font-size:0.8rem; text-align:center; padding:5px;">
-                    (Opcional) A�ade bonificaciones con ??
+                    (Opcional) Añade bonificaciones con 🎁
                 </div>
             `;
         }
@@ -384,10 +384,10 @@ function renderCalcList(type = 'buy') {
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                 <div style="flex: 1; min-width: 0;">
                     <div style="font-size: 0.8rem; font-weight: 700; color: white; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</div>
-                    <div style="font-size: 0.65rem; color: #999;">${item.price.toFixed(2)}� ${item.discount > 0 ? `? <span style="color: #00ff88; font-weight: 600;">${discountedPrice.toFixed(2)}�</span>` : ''}</div>
+                    <div style="font-size: 0.65rem; color: #999;">${item.price.toFixed(2)}€ ${item.discount > 0 ? `→ <span style="color: #00ff88; font-weight: 600;">${discountedPrice.toFixed(2)}€</span>` : ''}</div>
                 </div>
                 <div style="text-align: right;">
-                    <div style="font-size: 0.95rem; font-weight: 700; color: #4ade80;">${lineTotal.toFixed(2)}�</div>
+                    <div style="font-size: 0.95rem; font-weight: 700; color: #4ade80;">${lineTotal.toFixed(2)}€</div>
                 </div>
             </div>
             <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
@@ -396,7 +396,7 @@ function renderCalcList(type = 'buy') {
                     <div style="display: flex; gap: 4px; align-items: center;">
                         <button onclick="changeCalcQty('${type}', ${index}, -1)" 
                             style="background: linear-gradient(135deg, #dc2626, #991b1b); color: white; border: none; width: 24px; height: 24px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(220,38,38,0.3);">
-                            -
+                            −
                         </button>
                         <span style="color: white; font-weight: 700; min-width: 24px; text-align: center; font-size: 0.85rem;">${item.qty}</span>
                         <button onclick="changeCalcQty('${type}', ${index}, 1)" 
@@ -411,7 +411,7 @@ function renderCalcList(type = 'buy') {
                     <div style="display: flex; gap: 4px; align-items: center;">
                         <button onclick="changeCalcDiscount(${index}, -1)" 
                             style="background: linear-gradient(135deg, #dc2626, #991b1b); color: white; border: none; width: 24px; height: 24px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(220,38,38,0.3);">
-                            -
+                            −
                         </button>
                         <span style="color: #fbbf24; font-weight: 700; min-width: 32px; text-align: center; font-size: 0.85rem;">${item.discount}%</span>
                         <button onclick="changeCalcDiscount(${index}, 1)" 
@@ -422,7 +422,7 @@ function renderCalcList(type = 'buy') {
                 </div>` : ''}
                 <button onclick="removeCalcItem('${type}', ${index})" 
                     style="background: linear-gradient(135deg, #991b1b, #7f1d1d); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; font-weight: 600; transition: all 0.2s; box-shadow: 0 2px 6px rgba(153,27,27,0.3); white-space: nowrap;">
-                    � Eliminar
+                    × Eliminar
                 </button>
             </div>
         `;
@@ -478,10 +478,10 @@ function calculateBonification() {
     const avgPrice = totalQty > 0 ? totalPaid / totalQty : 0;
 
     // Update UI
-    document.getElementById('bonResultPrice').textContent = avgPrice.toFixed(2) + ' �';
+    document.getElementById('bonResultPrice').textContent = avgPrice.toFixed(2) + ' €';
     document.getElementById('bonPaidQty').textContent = totalQtyPaid;
     document.getElementById('bonFreeQty').textContent = totalQtyGift;
-    document.getElementById('bonResultTotal').textContent = totalPaid.toFixed(2) + '�';
+    document.getElementById('bonResultTotal').textContent = totalPaid.toFixed(2) + '€';
     document.getElementById('calcTotalGift').textContent = totalQtyGift; // Added this line based on the instruction's implied change
 }
 
@@ -521,7 +521,7 @@ function filterCalcProducts() {
 // === VISUAL FEEDBACK ===
 function showAddFeedback(type, productName) {
     const color = type === 'buy' ? '#4ade80' : '#fbbf24';
-    const icon = type === 'buy' ? '??' : '??';
+    const icon = type === 'buy' ? '🛒' : '🎁';
 
     // Create feedback element
     const feedback = document.createElement('div');
@@ -633,16 +633,16 @@ async function saveReminder() {
     const date = reminderDate.value;
 
     if (!text) {
-        alert('?? Por favor escribe un recordatorio');
+        alert('⚠️ Por favor escribe un recordatorio');
         return;
     }
 
     if (!date) {
-        alert('?? Por favor selecciona una fecha');
+        alert('⚠️ Por favor selecciona una fecha');
         return;
     }
 
-    btnSaveReminder.innerHTML = '? Guardando...';
+    btnSaveReminder.innerHTML = '⏳ Guardando...';
     btnSaveReminder.disabled = true;
 
     // DIRECTLY SAVE LOCALLY (Notion Removed)
@@ -675,7 +675,7 @@ async function saveReminder() {
         closeReminderModal();
 
         // Use Alert because Toasts are disabled
-        alert(`? GUARDADO!\n\nTu recordatorio se ha guardado correctamente.`);
+        alert(`✅ GUARDADO!\n\nTu recordatorio se ha guardado correctamente.`);
 
         triggerConfetti();
 
@@ -823,12 +823,12 @@ function activateRadar() {
 
     // Check if geolocation is available
     if (!navigator.geolocation) {
-        statusEl.innerHTML = '? Tu navegador no soporta geolocalizaci�n';
-        listEl.innerHTML = '<div style="color:#ff4444; text-align:center; padding:20px;">Geolocalizaci�n no disponible en este dispositivo</div>';
+        statusEl.innerHTML = '❌ Tu navegador no soporta geolocalización';
+        listEl.innerHTML = '<div style="color:#ff4444; text-align:center; padding:20px;">Geolocalización no disponible en este dispositivo</div>';
         return;
     }
 
-    statusEl.innerHTML = '?? Solicitando permisos de ubicaci�n...';
+    statusEl.innerHTML = '🔍 Solicitando permisos de ubicación...';
     listEl.innerHTML = '';
 
     // Request location with high accuracy
@@ -838,8 +838,8 @@ function activateRadar() {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
 
-            console.log('?? Location acquired:', lat, lon);
-            statusEl.innerHTML = '?? Escaneando negocios cercanos...';
+            console.log('📍 Location acquired:', lat, lon);
+            statusEl.innerHTML = '📡 Escaneando negocios cercanos...';
 
             // Get selected radius
             const radiusSelect = document.getElementById('radarRadius');
@@ -861,33 +861,33 @@ function activateRadar() {
                 case error.PERMISSION_DENIED:
                     errorMsg = `
                         <div style="color:#ff4444; padding:20px; text-align:center;">
-                            <h3 style="margin:0 0 15px 0;">?? GPS BLOQUEADO</h3>
+                            <h3 style="margin:0 0 15px 0;">🚫 GPS BLOQUEADO</h3>
                             <p style="margin:0 0 10px 0; font-size:0.9rem; line-height:1.5;">
-                                Has denegado el permiso de ubicaci�n.
+                                Has denegado el permiso de ubicación.
                             </p>
                             <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:8px; margin-top:15px; text-align:left;">
-                                <p style="margin:0 0 10px 0; font-weight:bold;">?? Para activar en iPad/iPhone:</p>
+                                <p style="margin:0 0 10px 0; font-weight:bold;">📱 Para activar en iPad/iPhone:</p>
                                 <ol style="margin:0; padding-left:20px; font-size:0.85rem; line-height:1.6;">
-                                    <li>Ve a <strong>Ajustes</strong> ? <strong>Safari</strong></li>
-                                    <li>Busca <strong>Ubicaci�n</strong></li>
+                                    <li>Ve a <strong>Ajustes</strong> → <strong>Safari</strong></li>
+                                    <li>Busca <strong>Ubicación</strong></li>
                                     <li>Selecciona <strong>"Preguntar" o "Permitir"</strong></li>
-                                    <li>Recarga esta p�gina</li>
+                                    <li>Recarga esta página</li>
                                 </ol>
                             </div>
                             <p style="margin-top:15px; font-size:0.8rem; color:#aaa;">
-                                ?? Tambi�n puedes usar la b�squeda manual escribiendo el nombre de la ciudad
+                                💡 También puedes usar la búsqueda manual escribiendo el nombre de la ciudad
                             </p>
                         </div>
                     `;
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">?? Ubicaci�n no disponible. Verifica tu conexi�n GPS.</div>';
+                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">📍 Ubicación no disponible. Verifica tu conexión GPS.</div>';
                     break;
                 case error.TIMEOUT:
-                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">?? Tiempo agotado. Intenta de nuevo.</div>';
+                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">⏱️ Tiempo agotado. Intenta de nuevo.</div>';
                     break;
                 default:
-                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">? Error desconocido al obtener ubicaci�n.</div>';
+                    errorMsg = '<div style="color:#ff4444; text-align:center; padding:20px;">❌ Error desconocido al obtener ubicación.</div>';
             }
 
             statusEl.innerHTML = '';
@@ -963,7 +963,7 @@ async function fetchNearbyPlaces(lat, lon, radiusKm, onlyOpen = false) {
     }
 
     if (!data) {
-        throw new Error('Todos los servidores de mapas est�n ocupados. Int�ntalo m�s tarde.');
+        throw new Error('Todos los servidores de mapas están ocupados. Inténtalo más tarde.');
     }
 
     const elements = data.elements || [];
@@ -1061,7 +1061,7 @@ async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
             iconSize: [20, 20],
             iconAnchor: [10, 10]
         });
-        L.marker([lat, lon], { icon: userIcon }).addTo(map).bindPopup("<b>T� est�s aqu�</b>");
+        L.marker([lat, lon], { icon: userIcon }).addTo(map).bindPopup("<b>Tú estás aquí</b>");
     }
 
     try {
@@ -1069,15 +1069,15 @@ async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
 
         // Display results
         if (businesses.length === 0) {
-            statusEl.innerHTML = '?? No se encontraron negocios';
+            statusEl.innerHTML = '🔍 No se encontraron negocios';
             listEl.innerHTML = `
                 <div style="color:#aaa; text-align:center; padding:20px;">
                     <p>No hay bares o restaurantes en un radio de ${radiusKm}km</p>
-                    <p style="font-size:0.8rem; margin-top:10px;">Prueba aumentando el radio de b�squeda</p>
+                    <p style="font-size:0.8rem; margin-top:10px;">Prueba aumentando el radio de búsqueda</p>
                 </div>
             `;
         } else {
-            statusEl.innerHTML = `? ${businesses.length} negocio${businesses.length > 1 ? 's' : ''} encontrado${businesses.length > 1 ? 's' : ''}`;
+            statusEl.innerHTML = `✅ ${businesses.length} negocio${businesses.length > 1 ? 's' : ''} encontrado${businesses.length > 1 ? 's' : ''}`;
 
             listEl.innerHTML = '';
             businesses.forEach(biz => {
@@ -1094,7 +1094,7 @@ async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
                     const popupContent = `
                         <b>${biz.name}</b><br>
                         <span style="font-size:0.8em">${biz.distance.toFixed(2)}km</span><br>
-                        ${biz.phone ? `<a href="tel:${biz.phone}" style="color:#10b981; font-weight:bold; text-decoration:none;">?? Llamar</a>` : ''}
+                        ${biz.phone ? `<a href="tel:${biz.phone}" style="color:#10b981; font-weight:bold; text-decoration:none;">📞 Llamar</a>` : ''}
                     `;
 
                     L.marker([biz.lat, biz.lon], { icon: venueIcon })
@@ -1111,18 +1111,18 @@ async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
                     : `${biz.distance.toFixed(2)}km`;
 
                 const typeIcon = {
-                    'bar': '??',
-                    'restaurant': '???',
-                    'cafe': '?',
-                    'pub': '??'
-                }[biz.type] || '??';
+                    'bar': '🍺',
+                    'restaurant': '🍽️',
+                    'cafe': '☕',
+                    'pub': '🍻'
+                }[biz.type] || '🏪';
 
                 card.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:5px;">
                         <div style="flex:1;">
                             <div style="font-weight:bold; color:white; font-size:0.95rem;">${typeIcon} ${biz.name}</div>
                             ${biz.address ? `<div style="font-size:0.75rem; color:#aaa; margin-top:3px;">${biz.address}</div>` : ''}
-                            ${biz.phone ? `<div style="font-size:0.75rem; color:#4ade80; margin-top:3px;">?? ${biz.phone}</div>` : ''}
+                            ${biz.phone ? `<div style="font-size:0.75rem; color:#4ade80; margin-top:3px;">📞 ${biz.phone}</div>` : ''}
                         </div>
                         <div style="background:rgba(0,255,136,0.2); color:#00ff88; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:bold; white-space:nowrap; margin-left:10px;">
                             ${distText}
@@ -1131,12 +1131,12 @@ async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
                     <div style="display:flex; gap:8px; margin-top:10px;">
                         <a href="https://www.google.com/maps/search/?api=1&query=${biz.lat},${biz.lon}" target="_blank" 
                            style="flex:1; background:#3b82f6; color:white; padding:6px; border-radius:6px; text-align:center; text-decoration:none; font-size:0.8rem;">
-                            ??? Ver Mapa
+                            🗺️ Ver Mapa
                         </a>
                         ${biz.phone ? `
                         <a href="tel:${biz.phone}" 
                            style="flex:1; background:#10b981; color:white; padding:6px; border-radius:6px; text-align:center; text-decoration:none; font-size:0.8rem;">
-                            ?? Llamar
+                            📞 Llamar
                         </a>
                         ` : ''}
                     </div>
@@ -1148,7 +1148,7 @@ async function scanNearbyBusinesses(lat, lon, radiusKm, onlyOpen) {
 
     } catch (error) {
         console.error('Error scanning businesses:', error);
-        statusEl.innerHTML = '? Error al escanear';
+        statusEl.innerHTML = '❌ Error al escanear';
         listEl.innerHTML = `
             <div style="color:#ff4444; text-align:center; padding:20px;">
                 <p>Error al buscar negocios cercanos</p>
@@ -1183,7 +1183,7 @@ function openCalculator() {
         }, 10);
     } else {
         console.error('Calculator modal NOT found');
-        alert('Error: Calculadora no encontrada. Recarga la p�gina.');
+        alert('Error: Calculadora no encontrada. Recarga la página.');
     }
 }
 
@@ -1203,11 +1203,11 @@ function closeCalculator() {
 function searchNearMe() {
     // Check if running on local file - Geolocation often fails here
     if (window.location.protocol === 'file:') {
-        alert('?? IMPORTANTE: La geolocalizaci�n no suele funcionar en archivos locales (file://). Para probar esta funci�n, necesitas subir la web a un servidor o usar "Live Server".');
+        alert('⚠️ IMPORTANTE: La geolocalización no suele funcionar en archivos locales (file://). Para probar esta función, necesitas subir la web a un servidor o usar "Live Server".');
     }
 
     if (!navigator.geolocation) {
-        alert('? Tu navegador no soporta geolocalizaci�n');
+        alert('❌ Tu navegador no soporta geolocalización');
         return;
     }
 
@@ -1227,7 +1227,7 @@ function searchNearMe() {
                 displaySearchResults(businesses);
             } catch (error) {
                 console.error('Search error:', error);
-                alert('? Error al buscar negocios: ' + error.message);
+                alert('❌ Error al buscar negocios: ' + error.message);
             } finally {
                 if (btn) btn.innerHTML = originalText;
             }
@@ -1239,16 +1239,16 @@ function searchNearMe() {
             // Detailed error messages
             switch (error.code) {
                 case error.PERMISSION_DENIED:
-                    alert('?? ACCESO DENEGADO\n\nNo has permitido el acceso a tu ubicaci�n. Por favor:\n1. Ve a los ajustes del navegador.\n2. Permite la ubicaci�n para este sitio.\n3. Int�ntalo de nuevo.');
+                    alert('🚫 ACCESO DENEGADO\n\nNo has permitido el acceso a tu ubicación. Por favor:\n1. Ve a los ajustes del navegador.\n2. Permite la ubicación para este sitio.\n3. Inténtalo de nuevo.');
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    alert('?? UBICACI�N NO DISPONIBLE\n\nNo se pudo determinar tu posici�n. Verifica que el GPS est� activo.');
+                    alert('📍 UBICACIÓN NO DISPONIBLE\n\nNo se pudo determinar tu posición. Verifica que el GPS esté activo.');
                     break;
                 case error.TIMEOUT:
-                    alert('?? TIEMPO AGOTADO\n\nLa b�squeda de GPS tard� demasiado. Int�ntalo de nuevo en un lugar abierto.');
+                    alert('⏱️ TIEMPO AGOTADO\n\nLa búsqueda de GPS tardó demasiado. Inténtalo de nuevo en un lugar abierto.');
                     break;
                 default:
-                    alert('? OCURRI� UN ERROR\n\nNo se pudo obtener la ubicaci�n. (C�digo: ' + error.code + ')');
+                    alert('❌ OCURRIÓ UN ERROR\n\nNo se pudo obtener la ubicación. (Código: ' + error.code + ')');
             }
         },
         {
@@ -1279,11 +1279,11 @@ function displaySearchResults(venues) {
                 : `${venue.distance.toFixed(2)}km`;
 
             const typeIcon = {
-                'bar': '??',
-                'restaurant': '???',
-                'cafe': '?',
-                'pub': '??'
-            }[venue.type] || '??';
+                'bar': '🍺',
+                'restaurant': '🍽️',
+                'cafe': '☕',
+                'pub': '🍻'
+            }[venue.type] || '🏪';
 
             const card = document.createElement('div');
             card.className = 'venue-card';
@@ -1300,7 +1300,7 @@ function displaySearchResults(venues) {
                 <div style="display:flex; justify-content:space-between; align-items:start;">
                     <div style="flex:1;">
                         <div class="venue-name" style="font-weight:bold; color:white; font-size:1rem;">${typeIcon} ${venue.name}</div>
-                        <div class="venue-address" style="color:#aaa; font-size:0.8rem; margin-top:4px;">${venue.address || 'Sin direcci�n'}</div>
+                        <div class="venue-address" style="color:#aaa; font-size:0.8rem; margin-top:4px;">${venue.address || 'Sin dirección'}</div>
                     </div>
                     <div style="text-align:right;">
                         <span style="background:rgba(0,255,136,0.1); color:#00ff88; padding:2px 6px; border-radius:4px; font-size:0.75rem; font-weight:bold;">${distText}</span>
@@ -1427,7 +1427,7 @@ function saveToDebts() {
     const notes = document.getElementById('inputNotes').value;
 
     if (!name) {
-        alert('?? Por favor ingresa un nombre');
+        alert('⚠️ Por favor ingresa un nombre');
         return;
     }
 
@@ -1446,7 +1446,7 @@ function saveToDebts() {
     // Save to localStorage
     localStorage.setItem('debts', JSON.stringify(debts));
 
-    alert('? Guardado correctamente');
+    alert('✅ Guardado correctamente');
     closeModal();
 }
 
@@ -1509,7 +1509,7 @@ function addDebtRow() {
 }
 
 function deleteDebt(index) {
-    if (!confirm('�Eliminar esta nota?')) return;
+    if (!confirm('¿Eliminar esta nota?')) return;
 
     const debts = JSON.parse(localStorage.getItem('debts') || '[]');
     debts.splice(index, 1);
@@ -1550,7 +1550,7 @@ function loadPlanesData() {
         row.className = 'debt-row';
         row.innerHTML = `
             <div style="flex:1;">
-                <div style="font-weight:bold; color:white;">${note.title || 'Sin t�tulo'}</div>
+                <div style="font-weight:bold; color:white;">${note.title || 'Sin título'}</div>
                 <div style="font-size:0.8rem; color:#aaa;">${note.date}</div>
                 <div style="font-size:0.85rem; color:#ccc; margin-top:5px;">${note.content || ''}</div>
             </div>
@@ -1563,7 +1563,7 @@ function loadPlanesData() {
 }
 
 function deleteNote(index) {
-    if (!confirm('�Eliminar esta nota?')) return;
+    if (!confirm('¿Eliminar esta nota?')) return;
 
     const notes = JSON.parse(localStorage.getItem('notes') || '[]');
     notes.splice(index, 1);
@@ -1609,6 +1609,7 @@ function closeQRModal() {
         modal.classList.remove('open');
     }
 }
+
 
 // === SAP PREMIUM BUTTON LOGIC ===
 document.addEventListener('DOMContentLoaded', () => {
