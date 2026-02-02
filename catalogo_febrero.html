@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Catálogo P02 Febrero</title>
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> -->
+    <style>
+        /* --- DISEÑO DE ALTA GAMA (PROFESIONAL) --- */
+        :root {
+            --primary-red: #e00000;
+            --fuze-green: #92ad2d;
+            --monster-green: #bbf000;
+            --dark: #1a1a1a;
+            --glass: rgba(255, 255, 255, 0.95);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            color: var(--dark);
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 80px;
+        }
+
+        /* Header e Instrucciones */
+        header {
+            background: var(--primary-red);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative circle */
+        header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            letter-spacing: -0.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* Buscador Inteligente */
+        .search-container {
+            padding: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 16px;
+            padding-left: 45px;
+            border-radius: 14px;
+            border: 2px solid transparent;
+            background: #f3f4f6;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            pointer-events: none;
+        }
+
+        .search-box:focus {
+            background: white;
+            border-color: var(--primary-red);
+            box-shadow: 0 10px 25px -5px rgba(224, 0, 0, 0.15);
+        }
+
+        /* Tabs de Canales */
+        .tabs {
+            display: flex;
+            padding: 15px 15px 5px;
+            gap: 12px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: white;
+            font-weight: 700;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tab-btn i {
+            font-size: 1.1em;
+        }
+
+        .tab-btn.active {
+            background: var(--dark);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .tab-btn.active.green {
+            background: var(--fuze-green);
+        }
+
+        /* Contenedor de Promociones */
+        .promo-list {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        .card:active {
+            transform: scale(0.98);
+        }
+
+        .card-img {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        /* Gradiente sobre imagen */
+        .card-img::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+        }
+
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--dark);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+        }
+
+        .badge.red {
+            background: var(--primary-red);
+            color: white;
+        }
+
+        .card-body {
+            padding: 20px;
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .card-body h3 {
+            margin: 0 0 8px 0;
+            font-size: 1.3rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .card-body p {
+            margin: 0;
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        .card-footer {
+            padding: 15px 20px;
+            background: #fafafa;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .btn-pdf {
+            background: var(--dark);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-pdf:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Estilo para Marcas */
+        .card.monster {
+            border-top: 6px solid var(--monster-green);
+        }
+
+        .card.fuzetea {
+            border-top: 6px solid var(--fuze-green);
+        }
+
+        .card.coke {
+            border-top: 6px solid var(--primary-red);
+        }
+
+        .card.royal {
+            border-top: 6px solid #d4af37;
+        }
+
+        /* Floating PDF Button */
+        .floating-pdf {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: var(--primary-red);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(224, 0, 0, 0.4);
+            z-index: 200;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-decoration: none;
+        }
+
+        .floating-pdf:hover {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .floating-pdf i {
+            font-size: 24px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>CATÁLOGO P02 FEBRERO</h1>
+        <p>Comercial Pro • 2026</p>
+    </header>
+
+    <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" class="search-box" placeholder="Busca marcas, productos..."
+            onkeyup="filterContent()">
+    </div>
+
+    <div class="tabs">
+        <button id="btn-horeca" class="tab-btn active" onclick="setChannel('horeca')">
+            <span>🍽️</span> HORECA
+        </button>
+        <button id="btn-tiendas" class="tab-btn" onclick="setChannel('retail')">
+            <span>🏪</span> TIENDAS
+        </button>
+    </div>
+
+    <!-- Contenedor Dinámico -->
+    <div id="promoContainer" class="promo-list">
+        <!-- JS inyectará las tarjetas aquí -->
+    </div>
+
+    <!-- Botón Flotante PDF -->
+    <a href="P02 FEBRERO26 CC.pdf" target="_blank" class="floating-pdf" title="Ver PDF Completo">
+        <span>📄</span>
+    </a>
+
+    <script>
+        // --- DATOS ---
+        const PROMOTIONS = [
+            {
+                id: 1,
+                title: "Monster Energy",
+                desc: "Promoción especial 5+1 en toda la gama. ¡Impulsa tu energía!",
+                type: "monster",
+                channel: "horeca",
+                badge: "5+1 GRATIS",
+                img: "https://www.monsterenergy.com/media/uploads_image/2020/09/25/1600/800/2f5343f8e6e5d8d052d9217b1897d8c6.jpg?mod=v1_1b730f06dbf87b8d8174df9ae11488c9"
+            },
+            {
+                id: 2,
+                title: "Fuze Tea",
+                desc: "Descuento directo del 15% en formato vidrio. Sabor original.",
+                type: "fuzetea",
+                channel: "horeca",
+                badge: "-15% DTO",
+                img: "https://www.coca-cola.com/content/dam/onexp/es/es/brands/fuze-tea/fuze-tea-logo.png"
+            },
+            {
+                id: 3,
+                title: "Coca-Cola Zero",
+                desc: "Pack ahorro vidrio 35cl. La elección perfecta sin azúcar.",
+                type: "coke",
+                channel: "horeca",
+                badge: "NOVEDAD",
+                img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRz-M3yYvVwM3yM_X9yX9yX9yX9yX9yX9yX9w&s"
+            },
+            {
+                id: 4,
+                title: "Royal Bliss",
+                desc: "Compra 3 cajas y llévate 1 de Cítricos gratis. Mixers premium.",
+                type: "royal",
+                channel: "horeca",
+                badge: "3+1 REGALO",
+                img: "https://www.coca-cola.com/content/dam/onexp/es/es/brands/royal-bliss/royal-bliss-logo.png"
+            },
+            {
+                id: 5,
+                title: "Monster Energy 50cl",
+                desc: "Formato lata grande para llevar. Precio especial preventa.",
+                type: "monster",
+                channel: "retail",
+                badge: "PRECIO WOW",
+                img: "https://www.chollometro.com/threads/2-latas-monster-energy-50cl-varios-sabores-1111005"
+            },
+            {
+                id: 6,
+                title: "Coca-Cola Pack 2L",
+                desc: "Pack familiar 2x2.0L. Ahorra comprando en pack.",
+                type: "coke",
+                channel: "retail",
+                badge: "PACK AHORRO",
+                img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRz-M3yYvVwM3yM_X9yX9yX9yX9yX9yX9yX9w&s"
+            },
+            {
+                id: 7,
+                title: "Aquarius 1.5L",
+                desc: "Pack 6 botellas. Hidratación diaria al mejor precio.",
+                type: "coke",
+                channel: "retail",
+                badge: "2ª UD 50%",
+                img: "https://www.coca-cola.com/content/dam/onexp/es/es/brands/aquarius/aquarius-logo.png"
+            }
+        ];
+
+        let currentChannel = 'horeca';
+
+        function init() {
+            try {
+                setChannel('horeca');
+                console.log('Catalog initialized');
+            } catch (e) {
+                console.error('Error initializing catalog:', e);
+                document.getElementById('promoContainer').innerHTML = '<p style="color:red; text-align:center;">Error al cargar promociones: ' + e.message + '</p>';
+            }
+        }
+
+        function setChannel(channel) {
+            currentChannel = channel;
+
+            // UI Updates
+            const btnHoreca = document.getElementById('btn-horeca');
+            const btnTiendas = document.getElementById('btn-tiendas');
+
+            if (btnHoreca) btnHoreca.className = `tab-btn ${channel === 'horeca' ? 'active' : ''}`;
+            if (btnTiendas) btnTiendas.className = `tab-btn ${channel === 'retail' ? 'active' : ''}`;
+
+            render();
+        }
+
+        function filterContent() {
+            render();
+        }
+
+        function render() {
+            const container = document.getElementById('promoContainer');
+            if (!container) return;
+
+            const searchInput = document.getElementById('searchInput');
+            const searchVal = searchInput ? searchInput.value.toLowerCase() : '';
+
+            const filtered = PROMOTIONS.filter(p => {
+                const matchChannel = p.channel === currentChannel;
+                const matchSearch = p.title.toLowerCase().includes(searchVal) ||
+                    p.desc.toLowerCase().includes(searchVal);
+                return matchChannel && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
+                        <div style="font-size: 40px; margin-bottom: 10px;">📂</div>
+                        <p>No hay promociones para mostrar aquí.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(p => `
+                <div class="card ${p.type}">
+                    <div class="card-img" style="background-image: url('${p.img}'); background-color: #eee; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                         ${!p.img ? `<div style="font-weight:900; font-size: 3rem; opacity: 0.1; text-transform:uppercase;">${p.type}</div>` : ''}
+                         <div class="badge ${p.badge.includes('%') || p.badge.includes('GRATIS') ? 'red' : ''}">${p.badge}</div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <h3>${p.title}</h3>
+                        <p>${p.desc}</p>
+                    </div>
+
+                    <div class="card-footer">
+                        <a href="P02 FEBRERO26 CC.pdf" target="_blank" class="btn-pdf">
+                            Ver PDF <span>➡️</span>
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Init Force
+        window.addEventListener('load', init);
+        if (document.readyState === 'complete') {
+            init();
+        }
+    </script>
+</body>
+
+</html>
