@@ -2,7 +2,6 @@ const CACHE_NAME = 'catalogo-v3-no-notion';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
-    './catalogo.html',
     './style.css',
     './app_v3.js',
     './logo_antonio.png',
