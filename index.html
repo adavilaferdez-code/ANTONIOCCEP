@@ -135,6 +135,27 @@
             }
         }
 
+        /* Promotional Card Pulse Animation */
+        @keyframes promoPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(251, 191, 36, 0.6), 0 4px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 30px rgba(251, 191, 36, 0.9), 0 6px 20px rgba(0, 0, 0, 0.4);
+            }
+        }
+
+        /* Hover effect for promo card */
+        .promo-card-feb:hover {
+            transform: scale(1.08) !important;
+            box-shadow: 0 0 35px rgba(251, 191, 36, 1), 0 8px 25px rgba(0, 0, 0, 0.5) !important;
+        }
+
         #calculatorModal.open .modal-content {
             animation: glassUnfoldFinal 0.6s cubic-bezier(0.16, 1, 0.3, 1) both !important;
             transition: none !important;
@@ -195,53 +216,73 @@
 
 
 
-                    <!-- 2. Shortcuts Grid -->
-                    <div class="bento-grid">
-                        <!-- 1. Productos -->
+                    <!-- 2. Shortcuts Grid - Primera Fila (4 tarjetas) -->
+                    <div class="bento-grid" style="display: flex; flex-wrap: nowrap; gap: 5px;">
                         <!-- 1. Productos -->
                         <div class="bento-card commercial-data" onclick="window.location.href='catalogo_premium.html'"
-                            style="cursor:pointer; border: 2px solid #00ff00;">
-                            <span style="font-size: 1.5rem;">📦</span>
-                            <span>CATÁLOGO</span>
+                            style="cursor:pointer; border: 2px solid #00ff00; min-width: 90px; max-width: 90px; min-height: 80px;">
+                            <span style="font-size: 1.3rem;">📦</span>
+                            <span style="font-size: 0.85rem;">CATÁLOGO</span>
                         </div>
 
                         <!-- 2. Power BI -->
                         <div class="bento-card sensitive-data"
-                            onclick="window.open('https://app.powerbi.com/', '_blank'); return false;">
-                            <span style="font-size: 1.5rem;">📊</span>
-                            <span>Power BI</span>
+                            onclick="window.open('https://app.powerbi.com/', '_blank'); return false;"
+                            style="min-width: 90px; max-width: 90px; min-height: 80px;">
+                            <span style="font-size: 1.3rem;">📊</span>
+                            <span style="font-size: 0.85rem;">Power BI</span>
                         </div>
 
                         <!-- 3. Checklist -->
-                        <div class="bento-card sensitive-data" onclick="openChecklist()">
-                            <span style="font-size: 1.5rem;">📋</span>
-                            <span>Checklist</span>
+                        <div class="bento-card sensitive-data" onclick="openChecklist()"
+                            style="min-width: 90px; max-width: 90px; min-height: 80px;">
+                            <span style="font-size: 1.3rem;">📋</span>
+                            <span style="font-size: 0.85rem;">Checklist</span>
                         </div>
 
                         <!-- 4. Negociaciones -->
-                        <div class="bento-card sensitive-data"
-                            onclick="window.open('https://gemini.google.com', '_blank')">
-                            <span style="font-size: 1.5rem;">🤝</span>
-                            <span>Negociación</span>
+                        <div class="bento-card sensitive-data" onclick="openPlanes()"
+                            style="min-width: 90px; max-width: 90px; min-height: 80px;">
+                            <span style="font-size: 1.3rem;">🤝</span>
+                            <span style="font-size: 0.75rem;">Negociación</span>
                         </div>
+                    </div>
 
-                        <!-- 5. Catálogo Clientes -->
+                    <!-- Segunda Fila (3 tarjetas centradas) -->
+                    <div class="bento-grid"
+                        style="display: flex; flex-wrap: nowrap; justify-content: center; gap: 5px; margin-top: 5px;">
+
+                        <!-- PRODUCTOS CCEP -->
                         <div class="bento-card commercial-data" onclick="window.open('catalogo_2025.pdf', '_blank')"
-                            style="cursor:pointer;">
-                            <span style="font-size: 1.5rem;">🖼️</span>
-                            <span>Catálogo</span>
+                            style="cursor:pointer;
+                                   min-width: 90px; max-width: 90px; min-height: 80px;
+                                   background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+                                   border: 3px solid #ef4444 !important;
+                                   box-shadow: 0 0 20px rgba(220, 38, 38, 0.5), 0 4px 15px rgba(0,0,0,0.3) !important;
+                                   animation: promoPulse 2s ease-in-out infinite;">
+                            <span style="font-size: 1.3rem;">📦</span>
+                            <span style="font-weight: 800; font-size: 0.75rem; color: #ffffff;">PRODUCTOS CCEP</span>
                         </div>
 
-                        <!-- 6. SAP SHORTCUT (GOLD) -->
+                        <!-- PBR FEBRERO -->
+                        <div class="bento-card commercial-data promo-card-feb"
+                            onclick="window.open('P02 FEBRERO26 CC.pdf', '_blank')" style="cursor:pointer;
+                                   min-width: 105px; max-width: 105px; min-height: 92px;
+                                   background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%) !important;
+                                   border: 3px solid #fbbf24 !important;
+                                   box-shadow: 0 0 20px rgba(251, 191, 36, 0.6), 0 4px 15px rgba(0,0,0,0.3) !important;
+                                   animation: promoPulse 2s ease-in-out infinite;">
+                            <span style="font-size: 1.7rem;">📋</span>
+                            <span style="font-weight: 800; color: #1f2937;">PBR FEBRERO</span>
+                        </div>
+
+                        <!-- SAP -->
                         <a href="shortcuts://run-shortcut?name=SAP" class="bento-card btn-gold-sap sensitive-data"
-                            id="sapButton">
+                            id="sapButton" style="min-width: 90px; max-width: 90px; min-height: 80px;">
                             <div class="sap-status-dot"></div>
-                            <span id="sapIcon" style="font-size: 1.5rem;">🔑</span>
-                            <span>SAP</span>
+                            <span id="sapIcon" style="font-size: 1.3rem;">🔑</span>
+                            <span style="font-size: 0.85rem;">SAP</span>
                         </a>
-
-
-
                     </div>
 
                     <!-- 3. Distribuidores -->
@@ -654,6 +695,8 @@
         </div>
     </div>
 
+
+
     <!-- Calculator Modal -->
     <!-- CALCULATOR MODAL (Wider for Commercial Use) -->
     <div id="calculatorModal" class="modal-overlay">
@@ -866,8 +909,10 @@
         </div>
     </div>
 
-    <script src="app_v3.js?v=20260131_1625"></script>
+    <script src="app_v3.js?v=20260204_2010"></script>
     <script src="toast.js"></script>
+
+
     <script>
         // Simple Date Script
         function updateDate() {
@@ -884,7 +929,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const overlay = document.getElementById('transitionOverlay');
             // Intercept links to catalogo.html
-            const catalogLinks = document.querySelectorAll('a[href="catalogo.html"]');
+            const catalogLinks = document.querySelectorAll('a[href="catalogo_premium.html"]');
 
             catalogLinks.forEach(link => {
                 link.addEventListener('click', (e) => {
@@ -893,10 +938,10 @@
                         overlay.classList.add('active-slide-up');
                         // Wait for animation then navigate
                         setTimeout(() => {
-                            window.location.href = 'catalogo.html?v=final_fix';
+                            window.location.href = 'catalogo_premium.html?v=final_fix';
                         }, 600);
                     } else {
-                        window.location.href = 'catalogo.html?v=final_fix';
+                        window.location.href = 'catalogo_premium.html?v=final_fix';
                     }
                 });
             });
@@ -919,9 +964,9 @@
         function openCatalogWithNote() {
             const activeId = localStorage.getItem('activeNoteId');
             if (activeId) {
-                window.location.href = `catalogo.html?v=final_fix&nid=${activeId}`;
+                window.location.href = `catalogo_premium.html?v=final_fix&nid=${activeId}`;
             } else {
-                window.location.href = 'catalogo.html?v=final_fix';
+                window.location.href = 'catalogo_premium.html?v=final_fix';
             }
         }
     </script>

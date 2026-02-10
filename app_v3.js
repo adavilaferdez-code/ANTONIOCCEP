@@ -1632,3 +1632,8 @@ function closeQRModal() {
         modal.classList.remove('open');
     }
 }
+// Simulator moved to index.html for reliability
+window.closeNegotiationModal = function () {
+    const modal = document.getElementById('negotiationModal');
+    if (modal) modal.classList.remove('open');
+};
