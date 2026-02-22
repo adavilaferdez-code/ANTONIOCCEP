@@ -84,17 +84,23 @@ let selectedCalcProducts = new Set();
 
 // Initial Discounts Configuration
 const initialDiscounts = {
-    // 2L Products (71%) - 2 bought + 5 free = 71.4% discount
-    1: 71, 2: 71, // Coca-Cola
-    5: 71, 6: 71, // Fanta
-    8: 71,        // Sprite
+    // 2L Products - TARIFA CC actualizada
+    1: 73, 2: 73, // Coca-Cola 2L → 73% descuento
+    5: 74, 6: 74, // Fanta 2L → 74% descuento
+    8: 74,        // Sprite 2L → 74% descuento
 
-    // Cans 33cl (62%) - 5 bought + 3 free = 37.5% discount? No, 62% is the direct discount
-    3: 62, 4: 62, // Coca-Cola
-    7: 62,        // Fanta
-    9: 62,        // Sprite
-    11: 62,       // Aquarius
-    13: 62,       // Fuze Tea
+    // Cans 33cl - TARIFA CC actualizada
+    3: 65, 4: 65, // Coca-Cola Lata 33cl → 65%
+    7: 71,        // Fanta Lata 33cl → 71%
+    9: 73,        // Sprite Lata 33cl → 73%
+    11: 62,       // Aquarius Lata 33cl (sin dato nuevo, mantener)
+    13: 65,       // Fuze Tea Lata 33cl → 65%
+
+    // Aquarius 1.5L → 64%
+    10: 64,
+
+    // Fuze Tea 1.5L → 70%
+    12: 70,
 
     // Monster (50%) - 1 bought + 1 free = 50% discount
     16: 50, 17: 50,
@@ -502,6 +508,9 @@ function calculateBonification() {
     if (bonFreeQty) bonFreeQty.textContent = totalQtyGift;
     if (bonResultTotal) bonResultTotal.textContent = totalPaid.toFixed(2) + '€';
     if (calcTotalGift) calcTotalGift.textContent = totalQtyGift;
+
+    const bonResultTotalIva = document.getElementById('bonResultTotalIva');
+    if (bonResultTotalIva) bonResultTotalIva.textContent = (totalPaid * 1.21).toFixed(2) + '€';
 }
 
 function clearCalcCart(type) {
@@ -576,6 +585,62 @@ function showAddFeedback(type, productName) {
         feedback.style.transform = 'translate(-50%, -50%) scale(0.8)';
         setTimeout(() => feedback.remove(), 300);
     }, 1500);
+}
+
+// === WHATSAPP SHARE ===
+function enviarWhatsApp() {
+    if (calcCartBuy.length === 0) {
+        alert('⚠️ Añade productos al carrito primero');
+        return;
+    }
+
+    const totalPaid = calcCartBuy.reduce((sum, item) => {
+        const discountedPrice = item.price * (1 - item.discount / 100);
+        return sum + (discountedPrice * item.qty);
+    }, 0);
+    const totalQtyPaid = calcCartBuy.reduce((sum, item) => sum + item.qty, 0);
+    const totalQtyGift = calcCartGift.reduce((sum, item) => sum + item.qty, 0);
+    const totalQty = totalQtyPaid + totalQtyGift;
+    const avgPrice = totalQty > 0 ? totalPaid / totalQty : 0;
+    const totalIva = totalPaid * 1.21;
+
+    let lines = [];
+    lines.push('🛒 *RESUMEN DE PEDIDO*');
+    lines.push('──────────────────────');
+
+    calcCartBuy.forEach(item => {
+        const discounted = item.price * (1 - item.discount / 100);
+        const lineTotal = discounted * item.qty;
+        lines.push(`📦 *${item.name}*`);
+        if (item.discount > 0) {
+            lines.push(`   ${item.price.toFixed(2)}€ → ${discounted.toFixed(2)}€ (-${item.discount}%) × ${item.qty} cajas`);
+        } else {
+            lines.push(`   ${item.price.toFixed(2)}€ × ${item.qty} cajas`);
+        }
+        lines.push(`   Subtotal: ${lineTotal.toFixed(2)}€`);
+    });
+
+    if (calcCartGift.length > 0) {
+        lines.push('');
+        lines.push('🎁 *BONIFICACIONES*');
+        calcCartGift.forEach(item => {
+            lines.push(`   ${item.name} × ${item.qty} caja${item.qty > 1 ? 's' : ''}`);
+        });
+    }
+
+    lines.push('──────────────────────');
+    lines.push(`📦 Total compradas: ${totalQtyPaid}`);
+    if (totalQtyGift > 0) lines.push(`🎁 Total bonif.: ${totalQtyGift}`);
+    lines.push(`💰 *Total factura: ${totalPaid.toFixed(2)}€*`);
+    lines.push(`   IVA incl. (21%): ${totalIva.toFixed(2)}€`);
+    lines.push('');
+    lines.push(`📊 *Precio medio real/caja: ${avgPrice.toFixed(2)}€*`);
+    lines.push('──────────────────────');
+    lines.push('_Generado con Comercial App_');
+
+    const message = lines.join('\n');
+    const encoded = encodeURIComponent(message);
+    window.open(`https://wa.me/?text=${encoded}`, '_blank');
 }
 
 // === EXPOSE FUNCTIONS TO WINDOW ===
