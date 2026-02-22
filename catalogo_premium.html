@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -380,30 +380,14 @@
 
                          <!-- PRICE DISPLAY -->
                          <div class="flex items-end justify-between relative">
-                            <div>
+                            <div style="flex:1; min-width:0;">
                                 <div class="flex items-center justify-between mb-1">
                                     <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Precio Unidad</p>
-                                    
-                                    <!-- RIVAL PRICE INPUT (Styled) -->
-                                    <div class="flex items-center gap-2">
-                                        <!-- Trash/Reset Button -->
-                                        <button onclick="resetCard(${p.id})" 
-                                            class="h-7 w-7 flex items-center justify-center rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 transition-all"
-                                            title="Borrar / Resetear">
-                                            <i class="fa-solid fa-trash-can text-sm"></i>
-                                        </button>
-
-                                        <div class="relative group/input flex items-center">
-                                            <div class="absolute left-2 text-red-400 text-[10px] pointer-events-none">
-                                                <i class="fa-solid fa-tag"></i>
-                                            </div>
-                                            <input type="number" step="0.01" placeholder="P.UD" id="input-unit-${p.id}"
-                                                class="w-24 pl-6 pr-2 py-1 text-right text-xs font-bold bg-red-50 border border-red-300 hover:border-red-500 focus:bg-white focus:border-red-600 focus:ring-2 focus:ring-red-500/20 rounded-md transition-all outline-none text-red-700 placeholder-red-300 shadow-sm"
-                                                style="-moz-appearance: textfield;"
-                                                oninput="handleUnitInput(${p.id}, this.value)"
-                                                onclick="this.select()">
-                                        </div>
-                                    </div>
+                                    <button onclick="resetCard(${p.id})" 
+                                        class="h-7 w-7 flex items-center justify-center rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 transition-all"
+                                        title="Borrar / Resetear">
+                                        <i class="fa-solid fa-trash-can text-sm"></i>
+                                    </button>
                                 </div>
                                 <p class="text-3xl font-black text-gray-900 tracking-tighter leading-none" id="price-unit-${p.id}">
                                     ${unitPrice.toFixed(2)}€
@@ -411,6 +395,14 @@
                                 <p class="text-xs text-gray-400 mt-1 font-medium" id="price-box-${p.id}">
                                     Caja: ${finalPrice.toFixed(2)}€
                                 </p>
+                                <!-- % DESCUENTO INPUT - debajo del precio -->
+                                <div class="relative flex items-center mt-2" style="max-width:90px;">
+                                    <input type="text" inputmode="decimal" placeholder="Dto." id="input-disc-${p.id}"
+                                        class="w-full pl-2 pr-7 py-1 text-right text-sm font-bold bg-orange-50 border border-orange-300 hover:border-orange-500 focus:bg-white focus:border-orange-600 focus:ring-2 focus:ring-orange-500/20 rounded-md transition-all outline-none text-orange-700 placeholder-orange-300 shadow-sm"
+                                        oninput="handleDiscInput(${p.id}, this.value)"
+                                        onclick="this.select()">
+                                    <span class="absolute right-2 text-orange-500 text-xs pointer-events-none font-black">%</span>
+                                </div>
                             </div>
 
                             <!-- BADGE -->
@@ -498,31 +490,76 @@
             }
         }
 
-        function handleUnitInput(id, unitVal) {
+        function handleDiscInput(id, discVal) {
             const product = PRODUCTS.find(p => p.id === id);
             if (!product) return;
 
-            // Normalize comma to dot just in case
-            if (typeof unitVal === 'string') unitVal = unitVal.replace(',', '.');
+            if (typeof discVal === 'string') discVal = discVal.replace(',', '.');
+            let disc = parseFloat(discVal);
+            if (isNaN(disc) || disc < 0) return;
+            if (disc > 100) disc = 100;
 
-            const targetUnit = parseFloat(unitVal);
-            if (isNaN(targetUnit) || targetUnit < 0) return;
+            const boxPrice = product.price * (1 - disc / 100);
+            const units = getUnits(product.envase);
+            const unitPrice = boxPrice / units;
+
+            // Update displays (NO slider movement)
+            document.getElementById(`price-unit-${id}`).textContent = unitPrice.toFixed(2) + '€';
+            document.getElementById(`price-box-${id}`).textContent = `Caja: ${boxPrice.toFixed(2)}€`;
+
+            // Store discount and update badge
+            discounts[id] = disc;
+            const badge = document.getElementById(`badge-${id}`);
+            const style = getBrandStyle(product);
+            let gradient = style.gradient;
+            if (disc > 40) gradient = 'from-red-600 to-red-500 animate-pulse';
+            else if (disc > 20) gradient = 'from-orange-500 to-yellow-500';
+            if (badge) {
+                if (disc > 0) {
+                    badge.className = `absolute -bottom-3 right-1 h-16 w-16 bg-gradient-to-br ${gradient} rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform border-4 border-white`;
+                    badge.innerHTML = `<span class="text-white font-black text-sm">-${disc.toFixed(0)}%</span>`;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+        }
+
+        function handleBoxInput(id, boxVal) {
+            const product = PRODUCTS.find(p => p.id === id);
+            if (!product) return;
+
+            if (typeof boxVal === 'string') boxVal = boxVal.replace(',', '.');
+            const targetBox = parseFloat(boxVal);
+            if (isNaN(targetBox) || targetBox < 0) return;
 
             const units = getUnits(product.envase);
-            let targetBoxPrice = targetUnit * units;
+            const unitPrice = targetBox / units;
 
-            // Cap at tariff price (slider max)
-            // If user enters a price higher than tariff, we clamp it to tariff (0% discount)
-            if (targetBoxPrice > product.price) {
-                targetBoxPrice = product.price;
-            }
+            // Update unit input
+            const unitInput = document.getElementById(`input-unit-${id}`);
+            if (unitInput) unitInput.value = unitPrice.toFixed(2);
 
-            // Update Slider Logic
-            const slider = document.getElementById(`slider-${id}`);
-            if (slider) {
-                slider.value = targetBoxPrice.toFixed(2);
-                // Trigger change logic
-                handleSliderChange(id, targetBoxPrice, true);
+            // Update displays directly (NO slider movement)
+            document.getElementById(`price-unit-${id}`).textContent = unitPrice.toFixed(2) + '€';
+            document.getElementById(`price-box-${id}`).textContent = `Caja: ${targetBox.toFixed(2)}€`;
+
+            // Update badge with implied discount
+            const newDiscount = (1 - (targetBox / product.price)) * 100;
+            discounts[id] = newDiscount;
+            const badge = document.getElementById(`badge-${id}`);
+            const style = getBrandStyle(product);
+            let gradient = style.gradient;
+            if (newDiscount > 40) gradient = 'from-red-600 to-red-500 animate-pulse';
+            else if (newDiscount > 20) gradient = 'from-orange-500 to-yellow-500';
+            if (badge) {
+                if (Math.abs(newDiscount) > 0.5) {
+                    badge.className = `absolute -bottom-3 right-1 h-16 w-16 bg-gradient-to-br ${gradient} rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform border-4 border-white`;
+                    badge.innerHTML = `<span class="text-white font-black text-sm">${newDiscount > 0 ? '-' : '+'}${Math.abs(newDiscount).toFixed(0)}%</span>`;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
             }
         }
 
@@ -576,14 +613,13 @@
             // competitorPrices[id] = null; // (Assuming we might track it, but sliderVal is source of truth mostly)
 
             // 2. Clear Input
-            const input = document.getElementById(`input-unit-${id}`);
-            if (input) input.value = '';
+            const inputDisc = document.getElementById(`input-disc-${id}`);
+            if (inputDisc) inputDisc.value = '';
 
             // 3. Reset Slider to Max (Tariff Price)
             const slider = document.getElementById(`slider-${id}`);
             if (slider) {
                 slider.value = product.price.toFixed(2);
-                // Trigger updates visual
                 handleSliderChange(id, product.price, true);
             }
         }
